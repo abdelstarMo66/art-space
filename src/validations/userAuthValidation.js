@@ -1,0 +1,59 @@
+const {body, check} = require("express-validator");
+
+const UserModel = require("../models/userModel");
+
+exports.signupValidator = [
+    body("name")
+        .notEmpty()
+        .withMessage("name must not be empty")
+        .isLength({min: 3})
+        .withMessage("name too short"),
+
+    body("email")
+        .notEmpty()
+        .withMessage("email must not be empty")
+        .isEmail()
+        .withMessage("invalid email address")
+        .custom((val, {req}) => UserModel.findOne({email: val}).then((user) => {
+            if (user) {
+                return Promise.reject(new Error(`this email already use, please enter other email or login`));
+            }
+        })),
+
+    body("password")
+        .notEmpty()
+        .withMessage("password must not be empty")
+        .isLength({min: 8})
+        .withMessage("password too short, please enter password at least 8 characters")
+        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
+        .withMessage("please enter strong password")
+        .custom((password, {req}) => {
+            if (password !== req.body.passwordConfirm) {
+                return Promise.reject(new Error("password confirmation incorrect"))
+            }
+            return true;
+        }),
+
+    body("passwordConfirm").notEmpty()
+        .withMessage("password confirmation required"),
+
+    body("phone")
+        .notEmpty()
+        .withMessage("phone must not be empty")
+        .matches(/^\+?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
+        .withMessage("please enter invalid phone")
+]
+
+exports.loginValidator = [
+    body("email")
+        .notEmpty()
+        .withMessage("email must not be empty")
+        .isEmail()
+        .withMessage("invalid email address"),
+
+    body("password")
+        .notEmpty()
+        .withMessage("password must not be empty")
+        .isLength({min: 8})
+        .withMessage("password too short, please enter password at least 8 characters"),
+]
