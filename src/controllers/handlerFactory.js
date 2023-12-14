@@ -35,10 +35,6 @@ const getOne = (Model, modelName) => asyncHandler(async (req, res, next) => {
 
     const doc = await Model.findById(id, "-password -__v");
 
-    if (!doc) {
-        return next(new ApiError(`no ${modelName} for this id ${id}`, 404))
-    }
-
     return res.status(200).json(
         apiSuccess(
             "user found successfully",

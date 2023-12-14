@@ -1,7 +1,9 @@
 const sharp = require("sharp");
+const bcrypt = require("bcrypt");
 
 const asyncHandler = require("../middlewares/asyncHandler");
 const generateJWT = require("../utils/generateJWT");
+const ApiError = require("../utils/apiError");
 const apiSuccess = require("../utils/apiSuccess");
 const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
 const UserModel = require("../models/userModel");
@@ -20,7 +22,7 @@ const resizeProfileImage = asyncHandler(async (req, res, next) => {
             .jpeg({quality: 95})
             .toFile(`uploads/users/${fileName}`);
 
-        req.body.image = fileName;
+        req.body.profileImg = fileName;
     }
     next();
 });
@@ -40,8 +42,30 @@ const signup = asyncHandler(async (req, res, next) => {
         ));
 });
 
+const login = asyncHandler(async (req, res, next) => {
+    const user = await UserModel.findOne({email: req.body.email});
+
+    const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
+
+    if (!user || !isPasswordCorrect) {
+        return next(new ApiError("Incorrect email or password", 401));
+    }
+
+    const token = await generateJWT({userId: user._id});
+
+    return res.status(201).json(
+        apiSuccess(
+            `login successfully, welcome ${user.name}`,
+            201,
+            {
+                token
+            },
+        ));
+})
+
 module.exports = {
     signup,
     uploadProfileImage,
     resizeProfileImage,
+    login,
 }

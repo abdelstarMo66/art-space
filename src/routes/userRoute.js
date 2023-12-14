@@ -5,6 +5,8 @@ const {
     getUser,
     updateUser,
     deleteUser,
+    uploadProfileImage,
+    resizeProfileImage
 } = require("../controllers/userController")
 const {
     getUserValidation,
@@ -19,7 +21,7 @@ router.route("/").get(getAllUsers);
 
 router.route("/:id")
     .get(getUserValidation, validationMiddleware, getUser)
-    .patch(updateUserValidation, validationMiddleware, updateUser)
+    .patch(uploadProfileImage, updateUserValidation, validationMiddleware,resizeProfileImage, updateUser)
     .delete(deleteUserValidation, validationMiddleware, deleteUser);
 
 module.exports = router
