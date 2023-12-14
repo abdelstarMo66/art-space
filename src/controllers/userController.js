@@ -1,6 +1,7 @@
 const fs = require("fs");
 
 const sharp = require("sharp");
+const bcrypt = require("bcrypt");
 
 const asyncHandler = require("../middlewares/asyncHandler");
 const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
@@ -110,7 +111,7 @@ const resizeProfileImage = asyncHandler(async (req, res, next) => {
     next();
 });
 
-const updateUser = asyncHandler(async (req, res, next) => {
+const updateUser = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
     await UserModel.findByIdAndUpdate(id, {
@@ -131,7 +132,56 @@ const updateUser = asyncHandler(async (req, res, next) => {
 
 });
 
-const deleteUser = asyncHandler(async (req, res, next) => {
+const search = asyncHandler(async (req, res, next) => {
+    const {keyword} = req.query;
+
+    const queryObj = {};
+    queryObj.$or = [
+        {name: {$regex: keyword, $options: "i"}},
+        {email: {$regex: keyword, $options: "i"},},
+        {phone: {$regex: keyword, $options: "i"},},
+        {gender: {$regex: keyword, $options: "i"},},
+        {address: {$regex: keyword, $options: "i"},}
+    ]
+
+    const users = await UserModel.find(queryObj, "-password -__v");
+
+    if (!users) {
+        return next(new ApiError(`No users found matched this search key: ${keyword}`, 404));
+    }
+
+    return res.status(200).json(
+        apiSuccess(
+            `users Found`,
+            200,
+            {users}
+        ));
+});
+
+const changePassword = asyncHandler(async (req, res) => {
+    const {id} = req.params;
+
+    await UserModel.findByIdAndUpdate(
+        id,
+        {
+            password: await bcrypt.hash(req.body.password, 12),
+            passwordChangedAt: Date.now(),
+        },
+        {
+            new: true,
+        }
+    );
+
+    return res.status(200).json(
+        apiSuccess(
+            `password changed successfully`,
+            200,
+            null
+        ));
+
+})
+
+const deleteUser = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
     const user = await UserModel.findByIdAndDelete(id);
@@ -156,7 +206,7 @@ const deleteUser = asyncHandler(async (req, res, next) => {
             null
         ));
 
-})
+});
 
 module.exports = {
     getAllUsers,
@@ -165,4 +215,6 @@ module.exports = {
     deleteUser,
     uploadProfileImage,
     resizeProfileImage,
+    changePassword,
+    search,
 }
