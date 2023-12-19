@@ -8,6 +8,7 @@ const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const UserModel = require("../models/userModel");
+const generateJWT = require("../utils/generateJWT");
 
 const getAllUsers = asyncHandler(async (req, res, next) => {
     const usersCount = await UserModel.countDocuments();
@@ -161,7 +162,7 @@ const search = asyncHandler(async (req, res, next) => {
 const changePassword = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
-    await UserModel.findByIdAndUpdate(
+    const user = await UserModel.findByIdAndUpdate(
         id,
         {
             password: await bcrypt.hash(req.body.password, 12),
@@ -172,13 +173,14 @@ const changePassword = asyncHandler(async (req, res) => {
         }
     );
 
+    const token = await generateJWT({userId: user._id});
+
     return res.status(200).json(
         apiSuccess(
             `password changed successfully`,
             200,
-            null
+            {token}
         ));
-
 })
 
 const deleteUser = asyncHandler(async (req, res) => {

@@ -1,4 +1,4 @@
-const {body, check} = require("express-validator");
+const {body} = require("express-validator");
 
 const UserModel = require("../models/userModel");
 
@@ -44,6 +44,30 @@ exports.signupValidator = [
         .withMessage("please enter invalid phone")
 ]
 
+exports.verifyEmailValidator = [
+    body("email")
+        .notEmpty()
+        .withMessage("email must not be empty")
+        .isEmail()
+        .withMessage("invalid email address")
+        .custom(async (val, {req}) => {
+            const user = await UserModel.findOne({email: val});
+            if (!user) {
+                return Promise.reject(new Error(`There are not email address match: ${val}`));
+            }
+        }),
+
+    body("activateCode")
+        .notEmpty()
+        .withMessage("activateCode must not be empty")
+        .custom((val) => {
+            if (val.length !== 6) {
+                return Promise.reject(new Error(`activate code must be 6 characters long`));
+            }
+            return true;
+        }),
+]
+
 exports.loginValidator = [
     body("email")
         .notEmpty()
@@ -56,4 +80,73 @@ exports.loginValidator = [
         .withMessage("password must not be empty")
         .isLength({min: 8})
         .withMessage("password too short, please enter password at least 8 characters"),
+]
+
+exports.forgotPasswordValidator = [
+    body("email")
+        .notEmpty()
+        .withMessage("email must not be empty")
+        .isEmail()
+        .withMessage("invalid email address")
+        .custom(async (val, {req}) => {
+            const user = await UserModel.findOne({email: val});
+            if (!user) {
+                return Promise.reject(new Error(`There are not email address match: ${val}`));
+            }
+        }),
+]
+
+exports.verifyCodeValidator = [
+    body("email")
+        .notEmpty()
+        .withMessage("email must not be empty")
+        .isEmail()
+        .withMessage("invalid email address")
+        .custom(async (val, {req}) => {
+            const user = await UserModel.findOne({email: val});
+            if (!user) {
+                return Promise.reject(new Error(`There are not email address match: ${val}`));
+            }
+        }),
+
+    body("resetCode")
+        .notEmpty()
+        .withMessage("resetCode must not be empty")
+        .custom((val) => {
+            if (val.length !== 6) {
+                return Promise.reject(new Error(`reset code must be 6 characters long`));
+            }
+            return true;
+        }),
+]
+
+exports.resetPasswordValidator = [
+    body("email")
+        .notEmpty()
+        .withMessage("email must not be empty")
+        .isEmail()
+        .withMessage("invalid email address")
+        .custom(async (val, {req}) => {
+            const user = await UserModel.findOne({email: val});
+            if (!user) {
+                return Promise.reject(new Error(`There are not email address match: ${val}`));
+            }
+        }),
+
+    body("password")
+        .notEmpty()
+        .withMessage("password must not be empty")
+        .isLength({min: 8})
+        .withMessage("password too short, please enter password at least 8 characters")
+        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
+        .withMessage("please enter strong password")
+        .custom((password, {req}) => {
+            if (password !== req.body.passwordConfirm) {
+                return Promise.reject(new Error("password confirmation incorrect"))
+            }
+            return true;
+        }),
+
+    body("passwordConfirm").notEmpty()
+        .withMessage("password confirmation required"),
 ]
