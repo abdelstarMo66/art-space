@@ -73,7 +73,7 @@ const verifyEmail = asyncHandler(async (req, res, next) => {
 
     const hashedActivateCode = crypto
         .createHash("sha256")
-        .update(req.body.resetCode)
+        .update(req.body.activateCode)
         .digest("hex");
 
     if (user.accountActivateCode === hashedActivateCode && user.AccountActivateExpires <= Date.now()) {

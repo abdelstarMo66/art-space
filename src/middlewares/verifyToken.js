@@ -25,6 +25,12 @@ const verifyToken = asyncHandler(async (req, res, next) => {
         );
     }
 
+    if (!currentUser.accountActive) {
+        return next(
+            new ApiError("this account is not verified, please verify this email ang go back", 400)
+        );
+    }
+
     if (currentUser.passwordChangedAt) {
         const passwordChangedTimeStamp = parseInt(
             currentUser.passwordChangedAt.getTime() / 1000,

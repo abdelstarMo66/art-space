@@ -119,6 +119,7 @@ const updateUser = asyncHandler(async (req, res) => {
         name: req.body.name,
         phone: req.body.phone,
         address: req.body.address,
+        gender: req.body.gender,
         profileImg: req.body.profileImg,
     }, {
         new: true,
@@ -159,30 +160,6 @@ const search = asyncHandler(async (req, res, next) => {
         ));
 });
 
-const changePassword = asyncHandler(async (req, res) => {
-    const {id} = req.params;
-
-    const user = await UserModel.findByIdAndUpdate(
-        id,
-        {
-            password: await bcrypt.hash(req.body.password, 12),
-            passwordChangedAt: Date.now(),
-        },
-        {
-            new: true,
-        }
-    );
-
-    const token = await generateJWT({userId: user._id});
-
-    return res.status(200).json(
-        apiSuccess(
-            `password changed successfully`,
-            200,
-            {token}
-        ));
-})
-
 const deleteUser = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
@@ -210,6 +187,56 @@ const deleteUser = asyncHandler(async (req, res) => {
 
 });
 
+const getUserProfile = asyncHandler(async (req, res, next) => {
+    req.params.id = req.user._id;
+    next();
+});
+
+const changePassword = asyncHandler(async (req, res) => {
+    const {id} = req.user._id;
+
+    const user = await UserModel.findByIdAndUpdate(
+        id,
+        {
+            password: await bcrypt.hash(req.body.password, 12),
+            passwordChangedAt: Date.now(),
+        },
+        {
+            new: true,
+        }
+    );
+
+    const token = await generateJWT({userId: user._id});
+
+    return res.status(200).json(
+        apiSuccess(
+            `password changed successfully`,
+            200,
+            {token}
+        ));
+})
+
+const updateProfile = asyncHandler(async (req, res) => {
+    const {id} = req.user._id;
+
+    await UserModel.findByIdAndUpdate(id, {
+        name: req.body.name,
+        phone: req.body.phone,
+        address: req.body.address,
+        profileImg: req.body.profileImg,
+    }, {
+        new: true,
+    });
+
+    return res.status(200).json(
+        apiSuccess(
+            `user updated successfully`,
+            200,
+            null
+        ));
+
+});
+
 module.exports = {
     getAllUsers,
     getUser,
@@ -219,4 +246,6 @@ module.exports = {
     resizeProfileImage,
     changePassword,
     search,
+    getUserProfile,
+    updateProfile,
 }

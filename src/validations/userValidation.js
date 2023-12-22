@@ -40,6 +40,11 @@ exports.updateUserValidation = [
         .isLength({min: 3})
         .withMessage("name too short"),
 
+    body("gender")
+        .optional()
+        .isIn(["male", "female"])
+        .withMessage("gender must be male or female"),
+
     body("phone")
         .optional()
         .matches(/^\+?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
@@ -104,4 +109,28 @@ exports.changeUserPasswordValidation = [
 
             return true;
         }),
+];
+
+exports.updateProfileValidation = [
+    param("id")
+        .isMongoId()
+        .withMessage("Invalid User Id")
+        .custom(async (val) => {
+            const user = await UserModel.findById(val);
+
+            if (!user) {
+                return Promise.reject(new ApiError(`no user for this id ${val}`, 404));
+            }
+            return true;
+        }),
+
+    body("name")
+        .optional()
+        .isLength({min: 3})
+        .withMessage("name too short"),
+
+    body("phone")
+        .optional()
+        .matches(/^\+?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
+        .withMessage("please enter invalid phone")
 ];
