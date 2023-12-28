@@ -2,6 +2,7 @@ const asyncHandler = require("./asyncHandler");
 const ApiError = require("../utils/apiError");
 const AdminModel = require("../models/adminModel");
 const UserModel = require("../models/userModel");
+const ArtistModel = require("../models/artistModel");
 
 
 exports.allowedToUser = () =>
@@ -16,7 +17,9 @@ exports.allowedToUser = () =>
 
 exports.allowedToArtist = () =>
     asyncHandler(async (req, res, next) => {
-        if (req.loggedUser.role !== "artist") {
+        const artist = await ArtistModel.findById(req.loggedUser._id);
+
+        if (!artist) {
             return next(new ApiError("You are not allowed access this route", 403));
         }
         next();

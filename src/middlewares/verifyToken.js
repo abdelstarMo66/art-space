@@ -4,6 +4,7 @@ const asyncHandler = require("../middlewares/asyncHandler");
 const ApiError = require("../utils/apiError");
 const UserModel = require("../models/userModel");
 const AdminModel = require("../models/adminModel");
+const ArtistModel = require("../models/artistModel");
 
 const verifyToken = asyncHandler(async (req, res, next) => {
     let token;
@@ -30,7 +31,7 @@ const verifyToken = asyncHandler(async (req, res, next) => {
         req.loggedUser = currentUser;
         next();
     } else {
-        const currentUser = await UserModel.findById(decoded.id);
+        const currentUser = await UserModel.findById(decoded.id) || await ArtistModel.findById(decoded.id);
 
         if (!currentUser) {
             return next(

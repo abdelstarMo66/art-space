@@ -7,11 +7,11 @@ const asyncHandler = require("../middlewares/asyncHandler");
 const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
-const UserModel = require("../models/userModel");
+const ArtistModel = require("../models/artistModel");
 const generateJWT = require("../utils/generateJWT");
 
-const getAllUsers = asyncHandler(async (req, res, next) => {
-    const usersCount = await UserModel.countDocuments();
+const getAllArtists = asyncHandler(async (req, res, next) => {
+    const artistsCount = await ArtistModel.countDocuments();
     const page = +req.query.page || 1;
     const limit = +req.query.limit || 20;
     const skip = (page - 1) * limit;
@@ -20,9 +20,9 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
     const pagination = {};
     pagination.currentPage = page;
     pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(usersCount / limit);
-    pagination.totalResults = usersCount;
-    if (endIndex < usersCount) {
+    pagination.numbersOfPages = Math.ceil(artistsCount / limit);
+    pagination.totalResults = artistsCount;
+    if (endIndex < artistsCount) {
         pagination.nextPage = page + 1;
     }
     if (skip > 0) {
@@ -39,49 +39,49 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
         limitField = this.queryString.fields.split(",").join(" ");
     }
 
-    const users = await UserModel
+    const artists = await ArtistModel
         .find()
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
         .select(limitField);
 
-    if (!users) {
-        return next(new ApiError(`No users found`, 404));
+    if (!artists) {
+        return next(new ApiError(`No artists found`, 404));
     }
 
     return res.status(200).json(
         apiSuccess(
-            `users Found`,
+            `artists Found`,
             200,
             {
                 pagination,
-                users
+                artists
             }
         ));
 });
 
-const getUser = asyncHandler(async (req, res, next) => {
+const getArtist = asyncHandler(async (req, res, next) => {
     const {id} = req.params;
 
-    const user = await UserModel.findById(id, "-password -__v");
+    const artist = await ArtistModel.findById(id, "-password -__v");
 
-    if (!user) {
-        return next(new ApiError(`no user for this id ${id}`, 404))
+    if (!artist) {
+        return next(new ApiError(`no artist for this id ${id}`, 404))
     }
 
     return res.status(200).json(
         apiSuccess(
-            "user found successfully",
+            "artist found successfully",
             200,
-            {user}
+            {artist}
         ));
 });
 
 const uploadProfileImage = uploadSingleImage("profileImg");
 
 const resizeProfileImage = asyncHandler(async (req, res, next) => {
-    const fileName = `user-${Math.round(
+    const fileName = `artist-${Math.round(
         Math.random() * 1e9
     )}-${Date.now()}.jpeg`;
 
@@ -90,11 +90,11 @@ const resizeProfileImage = asyncHandler(async (req, res, next) => {
             .resize(600, 600)
             .toFormat("jpeg")
             .jpeg({quality: 95})
-            .toFile(`uploads/users/${fileName}`)
+            .toFile(`uploads/artists/${fileName}`)
             .then(async () => {
-                const user = await UserModel.findById(req.params.id);
-                const oldFileName = user.profileImg;
-                const filePath = `uploads/users/${oldFileName}`;
+                const artist = await ArtistModel.findById(req.params.id);
+                const oldFileName = artist.profileImg;
+                const filePath = `uploads/artists/${oldFileName}`;
                 fs.access(filePath, fs.constants.F_OK, (err) => {
                     if (!err) {
                         // File exists, so delete it
@@ -112,10 +112,10 @@ const resizeProfileImage = asyncHandler(async (req, res, next) => {
     next();
 });
 
-const updateUser = asyncHandler(async (req, res) => {
+const updateArtist = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
-    await UserModel.findByIdAndUpdate(id, {
+    await ArtistModel.findByIdAndUpdate(id, {
         name: req.body.name,
         phone: req.body.phone,
         address: req.body.address,
@@ -127,7 +127,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         apiSuccess(
-            `user updated successfully`,
+            `artist updated successfully`,
             200,
             null
         ));
@@ -146,27 +146,27 @@ const search = asyncHandler(async (req, res, next) => {
         {address: {$regex: keyword, $options: "i"},}
     ]
 
-    const users = await UserModel.find(queryObj, "-password -__v");
+    const artists = await ArtistModel.find(queryObj, "-password -__v");
 
-    if (!users) {
-        return next(new ApiError(`No users found matched this search key: ${keyword}`, 404));
+    if (!artists) {
+        return next(new ApiError(`No artists found matched this search key: ${keyword}`, 404));
     }
 
     return res.status(200).json(
         apiSuccess(
-            `users Found`,
+            `artists Found`,
             200,
-            {users}
+            {artists}
         ));
 });
 
-const deleteUser = asyncHandler(async (req, res) => {
+const deleteArtist = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
-    const user = await UserModel.findByIdAndDelete(id);
+    const artist = await ArtistModel.findByIdAndDelete(id);
 
-    const oldFileName = user.profileImg;
-    const filePath = `uploads/users/${oldFileName}`;
+    const oldFileName = artist.profileImg;
+    const filePath = `uploads/artists/${oldFileName}`;
     fs.access(filePath, fs.constants.F_OK, (err) => {
         if (!err) {
             // File exists, so delete it
@@ -180,14 +180,14 @@ const deleteUser = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         apiSuccess(
-            `user deleted successfully`,
+            `artist deleted successfully`,
             200,
             null
         ));
 
 });
 
-const getUserProfile = asyncHandler(async (req, res, next) => {
+const getArtistProfile = asyncHandler(async (req, res, next) => {
     req.params.id = req.loggedUser._id;
     next();
 });
@@ -195,7 +195,7 @@ const getUserProfile = asyncHandler(async (req, res, next) => {
 const changePassword = asyncHandler(async (req, res) => {
     const id = req.loggedUser._id;
 
-    const user = await UserModel.findByIdAndUpdate(
+    const artist = await ArtistModel.findByIdAndUpdate(
         id,
         {
             password: await bcrypt.hash(req.body.password, 12),
@@ -206,7 +206,7 @@ const changePassword = asyncHandler(async (req, res) => {
         }
     );
 
-    const token = await generateJWT({id: user._id, role: "user"});
+    const token = await generateJWT({id: artist._id, role: "artist"});
 
     return res.status(200).json(
         apiSuccess(
@@ -219,7 +219,7 @@ const changePassword = asyncHandler(async (req, res) => {
 const updateProfile = asyncHandler(async (req, res) => {
     const id = req.loggedUser._id;
 
-    await UserModel.findByIdAndUpdate(id, {
+    await ArtistModel.findByIdAndUpdate(id, {
         name: req.body.name,
         phone: req.body.phone,
         address: req.body.address,
@@ -230,7 +230,7 @@ const updateProfile = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         apiSuccess(
-            `user updated successfully`,
+            `artist updated successfully`,
             200,
             null
         ));
@@ -238,14 +238,14 @@ const updateProfile = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-    getAllUsers,
-    getUser,
-    updateUser,
-    deleteUser,
+    getAllArtists,
+    getArtist,
+    updateArtist,
+    deleteArtist,
     uploadProfileImage,
     resizeProfileImage,
     changePassword,
     search,
-    getUserProfile,
+    getArtistProfile,
     updateProfile,
 }

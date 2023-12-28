@@ -9,6 +9,8 @@ const ApiError = require("./src/utils/apiError");
 const globalErrorMiddleware = require("./src/middlewares/globalErrorMiddleware")
 const userAuthRoute = require("./src/routes/userAuthRoute");
 const userRoute = require("./src/routes/userRoute");
+const artistAuthRoute = require("./src/routes/artistAuthRoute");
+const artistRoute = require("./src/routes/artistRoute");
 const adminRoute = require("./src/routes/adminRoute");
 const categoryRoute = require("./src/routes/categoryRoute");
 
@@ -26,6 +28,8 @@ if (process.env.NODE_ENV === "development") {
 
 app.use("/api/v1/userAuth", userAuthRoute);
 app.use("/api/v1/users", userRoute);
+app.use("/api/v1/artistAuth", artistAuthRoute);
+app.use("/api/v1/artists", artistRoute);
 app.use("/api/v1/admins", adminRoute);
 app.use("/api/v1/categories", categoryRoute);
 

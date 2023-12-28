@@ -34,7 +34,7 @@ router.get("/getProfile",
     getUser,
 );
 
-router.get("/updateProfile",
+router.patch("/updateProfile",
     allowedToUser(),
     uploadProfileImage,
     updateProfileValidation,

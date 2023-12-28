@@ -66,18 +66,6 @@ exports.deleteUserValidation = [
 ];
 
 exports.changeUserPasswordValidation = [
-    param("id")
-        .isMongoId()
-        .withMessage("Invalid User Id")
-        .custom(async (val) => {
-            const user = await UserModel.findById(val);
-
-            if (!user) {
-                return Promise.reject(new ApiError(`no user for this id ${val}`, 404));
-            }
-            return true;
-        }),
-
     body("currentPassword")
         .notEmpty()
         .withMessage("currentPassword must not be empty"),
@@ -92,7 +80,7 @@ exports.changeUserPasswordValidation = [
 
     body("password")
         .custom(async (val, {req}) => {
-            const user = await UserModel.findById(req.params.id);
+            const user = await UserModel.findById(req.loggedUser._id);
 
             const isCorrectPassword = await bcrypt.compare(
                 req.body.currentPassword,
@@ -112,18 +100,6 @@ exports.changeUserPasswordValidation = [
 ];
 
 exports.updateProfileValidation = [
-    param("id")
-        .isMongoId()
-        .withMessage("Invalid User Id")
-        .custom(async (val) => {
-            const user = await UserModel.findById(val);
-
-            if (!user) {
-                return Promise.reject(new ApiError(`no user for this id ${val}`, 404));
-            }
-            return true;
-        }),
-
     body("name")
         .optional()
         .isLength({min: 3})
