@@ -92,9 +92,9 @@ exports.createAdminValidation = [body("nId")
 
     body("role")
         .notEmpty()
-        .withMessage("role must be one of the following (CEO, IT and Tracker)")
-        .isIn(["CEO", "IT", "Tracker"])
-        .withMessage("role must be one of the following (CEO, IT and Tracker)"),
+        .withMessage("role must be IT or Tracker")
+        .isIn(["IT", "Tracker"])
+        .withMessage("role must be IT or Tracker"),
 ];
 
 exports.updateAdminValidation = [param("id")

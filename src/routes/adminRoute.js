@@ -2,6 +2,8 @@ const express = require("express");
 
 const {
     createAdmin,
+    uploadProfileImage,
+    resizeProfileImage,
     getAdmins,
     getAdmin,
     updateAdmin,
@@ -29,7 +31,7 @@ router.use(verifyToken, allowedToAdmins("CEO"));
 
 router.route("/")
     .get(getAdmins)
-    .post(createAdminValidation, validationMiddleware, createAdmin);
+    .post(uploadProfileImage,createAdminValidation, validationMiddleware,resizeProfileImage, createAdmin);
 
 router.get("/search", searchValidation, validationMiddleware, search)
 

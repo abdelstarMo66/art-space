@@ -1,17 +1,37 @@
-const asyncHandler = require("../middlewares/asyncHandler");
-const bcrypt = require("bcrypt");
-const apiSuccess = require("../utils/apiSuccess");
-const generateJWT = require("../utils/generateJWT");
-const ApiError = require("../utils/apiError");
-const AdminModel = require("../models/adminModel");
-const UserModel = require("../models/userModel");
 const fs = require("fs");
+
+const bcrypt = require("bcrypt");
+const sharp = require("sharp");
+
+const asyncHandler = require("../middlewares/asyncHandler");
+const generateJWT = require("../utils/generateJWT");
+const apiSuccess = require("../utils/apiSuccess");
+const ApiError = require("../utils/apiError");
+const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
+const AdminModel = require("../models/adminModel");
+
+const uploadProfileImage = uploadSingleImage("profileImg");
+
+const resizeProfileImage = asyncHandler(async (req, res, next) => {
+    const fileName = `admin-${Math.round(
+        Math.random() * 1e9
+    )}-${Date.now()}.jpeg`;
+
+    if (req.file) {
+        await sharp(req.file.buffer)
+            .resize(600, 600)
+            .toFormat("jpeg")
+            .jpeg({quality: 95})
+            .toFile(`uploads/admins/${fileName}`);
+
+        req.body.profileImg = fileName;
+    }
+    next();
+});
 
 const createAdmin = asyncHandler(async (req, res, next) => {
     const admin = await AdminModel.create(req.body);
     admin.password = await bcrypt.hash(admin.password, 12)
-
-    const token = await generateJWT({id: admin._id, role: "admin"});
 
     await admin.save();
 
@@ -19,7 +39,7 @@ const createAdmin = asyncHandler(async (req, res, next) => {
         apiSuccess(
             "registration successfully..",
             201,
-            {token},
+            null,
         ));
 });
 
@@ -194,6 +214,8 @@ const login = asyncHandler(async (req, res, next) => {
 
 module.exports = {
     createAdmin,
+    uploadProfileImage,
+    resizeProfileImage,
     getAdmins,
     getAdmin,
     updateAdmin,
