@@ -83,7 +83,7 @@ const verifyEmail = asyncHandler(async (req, res, next) => {
     user.accountActive = true;
     await user.save();
 
-    const token = await generateJWT({userId: user._id});
+    const token = await generateJWT({id: user._id,role: "user"});
 
     return res.status(200).json(apiSuccess("email verification successful", 200, {token}));
 })
@@ -91,13 +91,17 @@ const verifyEmail = asyncHandler(async (req, res, next) => {
 const login = asyncHandler(async (req, res, next) => {
     const user = await UserModel.findOne({email: req.body.email});
 
-    const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
-
-    if (!user || !isPasswordCorrect) {
+    if (!user) {
         return next(new ApiError("Incorrect email or password", 401));
     }
 
-    const token = await generateJWT({userId: user._id});
+    const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
+
+    if (!isPasswordCorrect) {
+        return next(new ApiError("Incorrect email or password", 401));
+    }
+
+    const token = await generateJWT({id: user._id,role: "user"});
 
     return res.status(200).json(
         apiSuccess(
@@ -175,7 +179,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 
     await user.save();
 
-    const token = await generateJWT({userId: user._id});
+    const token = await generateJWT({id: user._id,role: "user"});
 
     return res.status(200).json(
         apiSuccess(

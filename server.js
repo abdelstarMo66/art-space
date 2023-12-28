@@ -9,6 +9,7 @@ const ApiError = require("./src/utils/apiError");
 const globalErrorMiddleware = require("./src/middlewares/globalErrorMiddleware")
 const userAuthRoute = require("./src/routes/userAuthRoute");
 const userRoute = require("./src/routes/userRoute");
+const adminRoute = require("./src/routes/adminRoute");
 
 dotenv.config({path: "config/config.env",});
 dbConnection();
@@ -24,6 +25,7 @@ if (process.env.NODE_ENV === "development") {
 
 app.use("/api/v1/userAuth", userAuthRoute);
 app.use("/api/v1/users", userRoute);
+app.use("/api/v1/admins", adminRoute);
 
 app.all("*", (req, res, next) => {
     next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));

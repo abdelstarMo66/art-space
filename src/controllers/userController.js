@@ -188,12 +188,12 @@ const deleteUser = asyncHandler(async (req, res) => {
 });
 
 const getUserProfile = asyncHandler(async (req, res, next) => {
-    req.params.id = req.user._id;
+    req.params.id = req.loggedUser._id;
     next();
 });
 
 const changePassword = asyncHandler(async (req, res) => {
-    const {id} = req.user._id;
+    const {id} = req.loggedUser._id;
 
     const user = await UserModel.findByIdAndUpdate(
         id,
@@ -206,7 +206,7 @@ const changePassword = asyncHandler(async (req, res) => {
         }
     );
 
-    const token = await generateJWT({userId: user._id});
+    const token = await generateJWT({id: user._id, role: "user"});
 
     return res.status(200).json(
         apiSuccess(
@@ -217,7 +217,7 @@ const changePassword = asyncHandler(async (req, res) => {
 })
 
 const updateProfile = asyncHandler(async (req, res) => {
-    const {id} = req.user._id;
+    const {id} = req.loggedUser._id;
 
     await UserModel.findByIdAndUpdate(id, {
         name: req.body.name,

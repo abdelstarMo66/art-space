@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken")
 const asyncHandler = require("../middlewares/asyncHandler");
 const ApiError = require("../utils/apiError");
 const UserModel = require("../models/userModel");
+const AdminModel = require("../models/adminModel");
 
 const verifyToken = asyncHandler(async (req, res, next) => {
     let token;
@@ -16,40 +17,53 @@ const verifyToken = asyncHandler(async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    console.log(decoded)
+    if (decoded.role === "admin") {
+        const currentUser = await AdminModel.findById(decoded.id);
 
-    const currentUser = await UserModel.findById(decoded.userId);
-
-    if (!currentUser) {
-        return next(
-            new ApiError("the user belong to this token does not longer exist", 401)
-        );
-    }
-
-    if (!currentUser.accountActive) {
-        return next(
-            new ApiError("this account is not verified, please verify this email ang go back", 400)
-        );
-    }
-
-    if (currentUser.passwordChangedAt) {
-        const passwordChangedTimeStamp = parseInt(
-            currentUser.passwordChangedAt.getTime() / 1000,
-            10
-        );
-
-        // password changed after token created
-        if (passwordChangedTimeStamp > decoded.iat) {
+        if (!currentUser) {
             return next(
-                new ApiError(
-                    "User recently changed his password, please login again...",
-                    401
-                )
+                new ApiError("the admin belong to this token does not longer exist", 401)
             );
         }
-    }
+        
+        req.loggedUser = currentUser;
+        next();
+    } else {
+        const currentUser = await UserModel.findById(decoded.id);
 
-    req.user = currentUser;
-    next();
+        if (!currentUser) {
+            return next(
+                new ApiError("the user belong to this token does not longer exist", 401)
+            );
+        }
+
+        if (!currentUser.accountActive) {
+            return next(
+                new ApiError("this account is not verified, please verify this email ang go back", 400)
+            );
+        }
+
+        if (currentUser.passwordChangedAt) {
+            const passwordChangedTimeStamp = parseInt(
+                currentUser.passwordChangedAt.getTime() / 1000,
+                10
+            );
+
+            // password changed after token created
+            if (passwordChangedTimeStamp > decoded.iat) {
+                return next(
+                    new ApiError(
+                        "User recently changed his password, please login again...",
+                        401
+                    )
+                );
+            }
+        }
+
+        req.loggedUser = currentUser;
+        next();
+    }
 
 });
 
