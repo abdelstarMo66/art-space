@@ -64,12 +64,12 @@ const getAdmins = asyncHandler(async (req, res, next) => {
 
     let sortBy = "createdAt"
     if (req.query.sort) {
-        sortBy = this.queryString.sort.split(',').join(" ");
+        sortBy = req.query.sort.split(',').join(" ");
     }
 
     let limitField = "-__v -password";
     if (req.query.fields) {
-        limitField = this.queryString.fields.split(",").join(" ");
+        limitField = req.query.fields.split(",").join(" ");
     }
 
     const admins = await AdminModel
@@ -190,14 +190,14 @@ const login = asyncHandler(async (req, res, next) => {
     const admin = await AdminModel.findOne({username: req.body.username});
 
     if (!admin) {
-        return next(new ApiError("Incorrect email or password", 401));
+        return next(new ApiError("Incorrect username or password", 401));
 
     }
 
     const isPasswordCorrect = await bcrypt.compare(req.body.password, admin.password);
 
     if (!(isPasswordCorrect)) {
-        return next(new ApiError("Incorrect email or password", 401));
+        return next(new ApiError("Incorrect username or password", 401));
     }
 
     const token = await generateJWT({id: admin._id, role: "admin"});

@@ -25,7 +25,7 @@ exports.createAdminValidation = [body("nId")
         const admin = await AdminModel.findOne({nId: val});
 
         if (admin) {
-            return Promise.reject(new ApiError("nId already in use", 400));
+            return Promise.reject(new ApiError("national ID already in use", 400));
         }
 
         return true;

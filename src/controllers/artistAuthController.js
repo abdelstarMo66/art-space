@@ -83,7 +83,7 @@ const verifyEmail = asyncHandler(async (req, res, next) => {
     artist.accountActive = true;
     await artist.save();
 
-    const token = await generateJWT({id: artist._id,role: "artist"});
+    const token = await generateJWT({id: artist._id, role: "artist"});
 
     return res.status(200).json(apiSuccess("email verification successful", 200, {token}));
 })
@@ -101,7 +101,7 @@ const login = asyncHandler(async (req, res, next) => {
         return next(new ApiError("Incorrect email or password", 401));
     }
 
-    const token = await generateJWT({id: artist._id,role: "artist"});
+    const token = await generateJWT({id: artist._id, role: "artist"});
 
     return res.status(200).json(
         apiSuccess(
@@ -155,7 +155,7 @@ const verifyCode = asyncHandler(async (req, res, next) => {
 
     const artist = await ArtistModel.findOne({email: req.body.email})
 
-    if (artist.passwordResetCode === hashedResetCode && artist.passwordResetExpires <= Date.now()) {
+    if (artist.passwordResetCode !== hashedResetCode || artist.passwordResetExpires <= Date.now()) {
         return next(new ApiError("reset code invalid or expired"));
     }
 
@@ -179,7 +179,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 
     await artist.save();
 
-    const token = await generateJWT({id: artist._id,role: "artist"});
+    const token = await generateJWT({id: artist._id, role: "artist"});
 
     return res.status(200).json(
         apiSuccess(

@@ -37,12 +37,12 @@ const getCategories = asyncHandler(async (req, res, next) => {
 
     let sortBy = "createdAt"
     if (req.query.sort) {
-        sortBy = this.queryString.sort.split(',').join(" ");
+        sortBy = req.query.sort.split(',').join(" ");
     }
 
     let limitField = "-__v";
     if (req.query.fields) {
-        limitField = this.queryString.fields.split(",").join(" ");
+        limitField = req.query.fields.split(",").join(" ");
     }
 
     const categories = await CategoryModel

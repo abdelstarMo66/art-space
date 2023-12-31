@@ -155,7 +155,7 @@ const verifyCode = asyncHandler(async (req, res, next) => {
 
     const user = await UserModel.findOne({email: req.body.email})
 
-    if (user.passwordResetCode === hashedResetCode && user.passwordResetExpires <= Date.now()) {
+    if (user.passwordResetCode !== hashedResetCode || user.passwordResetExpires <= Date.now()) {
         return next(new ApiError("reset code invalid or expired"));
     }
 

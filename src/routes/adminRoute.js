@@ -21,17 +21,17 @@ const {
 } = require("../validations/adminValidation");
 const validationMiddleware = require("../middlewares/validationMiddleware")
 const verifyToken = require("../middlewares/verifyToken");
-const {allowedToAdmins} = require("../middlewares/allowTo");
+const {allowedToAdmins, permissionValidate} = require("../middlewares/allowTo");
 
 const router = express.Router();
 
 router.post("/login", loginValidator, validationMiddleware, login)
 
-router.use(verifyToken, allowedToAdmins("CEO"));
+router.use(verifyToken, allowedToAdmins("CEO"), permissionValidate);
 
 router.route("/")
     .get(getAdmins)
-    .post(uploadProfileImage,createAdminValidation, validationMiddleware,resizeProfileImage, createAdmin);
+    .post(uploadProfileImage, createAdminValidation, validationMiddleware, resizeProfileImage, createAdmin);
 
 router.get("/search", searchValidation, validationMiddleware, search)
 

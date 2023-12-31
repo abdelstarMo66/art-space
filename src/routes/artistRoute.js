@@ -22,50 +22,26 @@ const {
 } = require("../validations/artistValidation");
 const validationMiddleware = require("../middlewares/validationMiddleware");
 const verifyToken = require("../middlewares/verifyToken");
-const {allowedToAdmins, allowedToArtist} = require("../middlewares/allowTo");
+const {allowedToAdmins, allowedToArtist, permissionValidate} = require("../middlewares/allowTo");
 
 const router = express.Router();
 
 router.use(verifyToken);
 
-router.get("/getProfile",
-    allowedToArtist(),
-    getArtistProfile,
-    getArtist,
-);
+router.get("/getProfile", allowedToArtist(), permissionValidate, getArtistProfile, getArtist,);
 
-router.patch("/updateProfile",
-    allowedToArtist(),
-    uploadProfileImage,
-    updateProfileValidation,
-    validationMiddleware,
-    resizeProfileImage,
-    updateProfile,
-);
+router.patch("/updateProfile", allowedToArtist(), permissionValidate, uploadProfileImage, updateProfileValidation, validationMiddleware, resizeProfileImage, updateProfile,);
 
-router.patch("/changePassword",
-    allowedToArtist(),
-    changeArtistPasswordValidation,
-    validationMiddleware,
-    changePassword,
-)
+router.patch("/changePassword", allowedToArtist(), permissionValidate, changeArtistPasswordValidation, validationMiddleware, changePassword,)
 
-router.get("/",
-    allowedToAdmins("IT"),
-    getAllArtists,
-);
+router.get("/", allowedToAdmins("IT"), permissionValidate, getAllArtists,);
 
-router.get("/search",
-    allowedToAdmins("IT"),
-    searchValidation,
-    validationMiddleware,
-    search,
-)
+router.get("/search", allowedToAdmins("IT"), permissionValidate, searchValidation, validationMiddleware, search,)
 
 router.route("/:id")
-    .get(allowedToAdmins("IT"), getArtistValidation, validationMiddleware, getArtist)
-    .patch(allowedToAdmins("IT"), uploadProfileImage, updateArtistValidation, validationMiddleware, resizeProfileImage, updateArtist)
-    .delete(allowedToAdmins("IT"), allowedToArtist(), deleteArtistValidation, validationMiddleware, deleteArtist);
+    .get(allowedToAdmins("IT"), permissionValidate, getArtistValidation, validationMiddleware, getArtist)
+    .patch(allowedToAdmins("IT"), permissionValidate, uploadProfileImage, updateArtistValidation, validationMiddleware, resizeProfileImage, updateArtist)
+    .delete(allowedToAdmins("IT"), allowedToArtist(), permissionValidate, deleteArtistValidation, validationMiddleware, deleteArtist);
 
 
 module.exports = router
