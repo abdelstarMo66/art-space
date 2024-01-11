@@ -1,22 +1,22 @@
 const asyncHandler = require("../middlewares/asyncHandler");
 
-const CategoryModel = require("../models/categoryModel");
+const SubjectModel = require("../models/subjectModel");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 
-const createCategory = asyncHandler(async (req, res) => {
-    await CategoryModel.create(req.body);
+const createSubject = asyncHandler(async (req, res) => {
+    await SubjectModel.create(req.body);
 
     return res.status(201).json(
         apiSuccess(
-            `add category successfully..`,
+            `add subject successfully..`,
             201,
             null,
         ));
 });
 
-const getCategories = asyncHandler(async (req, res, next) => {
-    const categoriesCount = await CategoryModel.countDocuments();
+const getSubjects = asyncHandler(async (req, res, next) => {
+    const subjectsCount = await SubjectModel.countDocuments();
     const page = +req.query.page || 1;
     const limit = +req.query.limit || 20;
     const skip = (page - 1) * limit;
@@ -25,9 +25,9 @@ const getCategories = asyncHandler(async (req, res, next) => {
     const pagination = {};
     pagination.currentPage = page;
     pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(categoriesCount / limit);
-    pagination.totalResults = categoriesCount;
-    if (endIndex < categoriesCount) {
+    pagination.numbersOfPages = Math.ceil(subjectsCount / limit);
+    pagination.totalResults = subjectsCount;
+    if (endIndex < subjectsCount) {
         pagination.nextPage = page + 1;
     }
     if (skip > 0) {
@@ -44,63 +44,63 @@ const getCategories = asyncHandler(async (req, res, next) => {
         limitField = req.query.fields.split(",").join(" ");
     }
 
-    const categories = await CategoryModel
+    const subjects = await SubjectModel
         .find()
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
         .select(limitField);
 
-    if (!categories) {
-        return next(new ApiError(`No categories found`, 404));
+    if (!subjects) {
+        return next(new ApiError(`No subjects found`, 404));
     }
 
     return res.status(200).json(
         apiSuccess(
-            `categories Found`,
+            `subjects Found`,
             200,
             {
                 pagination,
-                categories
+                subjects
             }
         ));
 });
 
-const getCategory = asyncHandler(async (req, res) => {
+const getSubject = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
-    const category = await CategoryModel.findById(id);
+    const subject = await SubjectModel.findById(id);
 
     return res.status(200).json(
         apiSuccess(
-            "category found successfully",
+            "subject found successfully",
             200,
-            {category},
+            {subject},
         ));
 });
 
-const updateCategory = asyncHandler(async (req, res) => {
+const updateSubject = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
-    const category = await CategoryModel.findByIdAndUpdate(id, req.body, {new: true});
+    const subject = await SubjectModel.findByIdAndUpdate(id, req.body, {new: true});
 
     return res.status(200).json(
         apiSuccess(
-            "category updated successfully",
+            "subject updated successfully",
             200,
-            {category},
+            {subject},
         ));
 
 });
 
-const deleteCategory = asyncHandler(async (req, res) => {
+const deleteSubject = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
-    await CategoryModel.findByIdAndDelete(id);
+    await SubjectModel.findByIdAndDelete(id);
 
     return res.status(200).json(
         apiSuccess(
-            "category deleted successfully",
+            "subject deleted successfully",
             200,
             null,
         ));
@@ -115,25 +115,25 @@ const search = asyncHandler(async (req, res, next) => {
         {slug: {$regex: keyword, $options: "i"},},
     ]
 
-    const categories = await CategoryModel.find(queryObj, "-__v");
+    const subjects = await SubjectModel.find(queryObj, "-__v");
 
-    if (!categories) {
-        return next(new ApiError(`No categories found matched this search key: ${keyword}`, 404));
+    if (!subjects) {
+        return next(new ApiError(`No subjects found matched this search key: ${keyword}`, 404));
     }
 
     return res.status(200).json(
         apiSuccess(
-            `categories Found`,
+            `subjects Found`,
             200,
-            {categories}
+            {subjects}
         ));
 });
 
 module.exports = {
-    createCategory,
-    getCategories,
-    getCategory,
+    createSubject,
+    getSubjects,
+    getSubject,
     search,
-    updateCategory,
-    deleteCategory,
+    updateSubject,
+    deleteSubject,
 }

@@ -13,6 +13,8 @@ const artistAuthRoute = require("./src/routes/artistAuthRoute");
 const artistRoute = require("./src/routes/artistRoute");
 const adminRoute = require("./src/routes/adminRoute");
 const categoryRoute = require("./src/routes/categoryRoute");
+const styleRoute = require("./src/routes/styleRoute");
+const subjectRoute = require("./src/routes/subjectRoute");
 
 dotenv.config({path: "config/config.env",});
 dbConnection();
@@ -32,6 +34,8 @@ app.use("/api/v1/artistAuth", artistAuthRoute);
 app.use("/api/v1/artists", artistRoute);
 app.use("/api/v1/admins", adminRoute);
 app.use("/api/v1/categories", categoryRoute);
+app.use("/api/v1/styles", styleRoute);
+app.use("/api/v1/subjects", subjectRoute);
 
 app.all("*", (req, res, next) => {
     next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
