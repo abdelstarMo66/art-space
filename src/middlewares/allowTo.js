@@ -65,7 +65,6 @@ exports.allowedToAdmins = (...roles) => asyncHandler(async (req, res, next) => {
     next();
 });
 
-
 exports.permissionValidate = (req, res, next) => {
     if (req.allowSuccess) {
         next();

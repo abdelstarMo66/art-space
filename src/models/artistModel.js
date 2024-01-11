@@ -24,9 +24,17 @@ const artistSchema = new mongoose.Schema({
         type: String,
         default: "defaultImage.png",
     },
-    address: {
-        type: String
-    },
+    addresses: [
+        {
+            alias: String,
+            street: String,
+            region: String,
+            city: String,
+            country: String,
+            postalCode: String,
+            phone: String,
+        },
+    ],
     gender: {
         type: String,
         enum: ["male", "female"],

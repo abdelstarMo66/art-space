@@ -237,6 +237,66 @@ const updateProfile = asyncHandler(async (req, res) => {
 
 });
 
+const addUserAddress = asyncHandler(async (req, res) => {
+    const user = await UserModel.findById(req.loggedUser._id);
+
+    for (let i = 0; i < user.addresses.length; i++) {
+        if (JSON.stringify(req.body) === JSON.stringify(user.addresses[i], ["alias", "street", "region", "city", "country", "postalCode", "phone"])
+            || JSON.stringify(req.body) === JSON.stringify(user.addresses[i], ["alias", "street", "region", "city", "country", "postalCode"])
+            || JSON.stringify(req.body) === JSON.stringify(user.addresses[i], ["alias", "street", "region", "city", "country", "phone"])
+            || JSON.stringify(req.body) === JSON.stringify(user.addresses[i], ["alias", "street", "region", "city", "country"])) {
+            return res.status(200).json(
+                apiSuccess(
+                    "this address is already in the list of addresses",
+                    200,
+                    null,
+                ));
+        }
+    }
+
+    await user.updateOne({
+            $addToSet: {addresses: req.body},
+        },
+        {new: true}
+    )
+
+    return res.status(201).json(
+        apiSuccess(
+            "Address added successfully",
+            200,
+            null
+        ));
+
+});
+
+const removeUserAddress = asyncHandler(async (req, res) => {
+    const user = await UserModel.findByIdAndUpdate(
+        req.loggedUser._id,
+        {
+            $pull: {addresses: {_id: req.params.addressId}},
+        },
+        {new: true}
+    );
+
+    return res.status(200).json(
+        apiSuccess(
+            "Address removed successfully",
+            200,
+            user.addresses
+        ));
+});
+
+const getProfileAddresses = asyncHandler(async (req, res) => {
+    const user = await UserModel.findById(req.loggedUser._id).populate("addresses");
+
+    return res.status(200).json(
+        apiSuccess(
+            "Address Founded successfully",
+            200,
+            user.addresses
+        ));
+});
+
 module.exports = {
     getAllUsers,
     getUser,
@@ -248,4 +308,7 @@ module.exports = {
     search,
     getUserProfile,
     updateProfile,
+    addUserAddress,
+    removeUserAddress,
+    getProfileAddresses,
 }

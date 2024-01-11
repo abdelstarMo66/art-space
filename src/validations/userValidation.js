@@ -110,3 +110,31 @@ exports.updateProfileValidation = [
         .matches(/^\+?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
         .withMessage("please enter invalid phone")
 ];
+
+exports.addUserAddressValidation = [
+    body("alias")
+        .notEmpty()
+        .withMessage("please enter kind of address home/work/..."),
+
+    body("street")
+        .notEmpty()
+        .withMessage("please enter your street and street number, if any"),
+
+    body("region")
+        .notEmpty()
+        .withMessage("please enter your region"),
+
+    body("city")
+        .notEmpty()
+        .withMessage("please enter your city"),
+
+    body("country")
+        .notEmpty()
+        .withMessage("please enter your country"),
+
+    body("postalCode")
+        .optional(),
+
+    body("phone")
+        .optional(),
+];

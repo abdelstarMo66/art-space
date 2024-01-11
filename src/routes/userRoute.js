@@ -11,6 +11,9 @@ const {
     search,
     getUserProfile,
     updateProfile,
+    addUserAddress,
+    getProfileAddresses,
+    removeUserAddress
 } = require("../controllers/userController")
 const {
     getUserValidation,
@@ -19,6 +22,7 @@ const {
     changeUserPasswordValidation,
     searchValidation,
     updateProfileValidation,
+    addUserAddressValidation,
 } = require("../validations/userValidation");
 const validationMiddleware = require("../middlewares/validationMiddleware");
 const verifyToken = require("../middlewares/verifyToken");
@@ -51,6 +55,26 @@ router.patch("/changePassword",
     changeUserPasswordValidation,
     validationMiddleware,
     changePassword,
+)
+
+router.route("/address")
+    .post(
+        allowedToUser(),
+        permissionValidate,
+        addUserAddressValidation,
+        validationMiddleware,
+        addUserAddress
+    )
+    .get(
+        allowedToUser(),
+        permissionValidate,
+        getProfileAddresses,
+    )
+
+router.delete("/address/:addressId",
+    allowedToUser(),
+    permissionValidate,
+    removeUserAddress,
 )
 
 router.get("/",
