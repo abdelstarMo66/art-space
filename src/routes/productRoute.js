@@ -25,6 +25,7 @@ const {
 const validationMiddleware = require("../middlewares/validationMiddleware");
 const verifyToken = require("../middlewares/verifyToken");
 const {allowedToAdmins, allowedToUser, allowedToArtist, permissionValidate} = require("../middlewares/allowTo");
+const {body} = require("express-validator");
 
 const router = express.Router();
 
@@ -44,6 +45,10 @@ router.route("/")
         createProductValidation,
         validationMiddleware,
         resizeProductImage,
+        body("coverImage")
+            .notEmpty()
+            .withMessage("Product coverImage is required"),
+        validationMiddleware,
         createProduct,
     )
 
