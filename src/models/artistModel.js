@@ -51,6 +51,19 @@ const artistSchema = new mongoose.Schema({
     passwordResetVerified: Boolean,
 }, {timestamps: true});
 
+const setImageURL = (doc) => {
+    if (doc.profileImg) {
+        doc.profileImg = `${process.env.BASE_URL}/artists/${doc.profileImg}`;
+    }
+};
+
+artistSchema.post("init", (doc) => {
+    setImageURL(doc);
+});
+artistSchema.post("save", (doc) => {
+    setImageURL(doc);
+});
+
 const ArtistModel = mongoose.model("artist", artistSchema);
 
 module.exports = ArtistModel;

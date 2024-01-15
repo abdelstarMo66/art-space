@@ -40,8 +40,9 @@ exports.allowedToUser = () => asyncHandler(async (req, res, next) => {
 
     if (!user) {
         req.allowError = true;
+    } else {
+        req.allowSuccess = true;
     }
-    req.allowSuccess = true;
     next();
 });
 
@@ -50,8 +51,9 @@ exports.allowedToArtist = () => asyncHandler(async (req, res, next) => {
 
     if (!artist) {
         req.allowError = true;
+    } else {
+        req.allowSuccess = true;
     }
-    req.allowSuccess = true;
     next();
 });
 
@@ -60,8 +62,9 @@ exports.allowedToAdmins = (...roles) => asyncHandler(async (req, res, next) => {
 
     if (!admin || !roles.includes(admin.role)) {
         req.allowError = true;
+    } else {
+        req.allowSuccess = true;
     }
-    req.allowSuccess = true;
     next();
 });
 

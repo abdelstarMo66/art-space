@@ -43,6 +43,28 @@ const adminSchema = new mongoose.Schema({
     }
 }, {timestamps: true,});
 
+const setImageURL = (doc) => {
+    if (doc.coverImage) {
+        doc.coverImage = `${process.env.BASE_URL}/admins/${doc.coverImage}`;
+    }
+
+    if (doc.images) {
+        const images = [];
+        doc.images.forEach((image) => {
+            const imageUrl = `${process.env.BASE_URL}/admins/${image}`;
+            images.push(imageUrl);
+        });
+        doc.images = images;
+    }
+};
+
+adminSchema.post("init", (doc) => {
+    setImageURL(doc);
+});
+adminSchema.post("save", (doc) => {
+    setImageURL(doc);
+});
+
 const AdminModel = mongoose.model("admin", adminSchema);
 
 module.exports = AdminModel;
