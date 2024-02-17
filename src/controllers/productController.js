@@ -177,7 +177,6 @@ const deleteProduct = asyncHandler(async (req, res) => {
         });
     }
 
-
     return res.status(200).json(
         apiSuccess(
             "product deleted successfully",
@@ -265,6 +264,82 @@ const getMeProducts = asyncHandler(async (req, res, next) => {
         ));
 });
 
+const changeCoverImage = asyncHandler(async (req, res, next) => {
+    const {coverImage, oldImage} = req.body;
+
+    const imageUrl = "products" + oldImage.split("products", 3)[2];
+
+    const product = await ProductModel.findOne({coverImage: imageUrl}, "coverImage");
+
+    if (!product) {
+        return next(new ApiError(`No product found`, 404));
+    }
+
+    product.coverImage = coverImage;
+
+    fs.access(imageUrl, fs.constants.F_OK, (err) => {
+        if (!err) {
+            // File exists, so delete it
+            fs.unlink(imageUrl, (deleteErr) => {
+                if (deleteErr) {
+                    console.error("Error deleting file:", deleteErr);
+                }
+            });
+        }
+    });
+
+    await product.save();
+
+    return res.status(200).json(
+        apiSuccess(
+            "Cover Image updated successfully",
+            200,
+            null,
+        ));
+});
+
+const changeSpecificImage = asyncHandler(async (req, res, next) => {
+    const {images, oldImage} = req.body;
+
+    const imageUrl = "products" + oldImage.split("products", 3)[2];
+    const product = await ProductModel.findOne({images: {$in: [imageUrl]}}, "images");
+
+    if (!product) {
+        return next(new ApiError(`No product found`, 404));
+    }
+
+    const oldProductImages = product.images.map(image => "products" + image.split("products", 3)[2])
+
+    const index = oldProductImages.indexOf(imageUrl);
+
+    if (index > -1) {
+        oldProductImages[index] = images[0];
+        product.images = oldProductImages;
+
+        fs.access(imageUrl, fs.constants.F_OK, (err) => {
+            if (!err) {
+                // File exists, so delete it
+                fs.unlink(imageUrl, (deleteErr) => {
+                    if (deleteErr) {
+                        console.error("Error deleting file:", deleteErr);
+                    }
+                });
+            }
+        });
+
+        await product.save();
+    } else {
+        return next(new ApiError(`something went wrong please try again`, 500));
+    }
+
+    return res.status(200).json(
+        apiSuccess(
+            "Image updated successfully",
+            200,
+            null,
+        ));
+})
+
 module.exports = {
     createProduct,
     getProducts,
@@ -275,4 +350,6 @@ module.exports = {
     uploadProductImages,
     resizeProductImage,
     getMeProducts,
+    changeCoverImage,
+    changeSpecificImage
 }

@@ -100,16 +100,17 @@ productSchema.pre(/^find/, function (next) {
 });
 
 const setImageURL = (doc) => {
-    if (doc.coverImage) {
-        const imageUrl = `${process.env.BASE_URL}/products/${doc.coverImage}`;
-        doc.coverImage = imageUrl;
+    if (doc.coverImage && !doc.coverImage.startsWith(process.env.BASE_URL)) {
+        doc.coverImage = `${process.env.BASE_URL}/products/${doc.coverImage}`;
     }
 
     if (doc.images) {
         const images = [];
         doc.images.forEach((image) => {
-            const imageUrl = `${process.env.BASE_URL}/products/${image}`;
-            images.push(imageUrl);
+            if(!image.startsWith(process.env.BASE_URL)){
+                const imageUrl = `${process.env.BASE_URL}/products/${image}`;
+                images.push(imageUrl);
+            }
         });
         doc.images = images;
     }
@@ -118,9 +119,10 @@ const setImageURL = (doc) => {
 productSchema.post("init", (doc) => {
     setImageURL(doc);
 });
-productSchema.post("save", (doc) => {
-    setImageURL(doc);
-});
+
+// productSchema.post("save", (doc) => {
+//     setImageURL(doc);
+// });
 
 const ProductModel = mongoose.model("product", productSchema);
 

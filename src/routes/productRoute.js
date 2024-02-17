@@ -10,6 +10,8 @@ const {
     uploadProductImages,
     resizeProductImage,
     getMeProducts,
+    changeSpecificImage,
+    changeCoverImage,
 } = require("../controllers/productController");
 const {
     createProductValidation,
@@ -108,5 +110,9 @@ router.get("/search",
     validationMiddleware,
     search,
 )
+
+router.put("/changeCoverImage", uploadProductImages, resizeProductImage, changeCoverImage)
+
+router.put("/changeSpecificImage", uploadProductImages, resizeProductImage, changeSpecificImage)
 
 module.exports = router;
