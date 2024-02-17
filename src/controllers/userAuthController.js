@@ -33,14 +33,13 @@ const resizeProfileImage = asyncHandler(async (req, res, next) => {
 const signup = asyncHandler(async (req, res, next) => {
     const user = await UserModel.create(req.body);
     user.password = await bcrypt.hash(user.password, 12)
-    await user.save();
 
     const activateCode = Math.floor(100000 + Math.random() * 900000).toString();
 
     user.accountActivateCode = crypto
         .createHash("sha256")
         .update(activateCode)
-        .digest("hex");
+        .digest("hex")
     user.AccountActivateExpires = Date.now() + 10 * 60 * 1000;
 
     const message = `Hi ${user.name},\nYour verification code is ${activateCode}.\nEnter this code in our [website or app] to activate your [customer portal] account.\nWe’re glad you’re here!\nThe Art Space team\n`;
@@ -52,13 +51,12 @@ const signup = asyncHandler(async (req, res, next) => {
             text: message,
         });
     } catch (error) {
-        user.passwordResetCode = undefined;
-        user.passwordResetExpires = undefined;
-        user.passwordResetVerified = undefined;
+        user.accountActivateCode = undefined;
+        user.AccountActivateExpires = undefined;
 
-        await user.save();
-        return next(new ApiError("There is an error in sending email", 500));
     }
+
+    await user.save();
 
     return res.status(201).json(
         apiSuccess(
@@ -71,19 +69,24 @@ const signup = asyncHandler(async (req, res, next) => {
 const verifyEmail = asyncHandler(async (req, res, next) => {
     const user = await UserModel.findOne({email: req.body.email});
 
-    const hashedActivateCode = crypto
+    const hashedResetCode = crypto
         .createHash("sha256")
         .update(req.body.activateCode)
         .digest("hex");
 
-    if (user.accountActivateCode === hashedActivateCode && user.AccountActivateExpires <= Date.now()) {
+    console.log(user.accountActivateCode)
+    console.log(hashedResetCode)
+
+    if (user.accountActivateCode !== hashedResetCode || user.AccountActivateExpires <= Date.now()) {
         return next(new ApiError("activation code invalid or expired"));
     }
 
     user.accountActive = true;
+    user.accountActivateCode = undefined;
+    user.AccountActivateExpires = undefined;
     await user.save();
 
-    const token = await generateJWT({id: user._id,role: "user"});
+    const token = await generateJWT({id: user._id, role: "user"});
 
     return res.status(200).json(apiSuccess("email verification successful", 200, {token}));
 })
@@ -101,7 +104,7 @@ const login = asyncHandler(async (req, res, next) => {
         return next(new ApiError("Incorrect email or password", 401));
     }
 
-    const token = await generateJWT({id: user._id,role: "user"});
+    const token = await generateJWT({id: user._id, role: "user"});
 
     return res.status(200).json(
         apiSuccess(
@@ -179,7 +182,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 
     await user.save();
 
-    const token = await generateJWT({id: user._id,role: "user"});
+    const token = await generateJWT({id: user._id, role: "user"});
 
     return res.status(200).json(
         apiSuccess(
@@ -188,6 +191,42 @@ const resetPassword = asyncHandler(async (req, res, next) => {
             {
                 token
             },
+        ));
+})
+
+const resendCode = asyncHandler(async (req, res, next) => {
+    const user = await UserModel.findOne({email: req.body.email});
+
+    const activateCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.accountActivateCode = crypto
+        .createHash("sha256")
+        .update(activateCode)
+        .digest("hex")
+    user.AccountActivateExpires = Date.now() + 10 * 60 * 1000;
+
+    const message = `Hi ${user.name},\nYour verification code is ${activateCode}.\nEnter this code in our [website or app] to activate your [customer portal] account.\nWe’re glad you’re here!\nThe Art Space team\n`;
+
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: "Verification Code (valid for 10 minutes)",
+            text: message,
+        });
+        await user.save();
+    } catch (error) {
+        user.accountActivateCode = undefined;
+        user.AccountActivateExpires = undefined;
+
+        await user.save();
+        return next(new ApiError("There is an error in sending email", 500));
+    }
+
+    return res.status(200).json(
+        apiSuccess(
+            "check your email",
+            200,
+            null,
         ));
 })
 
@@ -200,4 +239,5 @@ module.exports = {
     forgotPassword,
     verifyCode,
     resetPassword,
+    resendCode,
 }

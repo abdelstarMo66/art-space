@@ -8,13 +8,14 @@ const {
     login,
     forgotPassword,
     verifyCode,
-    resetPassword
+    resetPassword,
+    resendCode,
 } = require("../controllers/userAuthController")
 const {
     signupValidator,
     verifyEmailValidator,
     loginValidator,
-    forgotPasswordValidator,
+    emailValidator,
     verifyCodeValidator,
     resetPasswordValidator
 } = require("../validations/userAuthValidation");
@@ -43,7 +44,7 @@ router.post("/login",
 )
 
 router.post("/forgotPassword",
-    forgotPasswordValidator,
+    emailValidator,
     validationMiddleware,
     forgotPassword,
 )
@@ -58,6 +59,12 @@ router.put("/resetPassword",
     resetPasswordValidator,
     validationMiddleware,
     resetPassword,
+)
+
+router.get("/resendCode",
+    emailValidator,
+    validationMiddleware,
+    resendCode,
 )
 
 module.exports = router

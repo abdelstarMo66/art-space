@@ -82,7 +82,7 @@ exports.loginValidator = [
         .withMessage("password too short, please enter password at least 8 characters"),
 ]
 
-exports.forgotPasswordValidator = [
+exports.emailValidator = [
     body("email")
         .notEmpty()
         .withMessage("email must not be empty")

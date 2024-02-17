@@ -97,7 +97,7 @@ exports.loginValidator = [
         ),
 ];
 
-exports.forgotPasswordValidator = [
+exports.emailValidator = [
     body("email")
         .notEmpty()
         .withMessage("email must not be empty")

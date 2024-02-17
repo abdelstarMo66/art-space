@@ -52,13 +52,10 @@ const signup = asyncHandler(async (req, res, next) => {
             text: message,
         });
     } catch (error) {
-        artist.passwordResetCode = undefined;
-        artist.passwordResetExpires = undefined;
-        artist.passwordResetVerified = undefined;
-
-        await artist.save();
-        return next(new ApiError("There is an error in sending email", 500));
+        artist.accountActivateCode = undefined;
+        artist.AccountActivateExpires = undefined;
     }
+    await artist.save();
 
     return res.status(201).json(
         apiSuccess(
@@ -76,11 +73,14 @@ const verifyEmail = asyncHandler(async (req, res, next) => {
         .update(req.body.activateCode)
         .digest("hex");
 
-    if (artist.accountActivateCode === hashedActivateCode && artist.AccountActivateExpires <= Date.now()) {
+    if (artist.accountActivateCode !== hashedActivateCode || artist.AccountActivateExpires <= Date.now()) {
         return next(new ApiError("activation code invalid or expired"));
     }
 
     artist.accountActive = true;
+    artist.accountActivateCode = undefined;
+    artist.AccountActivateExpires = undefined;
+
     await artist.save();
 
     const token = await generateJWT({id: artist._id, role: "artist"});
@@ -191,6 +191,41 @@ const resetPassword = asyncHandler(async (req, res, next) => {
         ));
 })
 
+const resendCode = asyncHandler(async (req,res,next)=>{
+    const artist = await ArtistModel.findOne({email: req.body.email});
+
+    const activateCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    artist.accountActivateCode = crypto
+        .createHash("sha256")
+        .update(activateCode)
+        .digest("hex");
+    artist.AccountActivateExpires = Date.now() + 10 * 60 * 1000;
+
+    const message = `Hi ${artist.name},\nYour verification code is ${activateCode}.\nEnter this code in our [website or app] to activate your [customer portal] account.\nWe’re glad you’re here!\nThe Art Space team\n`;
+
+    try {
+        await sendEmail({
+            email: artist.email,
+            subject: "Activating Your Account (valid for 10 minutes)",
+            text: message,
+        });
+    } catch (error) {
+        artist.accountActivateCode = undefined;
+        artist.AccountActivateExpires = undefined;
+
+        await artist.save();
+        return next(new ApiError("There is an error in sending email", 500));
+    }
+
+    return res.status(200).json(
+        apiSuccess(
+            "check your email",
+            200,
+            null,
+        ));
+})
+
 module.exports = {
     signup,
     verifyEmail,
@@ -200,4 +235,5 @@ module.exports = {
     forgotPassword,
     verifyCode,
     resetPassword,
+    resendCode,
 }
