@@ -7,6 +7,8 @@ const categoryRoute = require("./categoryRoute");
 const styleRoute = require("./styleRoute");
 const subjectRoute = require("./subjectRoute");
 const productRoute = require("./productRoute");
+const eventRoute = require("./eventRoute");
+const cartRoute = require("./cartRoute");
 
 const mountRoutes = (app) => {
     app.use("/api/v1/userAuth", userAuthRoute);
@@ -18,6 +20,8 @@ const mountRoutes = (app) => {
     app.use("/api/v1/styles", styleRoute);
     app.use("/api/v1/subjects", subjectRoute);
     app.use("/api/v1/products", productRoute);
+    app.use("/api/v1/events", eventRoute);
+    app.use("/api/v1/cart", cartRoute);
 }
 
 module.exports = mountRoutes;
