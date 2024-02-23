@@ -97,7 +97,8 @@ exports.createAdminValidation = [body("nId")
         .withMessage("role must be IT or Tracker"),
 ];
 
-exports.updateAdminValidation = [param("id")
+exports.updateAdminValidation = [
+    param("id")
     .isMongoId()
     .withMessage("Invalid User Id")
     .custom(async (val) => {

@@ -115,7 +115,6 @@ const updateAdmin = asyncHandler(async (req, res) => {
         phone: req.body.phone,
         gender: req.body.gender,
         role: req.body.role,
-        profileImg: req.body.profileImg,
     }, {
         new: true,
     });
@@ -132,6 +131,34 @@ const updateAdmin = asyncHandler(async (req, res) => {
             null
         ));
 
+});
+
+const updateImgProfile = asyncHandler(async (req, res, next) => {
+    const {id} = req.params;
+
+    const admin = await AdminModel.findByIdAndUpdate(id, {
+        profileImg: req.body.profileImg,
+    });
+
+    const oldFileName = admin.profileImg;
+    const filePath = `uploads/admins/${oldFileName}`;
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (!err) {
+            // File exists, so delete it
+            fs.unlink(filePath, (deleteErr) => {
+                if (deleteErr) {
+                    console.error('Error deleting file:', deleteErr);
+                }
+            });
+        }
+    });
+
+    return res.status(200).json(
+        apiSuccess(
+            `profile admin updated successfully`,
+            200,
+            null
+        ));
 });
 
 const deleteAdmin = asyncHandler(async (req, res) => {
@@ -219,6 +246,7 @@ module.exports = {
     getAdmins,
     getAdmin,
     updateAdmin,
+    updateImgProfile,
     deleteAdmin,
     search,
     login

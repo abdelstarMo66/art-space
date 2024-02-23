@@ -7,6 +7,7 @@ const {
     getAdmins,
     getAdmin,
     updateAdmin,
+    updateImgProfile,
     deleteAdmin,
     search,
     login
@@ -39,5 +40,7 @@ router.route("/:id")
     .get(getAdminValidation, validationMiddleware, getAdmin)
     .patch(updateAdminValidation, validationMiddleware, updateAdmin)
     .delete(deleteAdminValidation, validationMiddleware, deleteAdmin);
+
+router.put("/updateImgProfile/:id",uploadProfileImage, resizeProfileImage , updateImgProfile)
 
 module.exports = router;
