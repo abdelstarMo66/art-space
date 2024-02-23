@@ -7,8 +7,9 @@ const asyncHandler = require("../middlewares/asyncHandler");
 const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
-const ArtistModel = require("../models/artistModel");
 const generateJWT = require("../utils/generateJWT");
+const getImageUrl = require("../utils/getImageUrl");
+const ArtistModel = require("../models/artistModel");
 
 const getAllArtists = asyncHandler(async (req, res, next) => {
     const artistsCount = await ArtistModel.countDocuments();
@@ -34,38 +35,63 @@ const getAllArtists = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(",").join(" ");
     }
 
-    let limitField = "-__v -password";
-    if (req.query.fields) {
-        limitField = req.query.fields.split(",").join(" ");
-    }
+    const selectedField = "name email phone profileImg addresses gender accountActive";
 
     const artists = await ArtistModel.find()
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select(limitField);
+        .select(selectedField);
 
     if (!artists) {
         return next(new ApiError(`No artists found`, 404));
     }
 
-    return res.status(200).json(apiSuccess(`artists Found`, 200, {
-        pagination, artists,
-    }));
+    return res.status(200).json(
+        apiSuccess(
+            `artists Found`,
+            200,
+            {
+                pagination,
+                artists,
+            }
+        ));
 });
 
 const getArtist = asyncHandler(async (req, res, next) => {
     const {id} = req.params;
 
-    const artist = await ArtistModel.findById(id, "-password -__v");
+    const selectedField = "name email phone profileImg addresses gender accountActive";
+
+    const artist = await ArtistModel.findById(id, selectedField);
 
     if (!artist) {
         return next(new ApiError(`no artist for this id ${id}`, 404));
     }
 
+    artist.profileImg = getImageUrl(req, user.profileImg);
+
     return res
         .status(200)
-        .json(apiSuccess("artist found successfully", 200, {artist}));
+        .json(apiSuccess("artist found successfully", 200, artist));
+});
+
+
+const updateArtist = asyncHandler(async (req, res) => {
+    const {id} = req.params;
+
+    await ArtistModel.findByIdAndUpdate(id, {
+        name: req.body.name,
+        phone: req.body.phone,
+        address: req.body.address,
+        gender: req.body.gender,
+    }, {
+        new: true,
+    });
+
+    return res
+        .status(200)
+        .json(apiSuccess(`artist updated successfully`, 200, null));
 });
 
 const uploadProfileImage = uploadSingleImage("profileImg");
@@ -83,16 +109,19 @@ const resizeProfileImage = asyncHandler(async (req, res, next) => {
                 const artist = await ArtistModel.findById(req.params.id);
                 const oldFileName = artist.profileImg;
                 const filePath = `uploads/artists/${oldFileName}`;
-                fs.access(filePath, fs.constants.F_OK, (err) => {
-                    if (!err) {
-                        // File exists, so delete it
-                        fs.unlink(filePath, (deleteErr) => {
-                            if (deleteErr) {
-                                console.error("Error deleting file:", deleteErr);
-                            }
-                        });
-                    }
-                });
+
+                if (artist.profileImg !== "defaultImage.png") {
+                    fs.access(filePath, fs.constants.F_OK, (err) => {
+                        if (!err) {
+                            // File exists, so delete it
+                            fs.unlink(filePath, (deleteErr) => {
+                                if (deleteErr) {
+                                    console.error("Error deleting file:", deleteErr);
+                                }
+                            });
+                        }
+                    });
+                }
             });
 
         req.body.profileImg = fileName;
@@ -100,47 +129,38 @@ const resizeProfileImage = asyncHandler(async (req, res, next) => {
     next();
 });
 
-const updateArtist = asyncHandler(async (req, res) => {
-    const {id} = req.params;
+const updateProfileImage = asyncHandler(async (req, res) => {
+    await ArtistModel.findById(req.loggedUser._id, {profileImg: req.body.profileImg});
 
-    await ArtistModel.findByIdAndUpdate(id, {
-        name: req.body.name,
-        phone: req.body.phone,
-        address: req.body.address,
-        gender: req.body.gender,
-        profileImg: req.body.profileImg,
-    }, {
-        new: true,
-    });
-
-    return res
-        .status(200)
-        .json(apiSuccess(`artist updated successfully`, 200, null));
+    return res.status(200).json(
+        apiSuccess(
+            "profile image updated successfully",
+            200,
+            null,
+        ));
 });
 
 const search = asyncHandler(async (req, res, next) => {
     const {keyword} = req.query;
 
     const queryObj = {};
-    queryObj.$or = [{name: {$regex: keyword, $options: "i"}}, {
-        email: {
-            $regex: keyword,
-            $options: "i"
-        }
-    }, {phone: {$regex: keyword, $options: "i"}}, {
-        gender: {
-            $regex: keyword,
-            $options: "i"
-        }
-    }, {address: {$regex: keyword, $options: "i"}},];
+    queryObj.$or = [
+        {name: {$regex: keyword, $options: "i"}},
+        {email: {$regex: keyword, $options: "i"}},
+        {phone: {$regex: keyword, $options: "i"}},
+        {gender: {$regex: keyword, $options: "i"}},
+        {address: {$regex: keyword, $options: "i"}}
+    ];
 
-    const artists = await ArtistModel.find(queryObj, "-password -__v");
+    const selectedField = "name email phone profileImg addresses gender accountActive";
+
+    const artists = await ArtistModel.find(queryObj, selectedField);
 
     if (!artists) {
         return next(new ApiError(`No artists found matched this search key: ${keyword}`, 404));
     }
 
-    return res.status(200).json(apiSuccess(`artists Found`, 200, {artists}));
+    return res.status(200).json(apiSuccess(`artists Found`, 200, artists));
 });
 
 const deleteArtist = asyncHandler(async (req, res) => {
@@ -150,23 +170,26 @@ const deleteArtist = asyncHandler(async (req, res) => {
 
     const oldFileName = artist.profileImg;
     const filePath = `uploads/artists/${oldFileName}`;
-    fs.access(filePath, fs.constants.F_OK, (err) => {
-        if (!err) {
-            // File exists, so delete it
-            fs.unlink(filePath, (deleteErr) => {
-                if (deleteErr) {
-                    console.error("Error deleting file:", deleteErr);
-                }
-            });
-        }
-    });
+
+    if (artist.profileImg !== "defaultImage.png") {
+        fs.access(filePath, fs.constants.F_OK, (err) => {
+            if (!err) {
+                // File exists, so delete it
+                fs.unlink(filePath, (deleteErr) => {
+                    if (deleteErr) {
+                        console.error("Error deleting file:", deleteErr);
+                    }
+                });
+            }
+        });
+    }
 
     return res
         .status(200)
         .json(apiSuccess(`artist deleted successfully`, 200, null));
 });
 
-const getArtistProfile = asyncHandler(async (req, res, next) => {
+const setProfileID = asyncHandler(async (req, res, next) => {
     req.params.id = req.loggedUser._id;
     next();
 });
@@ -185,20 +208,6 @@ const changePassword = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(apiSuccess(`password changed successfully`, 200, {token}));
-});
-
-const updateProfile = asyncHandler(async (req, res) => {
-    const id = req.loggedUser._id;
-
-    await ArtistModel.findByIdAndUpdate(id, {
-        name: req.body.name, phone: req.body.phone, address: req.body.address, profileImg: req.body.profileImg,
-    }, {
-        new: true,
-    });
-
-    return res
-        .status(200)
-        .json(apiSuccess(`artist updated successfully`, 200, null));
 });
 
 const addArtistAddress = asyncHandler(async (req, res) => {
@@ -224,8 +233,10 @@ const addArtistAddress = asyncHandler(async (req, res) => {
 });
 
 const removeArtistAddress = asyncHandler(async (req, res) => {
+    const {addressId} = req.params;
+
     const artist = await ArtistModel.findByIdAndUpdate(req.loggedUser._id, {
-        $pull: {addresses: {_id: req.params.addressId}},
+        $pull: {addresses: {_id: addressId}},
     }, {new: true});
 
     return res
@@ -238,7 +249,7 @@ const getProfileAddresses = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(apiSuccess("Address Founded successfully", 200, artist.addresses));
+        .json(apiSuccess("Address Founded successfully", 200, {address: artist.addresses}));
 });
 
 module.exports = {
@@ -250,9 +261,9 @@ module.exports = {
     resizeProfileImage,
     changePassword,
     search,
-    getArtistProfile,
-    updateProfile,
+    setProfileID,
     addArtistAddress,
     removeArtistAddress,
     getProfileAddresses,
+    updateProfileImage
 };

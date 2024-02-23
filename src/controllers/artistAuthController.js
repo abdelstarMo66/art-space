@@ -4,10 +4,10 @@ const sharp = require("sharp");
 const bcrypt = require("bcrypt");
 
 const asyncHandler = require("../middlewares/asyncHandler");
-const generateJWT = require("../utils/generateJWT");
-const ApiError = require("../utils/apiError");
 const apiSuccess = require("../utils/apiSuccess");
+const ApiError = require("../utils/apiError");
 const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
+const generateJWT = require("../utils/generateJWT");
 const sendEmail = require("../utils/sendEmail");
 const ArtistModel = require("../models/artistModel");
 
@@ -20,7 +20,6 @@ const resizeProfileImage = asyncHandler(async (req, res, next) => {
 
     if (req.file) {
         await sharp(req.file.buffer)
-            .resize(600, 600)
             .toFormat("jpeg")
             .jpeg({quality: 95})
             .toFile(`uploads/artists/${fileName}`);
@@ -33,9 +32,8 @@ const resizeProfileImage = asyncHandler(async (req, res, next) => {
 const signup = asyncHandler(async (req, res, next) => {
     const artist = await ArtistModel.create(req.body);
     artist.password = await bcrypt.hash(artist.password, 12)
-    await artist.save();
 
-    const activateCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const activateCode = Math.floor(1000 + Math.random() * 9000).toString();
 
     artist.accountActivateCode = crypto
         .createHash("sha256")
@@ -66,11 +64,12 @@ const signup = asyncHandler(async (req, res, next) => {
 });
 
 const verifyEmail = asyncHandler(async (req, res, next) => {
+    const {activateCode} = req.body;
     const artist = await ArtistModel.findOne({email: req.body.email});
 
     const hashedActivateCode = crypto
         .createHash("sha256")
-        .update(req.body.activateCode)
+        .update(activateCode)
         .digest("hex");
 
     if (artist.accountActivateCode !== hashedActivateCode || artist.AccountActivateExpires <= Date.now()) {
@@ -107,16 +106,14 @@ const login = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `login successfully, welcome ${artist.name}`,
             200,
-            {
-                token
-            },
+            {token},
         ));
 })
 
 const forgotPassword = asyncHandler(async (req, res, next) => {
     const artist = await ArtistModel.findOne({email: req.body.email});
 
-    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetCode = Math.floor(1000 + Math.random() * 9000).toString();
 
     artist.passwordResetCode = crypto
         .createHash("sha256")
@@ -148,9 +145,10 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 })
 
 const verifyCode = asyncHandler(async (req, res, next) => {
+    const {resetCode} = req.body;
     const hashedResetCode = crypto
         .createHash("sha256")
-        .update(req.body.resetCode)
+        .update(resetCode)
         .digest("hex");
 
     const artist = await ArtistModel.findOne({email: req.body.email})
@@ -191,10 +189,10 @@ const resetPassword = asyncHandler(async (req, res, next) => {
         ));
 })
 
-const resendCode = asyncHandler(async (req,res,next)=>{
+const resendCode = asyncHandler(async (req, res, next) => {
     const artist = await ArtistModel.findOne({email: req.body.email});
 
-    const activateCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const activateCode = Math.floor(1000 + Math.random() * 9000).toString();
 
     artist.accountActivateCode = crypto
         .createHash("sha256")

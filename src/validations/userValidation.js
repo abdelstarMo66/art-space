@@ -80,35 +80,22 @@ exports.changeUserPasswordValidation = [
 
     body("password")
         .custom(async (val, {req}) => {
+            const {currentPassword, confirmPassword} = req.body;
+
             const user = await UserModel.findById(req.loggedUser._id);
 
-            const isCorrectPassword = await bcrypt.compare(
-                req.body.currentPassword,
-                user.password
-            );
+            const isCorrectPassword = await bcrypt.compare(currentPassword, user.password);
 
             if (!isCorrectPassword) {
                 return Promise.reject(new ApiError("Incorrect Current Password", 400));
             }
 
-            if (val !== req.body.confirmPassword) {
+            if (val !== confirmPassword) {
                 return Promise.reject(new ApiError("Please make sure passwords match", 400));
             }
 
             return true;
         }),
-];
-
-exports.updateProfileValidation = [
-    body("name")
-        .optional()
-        .isLength({min: 3})
-        .withMessage("name too short"),
-
-    body("phone")
-        .optional()
-        .matches(/^\+?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
-        .withMessage("please enter invalid phone")
 ];
 
 exports.addUserAddressValidation = [

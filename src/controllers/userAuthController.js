@@ -4,12 +4,12 @@ const sharp = require("sharp");
 const bcrypt = require("bcrypt");
 
 const asyncHandler = require("../middlewares/asyncHandler");
-const generateJWT = require("../utils/generateJWT");
-const ApiError = require("../utils/apiError");
 const apiSuccess = require("../utils/apiSuccess");
+const ApiError = require("../utils/apiError");
 const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
-const UserModel = require("../models/userModel");
+const generateJWT = require("../utils/generateJWT");
 const sendEmail = require("../utils/sendEmail");
+const UserModel = require("../models/userModel");
 
 const uploadProfileImage = uploadSingleImage("profileImg");
 
@@ -20,7 +20,6 @@ const resizeProfileImage = asyncHandler(async (req, res, next) => {
 
     if (req.file) {
         await sharp(req.file.buffer)
-            .resize(600, 600)
             .toFormat("jpeg")
             .jpeg({quality: 95})
             .toFile(`uploads/users/${fileName}`);
@@ -30,11 +29,11 @@ const resizeProfileImage = asyncHandler(async (req, res, next) => {
     next();
 });
 
-const signup = asyncHandler(async (req, res, next) => {
+const signup = asyncHandler(async (req, res) => {
     const user = await UserModel.create(req.body);
     user.password = await bcrypt.hash(user.password, 12)
 
-    const activateCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const activateCode = Math.floor(1000 + Math.random() * 9000).toString();
 
     user.accountActivateCode = crypto
         .createHash("sha256")
@@ -67,11 +66,12 @@ const signup = asyncHandler(async (req, res, next) => {
 });
 
 const verifyEmail = asyncHandler(async (req, res, next) => {
+    const {activateCode} = req.body;
     const user = await UserModel.findOne({email: req.body.email});
 
     const hashedResetCode = crypto
         .createHash("sha256")
-        .update(req.body.activateCode)
+        .update(activateCode)
         .digest("hex");
 
     console.log(user.accountActivateCode)
@@ -110,16 +110,14 @@ const login = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `login successfully, welcome ${user.name}`,
             200,
-            {
-                token
-            },
+            {token},
         ));
 })
 
 const forgotPassword = asyncHandler(async (req, res, next) => {
     const user = await UserModel.findOne({email: req.body.email});
 
-    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetCode = Math.floor(1000 + Math.random() * 9000).toString();
 
     user.passwordResetCode = crypto
         .createHash("sha256")
@@ -151,9 +149,11 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 })
 
 const verifyCode = asyncHandler(async (req, res, next) => {
+    const {resetCode} = req.body;
+
     const hashedResetCode = crypto
         .createHash("sha256")
-        .update(req.body.resetCode)
+        .update(resetCode)
         .digest("hex");
 
     const user = await UserModel.findOne({email: req.body.email})
@@ -197,7 +197,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 const resendCode = asyncHandler(async (req, res, next) => {
     const user = await UserModel.findOne({email: req.body.email});
 
-    const activateCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const activateCode = Math.floor(1000 + Math.random() * 9000).toString();
 
     user.accountActivateCode = crypto
         .createHash("sha256")

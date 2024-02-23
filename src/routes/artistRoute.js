@@ -9,11 +9,11 @@ const {
     resizeProfileImage,
     changePassword,
     search,
-    getArtistProfile,
-    updateProfile,
+    setProfileID,
     addArtistAddress,
     getProfileAddresses,
     removeArtistAddress,
+    updateProfileImage
 } = require("../controllers/artistController")
 const {
     getArtistValidation,
@@ -21,12 +21,11 @@ const {
     deleteArtistValidation,
     changeArtistPasswordValidation,
     searchValidation,
-    updateProfileValidation,
+    addArtistAddressValidation,
 } = require("../validations/artistValidation");
 const validationMiddleware = require("../middlewares/validationMiddleware");
 const verifyToken = require("../middlewares/verifyToken");
-const {allowedToAdmins, allowedToArtist, permissionValidate} = require("../middlewares/allowTo");
-const {addUserAddressValidation} = require("../validations/userValidation");
+const {allowedToAdmins, allowedToArtist, permissionValidate, allowedToUser} = require("../middlewares/allowTo");
 
 const router = express.Router();
 
@@ -35,18 +34,35 @@ router.use(verifyToken);
 router.get("/getProfile",
     allowedToArtist(),
     permissionValidate,
-    getArtistProfile,
+    setProfileID,
     getArtist,
 );
 
 router.patch("/updateProfile",
     allowedToArtist(),
     permissionValidate,
-    uploadProfileImage,
-    updateProfileValidation,
+    setProfileID,
+    updateArtistValidation,
     validationMiddleware,
+    updateArtist,
+);
+
+
+router.put("/updateImage",
+    allowedToArtist(),
+    permissionValidate,
+    uploadProfileImage,
     resizeProfileImage,
-    updateProfile,
+    updateProfileImage,
+);
+
+router.delete("/deleteProfile",
+    allowedToArtist(),
+    permissionValidate,
+    setProfileID,
+    deleteArtistValidation,
+    validationMiddleware,
+    deleteArtist,
 );
 
 router.patch("/changePassword",
@@ -62,7 +78,7 @@ router.route("/address")
     .post(
         allowedToArtist(),
         permissionValidate,
-        addUserAddressValidation,
+        addArtistAddressValidation,
         validationMiddleware,
         addArtistAddress
     )
@@ -84,8 +100,8 @@ router.get("/search", allowedToAdmins("IT"), permissionValidate, searchValidatio
 
 router.route("/:id")
     .get(allowedToAdmins("IT"), permissionValidate, getArtistValidation, validationMiddleware, getArtist)
-    .patch(allowedToAdmins("IT"), permissionValidate, uploadProfileImage, updateArtistValidation, validationMiddleware, resizeProfileImage, updateArtist)
-    .delete(allowedToAdmins("IT"), allowedToArtist(), permissionValidate, deleteArtistValidation, validationMiddleware, deleteArtist);
+    .patch(allowedToAdmins("IT"), permissionValidate, updateArtistValidation, validationMiddleware, updateArtist)
+    .delete(allowedToAdmins("IT"), permissionValidate, deleteArtistValidation, validationMiddleware, deleteArtist);
 
 
 module.exports = router

@@ -9,11 +9,11 @@ const {
     resizeProfileImage,
     changePassword,
     search,
-    getUserProfile,
-    updateProfile,
+    setProfileID,
     addUserAddress,
     getProfileAddresses,
-    removeUserAddress
+    removeUserAddress,
+    updateProfileImage,
 } = require("../controllers/userController")
 const {
     getUserValidation,
@@ -21,7 +21,6 @@ const {
     deleteUserValidation,
     changeUserPasswordValidation,
     searchValidation,
-    updateProfileValidation,
     addUserAddressValidation,
 } = require("../validations/userValidation");
 const validationMiddleware = require("../middlewares/validationMiddleware");
@@ -35,18 +34,34 @@ router.use(verifyToken);
 router.get("/getProfile",
     allowedToUser(),
     permissionValidate,
-    getUserProfile,
+    setProfileID,
     getUser,
 );
 
 router.patch("/updateProfile",
     allowedToUser(),
     permissionValidate,
-    uploadProfileImage,
-    updateProfileValidation,
+    setProfileID,
+    updateUserValidation,
     validationMiddleware,
+    updateUser,
+);
+
+router.put("/updateImage",
+    allowedToUser(),
+    permissionValidate,
+    uploadProfileImage,
     resizeProfileImage,
-    updateProfile,
+    updateProfileImage,
+);
+
+router.delete("/deleteProfile",
+    allowedToUser(),
+    permissionValidate,
+    setProfileID,
+    deleteUserValidation,
+    validationMiddleware,
+    deleteUser,
 );
 
 router.patch("/changePassword",
@@ -93,8 +108,8 @@ router.get("/search",
 
 router.route("/:id")
     .get(allowedToAdmins("IT"), permissionValidate, getUserValidation, validationMiddleware, getUser)
-    .patch(allowedToAdmins("IT"), permissionValidate, uploadProfileImage, updateUserValidation, validationMiddleware, resizeProfileImage, updateUser)
-    .delete(allowedToAdmins("IT"), allowedToUser(), permissionValidate, deleteUserValidation, validationMiddleware, deleteUser);
+    .patch(allowedToAdmins("IT"), permissionValidate, updateUserValidation, validationMiddleware, updateUser)
+    .delete(allowedToAdmins("IT"), permissionValidate, deleteUserValidation, validationMiddleware, deleteUser);
 
 
 module.exports = router

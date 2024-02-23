@@ -51,19 +51,6 @@ const userSchema = new mongoose.Schema({
     passwordResetVerified: Boolean,
 }, {timestamps: true});
 
-const setImageURL = (doc) => {
-    if (doc.profileImg) {
-        doc.profileImg = `${process.env.BASE_URL}/users/${doc.profileImg}`;
-    }
-};
-
-userSchema.post("init", (doc) => {
-    setImageURL(doc);
-});
-userSchema.post("save", (doc) => {
-    setImageURL(doc);
-});
-
 const UserModel = mongoose.model("user", userSchema);
 
 module.exports = UserModel;

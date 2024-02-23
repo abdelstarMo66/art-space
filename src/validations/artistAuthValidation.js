@@ -14,14 +14,10 @@ exports.signupValidator = [
         .withMessage("email must not be empty")
         .isEmail()
         .withMessage("invalid email address")
-        .custom((val, {req}) =>
+        .custom((val) =>
             ArtistModel.findOne({email: val}).then((artist) => {
                 if (artist) {
-                    return Promise.reject(
-                        new Error(
-                            `this email already use, please enter other email or login`
-                        )
-                    );
+                    return Promise.reject(new Error(`this email already use, please enter other email or login`));
                 }
             })
         ),
@@ -36,7 +32,9 @@ exports.signupValidator = [
         .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
         .withMessage("please enter strong password")
         .custom((password, {req}) => {
-            if (password !== req.body.passwordConfirm) {
+            const passwordConfirm = req.body;
+
+            if (password !== passwordConfirm) {
                 return Promise.reject(new Error("password confirmation incorrect"));
             }
             return true;
@@ -51,6 +49,10 @@ exports.signupValidator = [
         .withMessage("phone must not be empty")
         .matches(/^\+?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
         .withMessage("please enter invalid phone"),
+
+    body("profileImg")
+        .notEmpty()
+        .withMessage("profileImg must not be empty")
 ];
 
 exports.verifyEmailValidator = [
@@ -59,7 +61,7 @@ exports.verifyEmailValidator = [
         .withMessage("email must not be empty")
         .isEmail()
         .withMessage("invalid email address")
-        .custom(async (val, {req}) => {
+        .custom(async (val) => {
             const artist = await ArtistModel.findOne({email: val});
             if (!artist) {
                 return Promise.reject(
@@ -103,7 +105,7 @@ exports.emailValidator = [
         .withMessage("email must not be empty")
         .isEmail()
         .withMessage("invalid email address")
-        .custom(async (val, {req}) => {
+        .custom(async (val) => {
             const artist = await ArtistModel.findOne({email: val});
             if (!artist) {
                 return Promise.reject(
@@ -119,7 +121,7 @@ exports.verifyCodeValidator = [
         .withMessage("email must not be empty")
         .isEmail()
         .withMessage("invalid email address")
-        .custom(async (val, {req}) => {
+        .custom(async (val) => {
             const artist = await ArtistModel.findOne({email: val});
             if (!artist) {
                 return Promise.reject(
@@ -147,7 +149,7 @@ exports.resetPasswordValidator = [
         .withMessage("email must not be empty")
         .isEmail()
         .withMessage("invalid email address")
-        .custom(async (val, {req}) => {
+        .custom(async (val) => {
             const artist = await ArtistModel.findOne({email: val});
             if (!artist) {
                 return Promise.reject(
@@ -166,7 +168,8 @@ exports.resetPasswordValidator = [
         .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
         .withMessage("please enter strong password")
         .custom((password, {req}) => {
-            if (password !== req.body.passwordConfirm) {
+            const passwordConfirm = req.body;
+            if (password !== passwordConfirm) {
                 return Promise.reject(new Error("password confirmation incorrect"));
             }
             return true;

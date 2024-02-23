@@ -14,7 +14,7 @@ exports.signupValidator = [
         .withMessage("email must not be empty")
         .isEmail()
         .withMessage("invalid email address")
-        .custom((val, {req}) => UserModel.findOne({email: val}).then((user) => {
+        .custom((val) => UserModel.findOne({email: val}).then((user) => {
             if (user) {
                 return Promise.reject(new Error(`this email already use, please enter other email or login`));
             }
@@ -28,7 +28,9 @@ exports.signupValidator = [
         .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
         .withMessage("please enter strong password")
         .custom((password, {req}) => {
-            if (password !== req.body.passwordConfirm) {
+            const {passwordConfirm} = req.body;
+
+            if (password !== passwordConfirm) {
                 return Promise.reject(new Error("password confirmation incorrect"))
             }
             return true;
@@ -41,7 +43,11 @@ exports.signupValidator = [
         .notEmpty()
         .withMessage("phone must not be empty")
         .matches(/^\+?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
-        .withMessage("please enter invalid phone")
+        .withMessage("please enter invalid phone"),
+
+    body("profileImg")
+        .notEmpty()
+        .withMessage("profileImg must not be empty")
 ]
 
 exports.verifyEmailValidator = [
@@ -50,7 +56,7 @@ exports.verifyEmailValidator = [
         .withMessage("email must not be empty")
         .isEmail()
         .withMessage("invalid email address")
-        .custom(async (val, {req}) => {
+        .custom(async (val) => {
             const user = await UserModel.findOne({email: val});
             if (!user) {
                 return Promise.reject(new Error(`There are not email address match: ${val}`));
@@ -88,7 +94,7 @@ exports.emailValidator = [
         .withMessage("email must not be empty")
         .isEmail()
         .withMessage("invalid email address")
-        .custom(async (val, {req}) => {
+        .custom(async (val) => {
             const user = await UserModel.findOne({email: val});
             if (!user) {
                 return Promise.reject(new Error(`There are not email address match: ${val}`));
@@ -102,7 +108,7 @@ exports.verifyCodeValidator = [
         .withMessage("email must not be empty")
         .isEmail()
         .withMessage("invalid email address")
-        .custom(async (val, {req}) => {
+        .custom(async (val) => {
             const user = await UserModel.findOne({email: val});
             if (!user) {
                 return Promise.reject(new Error(`There are not email address match: ${val}`));
@@ -126,7 +132,7 @@ exports.resetPasswordValidator = [
         .withMessage("email must not be empty")
         .isEmail()
         .withMessage("invalid email address")
-        .custom(async (val, {req}) => {
+        .custom(async (val) => {
             const user = await UserModel.findOne({email: val});
             if (!user) {
                 return Promise.reject(new Error(`There are not email address match: ${val}`));
@@ -141,7 +147,9 @@ exports.resetPasswordValidator = [
         .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
         .withMessage("please enter strong password")
         .custom((password, {req}) => {
-            if (password !== req.body.passwordConfirm) {
+            const {passwordConfirm} = req.body;
+
+            if (password !== passwordConfirm) {
                 return Promise.reject(new Error("password confirmation incorrect"))
             }
             return true;
