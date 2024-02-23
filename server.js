@@ -3,6 +3,8 @@ const {join} = require("path")
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
+const cors = require("cors");
+const compression = require("compression");
 
 const dbConnection = require("./config/dbConnection.js");
 const ApiError = require("./src/utils/apiError");
@@ -13,6 +15,8 @@ dotenv.config({path: "config/config.env",});
 dbConnection();
 const app = express();
 
+app.use(cors());
+app.use(compression());
 app.use(express.json());
 app.use(express.static(join(__dirname, "uploads")));
 
