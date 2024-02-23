@@ -130,7 +130,7 @@ const resizeProfileImage = asyncHandler(async (req, res, next) => {
 });
 
 const updateProfileImage = asyncHandler(async (req, res) => {
-    await ArtistModel.findById(req.loggedUser._id, {profileImg: req.body.profileImg});
+    await ArtistModel.findByIdAndUpdate(req.loggedUser._id, {profileImg: req.body.profileImg});
 
     return res.status(200).json(
         apiSuccess(
