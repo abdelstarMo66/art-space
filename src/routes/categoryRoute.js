@@ -17,20 +17,20 @@ const {
 } = require("../validations/categoryValidation")
 const validationMiddleware = require("../middlewares/validationMiddleware");
 const verifyToken = require("../middlewares/verifyToken");
-const {allowedToAdmins, allowedToUser, permissionValidate} = require("../middlewares/allowTo");
+const {allowedToAdmins,allowedToArtist, allowedToUser, permissionValidate} = require("../middlewares/allowTo");
 
 const router = express.Router();
 
 router.use(verifyToken, allowedToAdmins("CEO"));
 
 router.route("/")
-    .get(allowedToUser(), permissionValidate, getCategories)
+    .get(allowedToUser(),allowedToArtist(), permissionValidate, getCategories)
     .post(permissionValidate, createCategoryValidation, validationMiddleware, createCategory)
 
 router.get("/search", permissionValidate, searchValidation, validationMiddleware, search)
 
 router.route("/:id")
-    .get(allowedToUser(), permissionValidate, getCategoryValidation, validationMiddleware, getCategory)
+    .get(permissionValidate, getCategoryValidation, validationMiddleware, getCategory)
     .patch(permissionValidate, updateCategoryValidation, validationMiddleware, updateCategory)
     .delete(permissionValidate, deleteCategoryValidation, validationMiddleware, deleteCategory)
 

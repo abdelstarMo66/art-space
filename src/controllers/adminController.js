@@ -4,10 +4,11 @@ const bcrypt = require("bcrypt");
 const sharp = require("sharp");
 
 const asyncHandler = require("../middlewares/asyncHandler");
-const generateJWT = require("../utils/generateJWT");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
+const generateJWT = require("../utils/generateJWT");
+const getImageUrl = require("../utils/getImageUrl");
 const AdminModel = require("../models/adminModel");
 
 const uploadProfileImage = uploadSingleImage("profileImg");
@@ -67,17 +68,14 @@ const getAdmins = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(',').join(" ");
     }
 
-    let limitField = "-__v -password";
-    if (req.query.fields) {
-        limitField = req.query.fields.split(",").join(" ");
-    }
+    const selectedField = "nId name username phone profileImg gender role";
 
     const admins = await AdminModel
         .find()
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select(limitField);
+        .select(selectedField);
 
     if (!admins) {
         return next(new ApiError(`No admins found`, 404));
@@ -98,6 +96,8 @@ const getAdmin = asyncHandler(async (req, res, next) => {
     const {id} = req.params;
 
     const admin = await AdminModel.findById(id, "-password -__v");
+
+    admin.profileImg = getImageUrl(req, admin.profileImg);
 
     return res.status(200).json(
         apiSuccess(
@@ -199,7 +199,9 @@ const search = asyncHandler(async (req, res, next) => {
         {nId: {$regex: keyword, $options: "i"},},
     ]
 
-    const admins = await AdminModel.find(queryObj, "-password -__v");
+    const selectedField = "nId name username phone profileImg gender role";
+
+    const admins = await AdminModel.find(queryObj, selectedField);
 
     if (!admins) {
         return next(new ApiError(`No admins found matched this search key: ${keyword}`, 404));
@@ -218,7 +220,6 @@ const login = asyncHandler(async (req, res, next) => {
 
     if (!admin) {
         return next(new ApiError("Incorrect username or password", 401));
-
     }
 
     const isPasswordCorrect = await bcrypt.compare(req.body.password, admin.password);

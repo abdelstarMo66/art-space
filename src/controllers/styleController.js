@@ -39,17 +39,14 @@ const getStyles = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(',').join(" ");
     }
 
-    let limitField = "-__v";
-    if (req.query.fields) {
-        limitField = req.query.fields.split(",").join(" ");
-    }
+    const selectedField = "title slug";
 
     const styles = await StyleModel
         .find()
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select(limitField);
+        .select(selectedField);
 
     if (!styles) {
         return next(new ApiError(`No styles found`, 404));

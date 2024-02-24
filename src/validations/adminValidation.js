@@ -6,30 +6,31 @@ const AdminModel = require("../models/adminModel");
 
 exports.getAdminValidation = [
     param("id")
-    .isMongoId()
-    .withMessage("Invalid User Id")
-    .custom(async (val) => {
-        const admin = await AdminModel.findById(val);
+        .isMongoId()
+        .withMessage("Invalid User Id")
+        .custom(async (val) => {
+            const admin = await AdminModel.findById(val);
 
-        if (!admin) {
-            return Promise.reject(new ApiError(`no admin for this id ${val}`, 404));
-        }
-        return true;
-    }),
+            if (!admin) {
+                return Promise.reject(new ApiError(`no admin for this id ${val}`, 404));
+            }
+            return true;
+        }),
 ];
 
-exports.createAdminValidation = [body("nId")
-    .notEmpty()
-    .withMessage("national ID must not be empty")
-    .custom(async (val, req) => {
-        const admin = await AdminModel.findOne({nId: val});
+exports.createAdminValidation = [
+    body("nId")
+        .notEmpty()
+        .withMessage("national ID must not be empty")
+        .custom(async (val, req) => {
+            const admin = await AdminModel.findOne({nId: val});
 
-        if (admin) {
-            return Promise.reject(new ApiError("national ID already in use", 400));
-        }
+            if (admin) {
+                return Promise.reject(new ApiError("national ID already in use", 400));
+            }
 
-        return true;
-    }),
+            return true;
+        }),
 
     body("name")
         .notEmpty()
@@ -60,8 +61,10 @@ exports.createAdminValidation = [body("nId")
         .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
         .withMessage("please enter strong password")
         .custom((password, {req}) => {
-            if (password !== req.body.passwordConfirm) {
-                return Promise.reject(new Error("password confirmation incorrect"))
+            const {passwordConfirm} = req.body
+
+            if (password !== passwordConfirm) {
+                return Promise.reject(new Error("password confirmation incorrect"));
             }
             return true;
         }),
@@ -99,16 +102,16 @@ exports.createAdminValidation = [body("nId")
 
 exports.updateAdminValidation = [
     param("id")
-    .isMongoId()
-    .withMessage("Invalid User Id")
-    .custom(async (val) => {
-        const admin = await AdminModel.findById(val);
+        .isMongoId()
+        .withMessage("Invalid User Id")
+        .custom(async (val) => {
+            const admin = await AdminModel.findById(val);
 
-        if (!admin) {
-            return Promise.reject(new ApiError(`no admin for this id ${val}`, 404));
-        }
-        return true;
-    }),
+            if (!admin) {
+                return Promise.reject(new ApiError(`no admin for this id ${val}`, 404));
+            }
+            return true;
+        }),
 
     body("name")
         .optional()
@@ -130,7 +133,6 @@ exports.updateAdminValidation = [
         .matches(/^\+?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
         .withMessage("please enter invalid phone"),
 
-
     body("password")
         .optional()
         .isLength({min: 8})
@@ -140,17 +142,19 @@ exports.updateAdminValidation = [
 
 ];
 
-exports.deleteAdminValidation = [param("id")
-    .isMongoId()
-    .withMessage("Invalid User Id")
-    .custom(async (val) => {
-        const admin = await AdminModel.findById(val);
+exports.deleteAdminValidation = [
+    param("id")
+        .isMongoId()
+        .withMessage("Invalid User Id")
+        .custom(async (val) => {
+            const admin = await AdminModel.findById(val);
 
-        if (!admin) {
-            return Promise.reject(new ApiError(`no admin for this id ${val}`, 404));
-        }
-        return true;
-    }),];
+            if (!admin) {
+                return Promise.reject(new ApiError(`no admin for this id ${val}`, 404));
+            }
+            return true;
+        }),
+];
 
 exports.searchValidation = [
     check("keyword").notEmpty().withMessage("keyword search must be not empty"),

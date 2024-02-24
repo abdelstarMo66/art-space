@@ -39,17 +39,14 @@ const getCategories = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(',').join(" ");
     }
 
-    let limitField = "-__v";
-    if (req.query.fields) {
-        limitField = req.query.fields.split(",").join(" ");
-    }
+    const selectedField = "title slug";
 
     const categories = await CategoryModel
         .find()
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select(limitField);
+        .select(selectedField);
 
     if (!categories) {
         return next(new ApiError(`No categories found`, 404));

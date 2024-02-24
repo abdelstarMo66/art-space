@@ -39,17 +39,14 @@ const getSubjects = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(',').join(" ");
     }
 
-    let limitField = "-__v";
-    if (req.query.fields) {
-        limitField = req.query.fields.split(",").join(" ");
-    }
+    const selectedField = "title slug";
 
     const subjects = await SubjectModel
         .find()
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select(limitField);
+        .select(selectedField);
 
     if (!subjects) {
         return next(new ApiError(`No subjects found`, 404));
