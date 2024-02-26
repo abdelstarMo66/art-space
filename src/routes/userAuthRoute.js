@@ -4,7 +4,7 @@ const {
     signup,
     verifyEmail,
     uploadProfileImage,
-    resizeProfileImage,
+    uploadToHost,
     login,
     forgotPassword,
     verifyCode,
@@ -27,7 +27,7 @@ router.post("/signup",
     uploadProfileImage,
     signupValidator,
     validationMiddleware,
-    resizeProfileImage,
+    uploadToHost,
     signup
 );
 

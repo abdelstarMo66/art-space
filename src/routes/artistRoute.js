@@ -6,7 +6,7 @@ const {
     updateArtist,
     deleteArtist,
     uploadProfileImage,
-    resizeProfileImage,
+    uploadToHost,
     changePassword,
     search,
     setProfileID,
@@ -25,7 +25,7 @@ const {
 } = require("../validations/artistValidation");
 const validationMiddleware = require("../middlewares/validationMiddleware");
 const verifyToken = require("../middlewares/verifyToken");
-const {allowedToAdmins, allowedToArtist, permissionValidate, allowedToUser} = require("../middlewares/allowTo");
+const {allowedToAdmins, allowedToArtist, permissionValidate} = require("../middlewares/allowTo");
 
 const router = express.Router();
 
@@ -53,7 +53,7 @@ router.put("/updateImage",
     permissionValidate,
     setProfileID,
     uploadProfileImage,
-    resizeProfileImage,
+    uploadToHost,
     updateProfileImage,
 );
 

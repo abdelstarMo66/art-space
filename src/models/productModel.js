@@ -66,11 +66,16 @@ const productSchema = new mongoose.Schema({
     },
 
     coverImage: {
-        type: String,
-        required: [true, "cover image is required"],
+        public_id: String,
+        secure_url: String,
     },
 
-    images: [String],
+    images: [
+        {
+            public_id: String,
+            secure_url: String,
+        }
+    ],
 
     material: {
         type: String,
@@ -98,31 +103,6 @@ productSchema.pre(/^find/, function (next) {
     });
     next();
 });
-
-const setImageURL = (doc) => {
-    if (doc.coverImage && !doc.coverImage.startsWith(process.env.BASE_URL)) {
-        doc.coverImage = `${process.env.BASE_URL}/products/${doc.coverImage}`;
-    }
-
-    if (doc.images) {
-        const images = [];
-        doc.images.forEach((image) => {
-            if(!image.startsWith(process.env.BASE_URL)){
-                const imageUrl = `${process.env.BASE_URL}/products/${image}`;
-                images.push(imageUrl);
-            }
-        });
-        doc.images = images;
-    }
-};
-
-productSchema.post("init", (doc) => {
-    setImageURL(doc);
-});
-
-// productSchema.post("save", (doc) => {
-//     setImageURL(doc);
-// });
 
 const ProductModel = mongoose.model("product", productSchema);
 

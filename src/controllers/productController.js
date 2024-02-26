@@ -1,49 +1,49 @@
-const asyncHandler = require("../middlewares/asyncHandler");
-const sharp = require("sharp");
+const cloudinary = require("cloudinary").v2;
 
+const asyncHandler = require("../middlewares/asyncHandler");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
-const {uploadMixOfImage} = require("../middlewares/uploadImageMiddleware");
+const {uploadMixOfImage} = require("../middlewares/cloudinaryUploadImage");
 const ProductModel = require("../models/productModel");
 const fs = require("fs");
 
 const uploadProductImages = uploadMixOfImage([
-    {name: "coverImage", maxCount: 1},
-    {name: "images", maxCount: 8},
-]);
+        {name: "coverImage", maxCount: 1},
+        {name: "images", maxCount: 8},
+    ],
+    "product",
+)
 
-const resizeProductImage = asyncHandler(async (req, res, next) => {
+const uploadToHost = asyncHandler(async (req, res, next) => {
     if (req.files.coverImage) {
-        const imageCoverFileName = `products-${Math.round(
-            Math.random() * 1e9
-        )}-${Date.now()}-cover.jpeg`;
+        const coverImageOptions = {
+            folder: "product",
+            public_id: req.files.coverImage[0].filename,
+            use_filename: true,
+            resource_type: "image",
+            format: "jpg",
+        };
 
-        await sharp(req.files.coverImage[0].buffer)
-            .resize(2000, 1333)
-            .toFormat("jpeg")
-            .jpeg({quality: 95})
-            .toFile(`uploads/products/${imageCoverFileName}`);
-
-        req.body.coverImage = imageCoverFileName;
+        req.body.coverImage = await cloudinary.uploader.upload(req.files.coverImage[0].path, coverImageOptions);
     }
 
     if (req.files.images) {
         req.body.images = [];
         await Promise.all(
-            req.files.images.map(async (image, index) => {
-                const imageName = `products-${Math.round(
-                    Math.random() * 1e9
-                )}-${Date.now()}-${index}.jpeg`;
+            req.files.images.map(async image => {
+                console.log(image)
+                const imagesOptions = {
+                    folder: "product",
+                    public_id: image.filename,
+                    use_filename: true,
+                    resource_type: "image",
+                    format: "jpg",
+                };
 
-                await sharp(image.buffer)
-                    .resize(2000, 1333)
-                    .toFormat("jpeg")
-                    .jpeg({quality: 90})
-                    .toFile(`uploads/products/${imageName}`);
-
+                const imageName = await cloudinary.uploader.upload(image.path, imagesOptions);
                 req.body.images.push(imageName);
             })
-        );
+        )
     }
 
     next();
@@ -85,17 +85,12 @@ const getProducts = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(',').join(" ");
     }
 
-    let limitField = "-__v";
-    if (req.query.fields) {
-        limitField = req.query.fields.split(",").join(" ");
-    }
-
     const products = await ProductModel
         .find()
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select(limitField);
+        .select("-__v -createdAt -updatedAt");
 
     if (!products) {
         return next(new ApiError(`No products found`, 404));
@@ -141,7 +136,6 @@ const updateProduct = asyncHandler(async (req, res) => {
             height: req.body.height,
             width: req.body.width,
             depth: req.body.depth,
-            coverImage: req.body.coverImage,
         },
         {new: true},
     );
@@ -163,18 +157,8 @@ const deleteProduct = asyncHandler(async (req, res) => {
     const images = [...(product.images)]
     images.push(product.coverImage);
 
-    for (let oldFileName in images) {
-        const filePath = `uploads/products/${oldFileName}`;
-        fs.access(filePath, fs.constants.F_OK, (err) => {
-            if (!err) {
-                // File exists, so delete it
-                fs.unlink(filePath, (deleteErr) => {
-                    if (deleteErr) {
-                        console.error('Error deleting file:', deleteErr);
-                    }
-                });
-            }
-        });
+    for (let image in images) {
+        await cloudinary.uploader.destroy(image.public_id);
     }
 
     return res.status(200).json(
@@ -199,7 +183,7 @@ const search = asyncHandler(async (req, res, next) => {
         {material: {$regex: keyword, $options: "i"},},
     ]
 
-    const products = await ProductModel.find(queryObj, "-__v");
+    const products = await ProductModel.find(queryObj, "-__v -createdAt -updatedAt");
 
     if (!products) {
         return next(new ApiError(`No products found matched this search key: ${keyword}`, 404));
@@ -237,17 +221,12 @@ const getMeProducts = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(',').join(" ");
     }
 
-    let limitField = "-__v";
-    if (req.query.fields) {
-        limitField = req.query.fields.split(",").join(" ");
-    }
-
     const products = await ProductModel
         .find({owner: req.loggedUser._id})
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select(limitField);
+        .select("-__v -createdAt -updatedAt");
 
     if (!products) {
         return next(new ApiError(`No products found`, 404));
@@ -265,30 +244,15 @@ const getMeProducts = asyncHandler(async (req, res, next) => {
 });
 
 const changeCoverImage = asyncHandler(async (req, res, next) => {
-    const {coverImage, oldImage} = req.body;
+    const {coverImage} = req.body;
 
-    const imageUrl = "products" + oldImage.split("products", 3)[2];
-
-    const product = await ProductModel.findOne({coverImage: imageUrl}, "coverImage");
+    const product = await ProductModel.findOneAndUpdate(req.params.productId, {coverImage});
 
     if (!product) {
         return next(new ApiError(`No product found`, 404));
     }
 
-    product.coverImage = coverImage;
-
-    fs.access(imageUrl, fs.constants.F_OK, (err) => {
-        if (!err) {
-            // File exists, so delete it
-            fs.unlink(imageUrl, (deleteErr) => {
-                if (deleteErr) {
-                    console.error("Error deleting file:", deleteErr);
-                }
-            });
-        }
-    });
-
-    await product.save();
+    await cloudinary.uploader.destroy(product.coverImage.publicId);
 
     return res.status(200).json(
         apiSuccess(
@@ -299,33 +263,21 @@ const changeCoverImage = asyncHandler(async (req, res, next) => {
 });
 
 const changeSpecificImage = asyncHandler(async (req, res, next) => {
-    const {images, oldImage} = req.body;
+    const {images, publicId} = req.body;
+    const {productId} = req.params
 
-    const imageUrl = "products" + oldImage.split("products", 3)[2];
-    const product = await ProductModel.findOne({images: {$in: [imageUrl]}}, "images");
+    const product = await ProductModel.findById(productId);
 
     if (!product) {
         return next(new ApiError(`No product found`, 404));
     }
 
-    const oldProductImages = product.images.map(image => "products" + image.split("products", 3)[2])
-
-    const index = oldProductImages.indexOf(imageUrl);
+    const index = product.images.findIndex(image => image.public_id === publicId)
 
     if (index > -1) {
-        oldProductImages[index] = images[0];
-        product.images = oldProductImages;
+        product.images[index] = images[0];
 
-        fs.access(imageUrl, fs.constants.F_OK, (err) => {
-            if (!err) {
-                // File exists, so delete it
-                fs.unlink(imageUrl, (deleteErr) => {
-                    if (deleteErr) {
-                        console.error("Error deleting file:", deleteErr);
-                    }
-                });
-            }
-        });
+        await cloudinary.uploader.destroy(publicId);
 
         await product.save();
     } else {
@@ -348,7 +300,7 @@ module.exports = {
     updateProduct,
     deleteProduct,
     uploadProductImages,
-    resizeProductImage,
+    uploadToHost,
     getMeProducts,
     changeCoverImage,
     changeSpecificImage

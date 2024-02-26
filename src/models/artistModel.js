@@ -21,8 +21,8 @@ const artistSchema = new mongoose.Schema({
         type: String,
     },
     profileImg: {
-        type: String,
-        default: "defaultImage.png",
+        public_id: String,
+        secure_url: String,
     },
     addresses: [
         {
@@ -50,19 +50,6 @@ const artistSchema = new mongoose.Schema({
     passwordResetExpires: Date,
     passwordResetVerified: Boolean,
 }, {timestamps: true});
-
-const setImageURL = (doc) => {
-    if (doc.profileImg) {
-        doc.profileImg = `${process.env.BASE_URL}/artists/${doc.profileImg}`;
-    }
-};
-
-artistSchema.post("init", (doc) => {
-    setImageURL(doc);
-});
-artistSchema.post("save", (doc) => {
-    setImageURL(doc);
-});
 
 const ArtistModel = mongoose.model("artist", artistSchema);
 

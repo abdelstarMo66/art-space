@@ -3,7 +3,7 @@ const express = require("express");
 const {
     createAdmin,
     uploadProfileImage,
-    resizeProfileImage,
+    uploadToHost,
     getAdmins,
     getAdmin,
     updateAdmin,
@@ -32,7 +32,7 @@ router.use(verifyToken, allowedToAdmins("CEO"), permissionValidate);
 
 router.route("/")
     .get(getAdmins)
-    .post(uploadProfileImage, createAdminValidation, validationMiddleware, resizeProfileImage, createAdmin);
+    .post(uploadProfileImage, createAdminValidation, validationMiddleware,uploadToHost, createAdmin);
 
 router.get("/search", searchValidation, validationMiddleware, search)
 
@@ -41,6 +41,6 @@ router.route("/:id")
     .patch(updateAdminValidation, validationMiddleware, updateAdmin)
     .delete(deleteAdminValidation, validationMiddleware, deleteAdmin);
 
-router.put("/updateImgProfile/:id",uploadProfileImage, resizeProfileImage , updateImgProfile)
+router.put("/updateImgProfile/:id",uploadProfileImage, uploadToHost , updateImgProfile)
 
 module.exports = router;

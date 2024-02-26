@@ -1,35 +1,34 @@
 const crypto = require("crypto");
 
-const sharp = require("sharp");
 const bcrypt = require("bcrypt");
+const cloudinary = require("cloudinary").v2;
 
 const asyncHandler = require("../middlewares/asyncHandler");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
-const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
+const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
+const {verificationMessage, resetMessage, resendMessage} = require("../utils/emailMessages");
 const generateJWT = require("../utils/generateJWT");
 const sendEmail = require("../utils/sendEmail");
 const ArtistModel = require("../models/artistModel");
 
-const uploadProfileImage = uploadSingleImage("profileImg");
+const uploadProfileImage = uploadSingleImage("profileImg", "artist");
 
-const resizeProfileImage = asyncHandler(async (req, res, next) => {
-    const fileName = `artist-${Math.round(
-        Math.random() * 1e9
-    )}-${Date.now()}.jpeg`;
+const uploadToHost = asyncHandler(async (req, res, next) => {
+    const options = {
+        folder: "artist",
+        public_id: req.file.filename,
+        use_filename: true,
+        resource_type: "image",
+        format: "jpg",
+    };
 
-    if (req.file) {
-        await sharp(req.file.buffer)
-            .toFormat("jpeg")
-            .jpeg({quality: 95})
-            .toFile(`uploads/artists/${fileName}`);
+    req.body.profileImg = await cloudinary.uploader.upload(req.file.path, options);
 
-        req.body.profileImg = fileName;
-    }
     next();
 });
 
-const signup = asyncHandler(async (req, res, next) => {
+const signup = asyncHandler(async (req, res) => {
     const artist = await ArtistModel.create(req.body);
     artist.password = await bcrypt.hash(artist.password, 12)
 
@@ -41,7 +40,7 @@ const signup = asyncHandler(async (req, res, next) => {
         .digest("hex");
     artist.AccountActivateExpires = Date.now() + 10 * 60 * 1000;
 
-    const message = `Hi ${artist.name},\nYour verification code is ${activateCode}.\nEnter this code in our [website or app] to activate your [customer portal] account.\nWe’re glad you’re here!\nThe Art Space team\n`;
+    const message = verificationMessage(artist.name, activateCode);
 
     try {
         await sendEmail({
@@ -53,6 +52,7 @@ const signup = asyncHandler(async (req, res, next) => {
         artist.accountActivateCode = undefined;
         artist.AccountActivateExpires = undefined;
     }
+
     await artist.save();
 
     return res.status(201).json(
@@ -124,7 +124,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 
     await artist.save();
 
-    const message = `Hi ${artist.name},\nThere was a request to change your password!\nIf you did not make this request then please ignore this email.\nOtherwise, please enter this code to change your password: ${resetCode}\n`;
+    const message = resetMessage(artist.name, resetCode);
 
     try {
         await sendEmail({
@@ -192,15 +192,16 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 const resendCode = asyncHandler(async (req, res, next) => {
     const artist = await ArtistModel.findOne({email: req.body.email});
 
-    const activateCode = Math.floor(1000 + Math.random() * 9000).toString();
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
 
     artist.accountActivateCode = crypto
         .createHash("sha256")
-        .update(activateCode)
+        .update(code)
         .digest("hex");
+
     artist.AccountActivateExpires = Date.now() + 10 * 60 * 1000;
 
-    const message = `Hi ${artist.name},\nYour verification code is ${activateCode}.\nEnter this code in our [website or app] to activate your [customer portal] account.\nWe’re glad you’re here!\nThe Art Space team\n`;
+    const message = resendMessage(artist.name, code);
 
     try {
         await sendEmail({
@@ -228,7 +229,7 @@ module.exports = {
     signup,
     verifyEmail,
     uploadProfileImage,
-    resizeProfileImage,
+    uploadToHost,
     login,
     forgotPassword,
     verifyCode,

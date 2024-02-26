@@ -1,36 +1,30 @@
-const fs = require("fs");
-
 const bcrypt = require("bcrypt");
-const sharp = require("sharp");
+const cloudinary = require("cloudinary").v2;
 
 const asyncHandler = require("../middlewares/asyncHandler");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
-const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
+const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
 const generateJWT = require("../utils/generateJWT");
-const getImageUrl = require("../utils/getImageUrl");
 const AdminModel = require("../models/adminModel");
 
-const uploadProfileImage = uploadSingleImage("profileImg");
+const uploadProfileImage = uploadSingleImage("profileImg", "admin");
 
-const resizeProfileImage = asyncHandler(async (req, res, next) => {
-    const fileName = `admin-${Math.round(
-        Math.random() * 1e9
-    )}-${Date.now()}.jpeg`;
+const uploadToHost = asyncHandler(async (req, res, next) => {
+    const options = {
+        folder: "admin",
+        public_id: req.file.filename,
+        use_filename: true,
+        resource_type: "image",
+        format: "jpg",
+    };
 
-    if (req.file) {
-        await sharp(req.file.buffer)
-            .resize(600, 600)
-            .toFormat("jpeg")
-            .jpeg({quality: 95})
-            .toFile(`uploads/admins/${fileName}`);
+    req.body.profileImg = await cloudinary.uploader.upload(req.file.path, options);
 
-        req.body.profileImg = fileName;
-    }
     next();
 });
 
-const createAdmin = asyncHandler(async (req, res, next) => {
+const createAdmin = asyncHandler(async (req, res) => {
     const admin = await AdminModel.create(req.body);
     admin.password = await bcrypt.hash(admin.password, 12)
 
@@ -92,12 +86,12 @@ const getAdmins = asyncHandler(async (req, res, next) => {
         ));
 });
 
-const getAdmin = asyncHandler(async (req, res, next) => {
+const getAdmin = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
-    const admin = await AdminModel.findById(id, "-password -__v");
+    const selectedField = "nId name username phone profileImg gender role";
 
-    admin.profileImg = getImageUrl(req, admin.profileImg);
+    const admin = await AdminModel.findById(id, selectedField);
 
     return res.status(200).json(
         apiSuccess(
@@ -133,25 +127,14 @@ const updateAdmin = asyncHandler(async (req, res) => {
 
 });
 
-const updateImgProfile = asyncHandler(async (req, res, next) => {
+const updateImgProfile = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
     const admin = await AdminModel.findByIdAndUpdate(id, {
         profileImg: req.body.profileImg,
     });
 
-    const oldFileName = admin.profileImg;
-    const filePath = `uploads/admins/${oldFileName}`;
-    fs.access(filePath, fs.constants.F_OK, (err) => {
-        if (!err) {
-            // File exists, so delete it
-            fs.unlink(filePath, (deleteErr) => {
-                if (deleteErr) {
-                    console.error('Error deleting file:', deleteErr);
-                }
-            });
-        }
-    });
+    await cloudinary.uploader.destroy(admin.profileImg.public_id);
 
     return res.status(200).json(
         apiSuccess(
@@ -166,18 +149,7 @@ const deleteAdmin = asyncHandler(async (req, res) => {
 
     const admin = await AdminModel.findByIdAndDelete(id);
 
-    const oldFileName = admin.profileImg;
-    const filePath = `uploads/admins/${oldFileName}`;
-    fs.access(filePath, fs.constants.F_OK, (err) => {
-        if (!err) {
-            // File exists, so delete it
-            fs.unlink(filePath, (deleteErr) => {
-                if (deleteErr) {
-                    console.error('Error deleting file:', deleteErr);
-                }
-            });
-        }
-    });
+    await cloudinary.uploader.destroy(admin.profileImg.public_id);
 
     return res.status(200).json(
         apiSuccess(
@@ -243,7 +215,7 @@ const login = asyncHandler(async (req, res, next) => {
 module.exports = {
     createAdmin,
     uploadProfileImage,
-    resizeProfileImage,
+    uploadToHost,
     getAdmins,
     getAdmin,
     updateAdmin,

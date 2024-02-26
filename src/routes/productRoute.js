@@ -8,7 +8,7 @@ const {
     updateProduct,
     deleteProduct,
     uploadProductImages,
-    resizeProductImage,
+    uploadToHost,
     getMeProducts,
     changeSpecificImage,
     changeCoverImage,
@@ -46,11 +46,7 @@ router.route("/")
         uploadProductImages,
         createProductValidation,
         validationMiddleware,
-        resizeProductImage,
-        body("coverImage")
-            .notEmpty()
-            .withMessage("Product coverImage is required"),
-        validationMiddleware,
+        uploadToHost,
         createProduct,
     )
 
@@ -111,8 +107,8 @@ router.get("/search",
     search,
 )
 
-router.put("/changeCoverImage", uploadProductImages, resizeProductImage, changeCoverImage)
+router.put("/changeCoverImage/:productId", uploadProductImages, uploadToHost, changeCoverImage)
 
-router.put("/changeSpecificImage", uploadProductImages, resizeProductImage, changeSpecificImage)
+router.put("/changeSpecificImage/:productId", uploadProductImages, uploadToHost, changeSpecificImage)
 
 module.exports = router;

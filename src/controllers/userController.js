@@ -1,14 +1,13 @@
 const fs = require("fs");
 
-const sharp = require("sharp");
 const bcrypt = require("bcrypt");
+const cloudinary = require("cloudinary").v2;
 
 const asyncHandler = require("../middlewares/asyncHandler");
-const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
+const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const generateJWT = require("../utils/generateJWT");
-const getImageUrl = require("../utils/getImageUrl");
 const UserModel = require("../models/userModel");
 
 const getAllUsers = asyncHandler(async (req, res, next) => {
@@ -70,8 +69,6 @@ const getUser = asyncHandler(async (req, res, next) => {
         return next(new ApiError(`no user for this id ${id}`, 404))
     }
 
-    user.profileImg = getImageUrl(req, user.profileImg);
-
     return res.status(200).json(
         apiSuccess(
             "user found successfully",
@@ -101,43 +98,26 @@ const updateUser = asyncHandler(async (req, res) => {
 
 });
 
-const uploadProfileImage = uploadSingleImage("profileImg");
+const uploadProfileImage = uploadSingleImage("profileImg", "user");
 
-const resizeProfileImage = asyncHandler(async (req, res, next) => {
-    const fileName = `user-${Math.round(
-        Math.random() * 1e9
-    )}-${Date.now()}.jpeg`;
+const uploadToHost = asyncHandler(async (req, res, next) => {
+    const options = {
+        folder: "user",
+        public_id: req.file.filename,
+        use_filename: true,
+        resource_type: "image",
+        format: "jpg",
+    };
 
-    if (req.file) {
-        await sharp(req.file.buffer)
-            .toFormat("jpeg")
-            .jpeg({quality: 95})
-            .toFile(`uploads/users/${fileName}`)
-            .then(async () => {
-                const user = await UserModel.findById(req.params.id);
-                const oldFileName = user.profileImg;
-                const filePath = `uploads/users/${oldFileName}`;
+    req.body.profileImg = await cloudinary.uploader.upload(req.file.path, options);
 
-                if (user.profileImg !== "defaultImage.png") {
-                    fs.access(filePath, fs.constants.F_OK, (err) => {
-                        if (!err) {
-                            fs.unlink(filePath, (deleteErr) => {
-                                if (deleteErr) {
-                                    return next(new ApiError(`something happen when change profileImg`, 400));
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-
-        req.body.profileImg = fileName;
-    }
     next();
 });
 
 const updateProfileImage = asyncHandler(async (req, res) => {
-    await UserModel.findByIdAndUpdate(req.loggedUser._id, {profileImg: req.body.profileImg});
+    const user = await UserModel.findByIdAndUpdate(req.loggedUser._id, {profileImg: req.body.profileImg});
+
+    await cloudinary.uploader.destroy(user.profileImg.public_id);
 
     return res.status(200).json(
         apiSuccess(
@@ -180,21 +160,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 
     const user = await UserModel.findByIdAndDelete(id);
 
-    const oldFileName = user.profileImg;
-    const filePath = `uploads/users/${oldFileName}`;
-
-    if (user.profileImg !== "defaultImage.png") {
-        fs.access(filePath, fs.constants.F_OK, (err) => {
-            if (!err) {
-                // File exists, so delete it
-                fs.unlink(filePath, (deleteErr) => {
-                    if (deleteErr) {
-                        console.error('Error deleting file:', deleteErr);
-                    }
-                });
-            }
-        });
-    }
+    await cloudinary.uploader.destroy(user.profileImg.public_id);
 
     return res.status(200).json(
         apiSuccess(
@@ -302,7 +268,7 @@ module.exports = {
     updateUser,
     deleteUser,
     uploadProfileImage,
-    resizeProfileImage,
+    uploadToHost,
     changePassword,
     search,
     setProfileID,

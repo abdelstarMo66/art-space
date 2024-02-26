@@ -1,31 +1,30 @@
 const crypto = require("crypto");
 
-const sharp = require("sharp");
 const bcrypt = require("bcrypt");
+const cloudinary = require("cloudinary").v2;
 
 const asyncHandler = require("../middlewares/asyncHandler");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
-const {uploadSingleImage} = require("../middlewares/uploadImageMiddleware");
+const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
+const {verificationMessage, resetMessage, resendMessage} = require("../utils/emailMessages");
 const generateJWT = require("../utils/generateJWT");
 const sendEmail = require("../utils/sendEmail");
 const UserModel = require("../models/userModel");
 
-const uploadProfileImage = uploadSingleImage("profileImg");
+const uploadProfileImage = uploadSingleImage("profileImg", "user");
 
-const resizeProfileImage = asyncHandler(async (req, res, next) => {
-    const fileName = `user-${Math.round(
-        Math.random() * 1e9
-    )}-${Date.now()}.jpeg`;
+const uploadToHost = asyncHandler(async (req, res, next) => {
+    const options = {
+        folder: "user",
+        public_id: req.file.filename,
+        use_filename: true,
+        resource_type: "image",
+        format: "jpg",
+    };
 
-    if (req.file) {
-        await sharp(req.file.buffer)
-            .toFormat("jpeg")
-            .jpeg({quality: 95})
-            .toFile(`uploads/users/${fileName}`);
+    req.body.profileImg = await cloudinary.uploader.upload(req.file.path, options);
 
-        req.body.profileImg = fileName;
-    }
     next();
 });
 
@@ -41,7 +40,7 @@ const signup = asyncHandler(async (req, res) => {
         .digest("hex")
     user.AccountActivateExpires = Date.now() + 10 * 60 * 1000;
 
-    const message = `Hi ${user.name},\nYour verification code is ${activateCode}.\nEnter this code in our [website or app] to activate your [customer portal] account.\nWe’re glad you’re here!\nThe Art Space team\n`;
+    const message = verificationMessage(user.name, activateCode);
 
     try {
         await sendEmail({
@@ -128,7 +127,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 
     await user.save();
 
-    const message = `Hi ${user.name},\nThere was a request to change your password!\nIf you did not make this request then please ignore this email.\nOtherwise, please enter this code to change your password: ${resetCode}\n`;
+    const message = resetMessage(user.name, resetCode);
 
     try {
         await sendEmail({
@@ -197,15 +196,15 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 const resendCode = asyncHandler(async (req, res, next) => {
     const user = await UserModel.findOne({email: req.body.email});
 
-    const activateCode = Math.floor(1000 + Math.random() * 9000).toString();
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
 
     user.accountActivateCode = crypto
         .createHash("sha256")
-        .update(activateCode)
+        .update(code)
         .digest("hex")
     user.AccountActivateExpires = Date.now() + 10 * 60 * 1000;
 
-    const message = `Hi ${user.name},\nYour verification code is ${activateCode}.\nEnter this code in our [website or app] to activate your [customer portal] account.\nWe’re glad you’re here!\nThe Art Space team\n`;
+    const message = resendMessage(user.name, code);
 
     try {
         await sendEmail({
@@ -234,7 +233,7 @@ module.exports = {
     signup,
     verifyEmail,
     uploadProfileImage,
-    resizeProfileImage,
+    uploadToHost,
     login,
     forgotPassword,
     verifyCode,

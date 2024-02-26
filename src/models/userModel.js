@@ -21,8 +21,8 @@ const userSchema = new mongoose.Schema({
         type: String,
     },
     profileImg: {
-        type: String,
-        default: "defaultImage.png",
+        public_id: String,
+        secure_url: String,
     },
     addresses: [
         {

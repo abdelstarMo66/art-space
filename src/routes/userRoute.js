@@ -6,7 +6,7 @@ const {
     updateUser,
     deleteUser,
     uploadProfileImage,
-    resizeProfileImage,
+    uploadToHost,
     changePassword,
     search,
     setProfileID,
@@ -52,7 +52,7 @@ router.put("/updateImage",
     permissionValidate,
     setProfileID,
     uploadProfileImage,
-    resizeProfileImage,
+    uploadToHost,
     updateProfileImage,
 );
 
