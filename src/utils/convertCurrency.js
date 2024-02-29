@@ -153,7 +153,7 @@ class CurrencyConverter {
         "TWD": "NT$",
         "PEN": "Peruvian Sol"
     }
-    currencyCode = ["AFN", "ALL", "DZD", "AOA", "ARS", "AMD", "AWG", "AUD", "AZN", "BSD", "BHD", "BBD", "BDT", "BYN", "BZD", "BMD", "BTN", "XBT", "BOB", "BAM", "BWP", "BRL", "BND", "BGN", "BIF", "XPF", "KHR", "CAD", "CVE", "KYD", "FCFA", "CLP", "CLF", "CNY", "CNY", "COP", "CF", "CHF", "CDF", "CRC", "HRK", "CUC", "CZK", "DKK", "DJF", "DOP", "XCD", "EGP", "ETB", "FJD", "GMD", "GBP", "GEL", "GHS", "GTQ", "GNF", "GYD", "HTG", "HNL", "HKD", "HUF", "ISK", "INR", "IDR", "IRR", "IQD", "ILS", "JMD", "JPY", "JOD", "KMF", "KZT", "KES", "KWD", "KGS", "LAK", "LBP", "LSL", "LRD", "LYD", "MOP", "MKD", "MGA" , "MWK", "MYR", "MVR", "MRO", "MUR", "MXN", "MDL", "MAD", "MZN", "MMK", "NAD", "NPR", "ANG", "NZD", "NIO", "NGN", "NOK", "OMR", "PKR", "PAB", "PGK", "PYG", "PHP", "PLN", "QAR", "RON", "RUB", "RWF", "SVC", "SAR", "RSD", "SCR", "SLL", "SGD", "SBD", "SOS", "ZAR", "KRW", "VES", "LKR", "SDG", "SRD", "SZL", "SEK", "CHF", "TJS", "TZS", "THB", "TOP", "TTD", "TND", "TRY" , "TMT", "UGX", "UAH", "AED", "USD", "UYU", "UZS", "VND", "XOF", "YER", "ZMW", "ETH", "EUR", "LTC", "TWD", "PEN"]
+    currencyCode = ["AFN", "ALL", "DZD", "AOA", "ARS", "AMD", "AWG", "AUD", "AZN", "BSD", "BHD", "BBD", "BDT", "BYN", "BZD", "BMD", "BTN", "XBT", "BOB", "BAM", "BWP", "BRL", "BND", "BGN", "BIF", "XPF", "KHR", "CAD", "CVE", "KYD", "FCFA", "CLP", "CLF", "CNY", "CNY", "COP", "CF", "CHF", "CDF", "CRC", "HRK", "CUC", "CZK", "DKK", "DJF", "DOP", "XCD", "EGP", "ETB", "FJD", "GMD", "GBP", "GEL", "GHS", "GTQ", "GNF", "GYD", "HTG", "HNL", "HKD", "HUF", "ISK", "INR", "IDR", "IRR", "IQD", "ILS", "JMD", "JPY", "JOD", "KMF", "KZT", "KES", "KWD", "KGS", "LAK", "LBP", "LSL", "LRD", "LYD", "MOP", "MKD", "MGA", "MWK", "MYR", "MVR", "MRO", "MUR", "MXN", "MDL", "MAD", "MZN", "MMK", "NAD", "NPR", "ANG", "NZD", "NIO", "NGN", "NOK", "OMR", "PKR", "PAB", "PGK", "PYG", "PHP", "PLN", "QAR", "RON", "RUB", "RWF", "SVC", "SAR", "RSD", "SCR", "SLL", "SGD", "SBD", "SOS", "ZAR", "KRW", "VES", "LKR", "SDG", "SRD", "SZL", "SEK", "CHF", "TJS", "TZS", "THB", "TOP", "TTD", "TND", "TRY", "TMT", "UGX", "UAH", "AED", "USD", "UYU", "UZS", "VND", "XOF", "YER", "ZMW", "ETH", "EUR", "LTC", "TWD", "PEN"]
 
     constructor(params) {
         this.currencyFrom = ""
@@ -179,6 +179,7 @@ class CurrencyConverter {
                 this.setDecimalComma(params["isDecimalComma"])
         }
     }
+
     from(currencyFrom) {
         if (typeof currencyFrom !== "string")
             throw new TypeError("currency code should be a string")
@@ -189,6 +190,7 @@ class CurrencyConverter {
         this.currencyFrom = currencyFrom.toUpperCase()
         return this
     }
+
     to(currencyTo) {
         if (typeof currencyTo !== "string")
             throw new TypeError("currency code should be a string")
@@ -199,6 +201,7 @@ class CurrencyConverter {
         this.currencyTo = currencyTo
         return this
     }
+
     amount(currencyAmount) {
         if (typeof currencyAmount !== "number")
             throw new TypeError("amount should be a number")
@@ -270,7 +273,7 @@ class CurrencyConverter {
                 });
             } else {
                 return new Promise((resolve, reject) => {
-                    request(`https://www.google.com/search?q=${this.currencyAmount}+${this.currencyFrom}+to+${this.currencyTo}+&hl=en`, function(error, response, body) {
+                    request(`https://www.google.com/search?q=${this.currencyAmount}+${this.currencyFrom}+to+${this.currencyTo}+&hl=en`, function (error, response, body) {
                         if (error) {
                             return reject(error);
                         } else {
@@ -360,17 +363,18 @@ class CurrencyConverter {
         }
     }
 }
+
 const convertCurrency = async (from, to, amount) => {
     let currencyConverter = new CurrencyConverter()
 
-    let ratesCacheOptions = {
-        isRatesCaching: true, // Set this boolean to true to implement rate caching
-        ratesCacheDuration: 3600 // Set this to a positive number to set the number of seconds you want the rates to be cached. Defaults to 3600 seconds (1 hour)
-    }
+    // let ratesCacheOptions = {
+    //     isRatesCaching: true, // Set this boolean to true to implement rate caching
+    //     ratesCacheDuration: 3600 // Set this to a positive number to set the number of seconds you want the rates to be cached. Defaults to 3600 seconds (1 hour)
+    // }
+    //
+    // currencyConverter = currencyConverter.setupRatesCache(ratesCacheOptions)
 
-    currencyConverter = currencyConverter.setupRatesCache(ratesCacheOptions)
-
-    return await currencyConverter.from(from).to(to).amount(Number(amount)).convert();
+    return parseInt(await currencyConverter.from(from).to(to).amount(Number(amount)).convert());
 }
 
 module.exports = convertCurrency
