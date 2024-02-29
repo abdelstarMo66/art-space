@@ -10,7 +10,8 @@ const {
     updateImgProfile,
     deleteAdmin,
     search,
-    login
+    login,
+    setProfileID,
 } = require("../controllers/adminController");
 const {
     createAdminValidation,
@@ -27,6 +28,14 @@ const {allowedToAdmins, permissionValidate} = require("../middlewares/allowTo");
 const router = express.Router();
 
 router.post("/login", loginValidator, validationMiddleware, login)
+
+router.get("/getProfile",
+    verifyToken,
+    allowedToAdmins("IT", "Tracker", "CEO"),
+    permissionValidate,
+    setProfileID,
+    getAdmin,
+);
 
 router.use(verifyToken, allowedToAdmins("CEO"), permissionValidate);
 

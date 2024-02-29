@@ -212,6 +212,11 @@ const login = asyncHandler(async (req, res, next) => {
         ));
 });
 
+const setProfileID = asyncHandler(async (req, res, next) => {
+    req.params.id = req.loggedUser._id;
+    next();
+});
+
 module.exports = {
     createAdmin,
     uploadProfileImage,
@@ -222,5 +227,6 @@ module.exports = {
     updateImgProfile,
     deleteAdmin,
     search,
-    login
+    login,
+    setProfileID
 }
