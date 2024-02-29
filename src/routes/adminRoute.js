@@ -29,13 +29,7 @@ const router = express.Router();
 
 router.post("/login", loginValidator, validationMiddleware, login)
 
-router.get("/getProfile",
-    verifyToken,
-    allowedToAdmins("IT", "Tracker", "CEO"),
-    permissionValidate,
-    setProfileID,
-    getAdmin,
-);
+router.get("/getProfile", verifyToken, allowedToAdmins("IT", "Tracker", "CEO"), permissionValidate, setProfileID, getAdmin);
 
 router.use(verifyToken, allowedToAdmins("CEO"), permissionValidate);
 
