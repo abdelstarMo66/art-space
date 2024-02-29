@@ -272,7 +272,7 @@ const createCardOrder = async (session) => {
     const cart = await CartModel.findById(cartId);
     const user = await UserModel.findOne({email});
 
-    const order = await OrderModel.create({
+    await OrderModel.create({
         user: user._id,
         shippingAddress: address,
         cartItems: cart.cartItems,
@@ -295,7 +295,7 @@ const createCardOrder = async (session) => {
     await CartModel.findByIdAndDelete(cartId);
 }
 
-const webhookCheckout = asyncHandler(async (req, res, next) => {
+const webhookCheckout = asyncHandler(async (req, res) => {
     const sig = req.headers['stripe-signature'];
 
     let event;
