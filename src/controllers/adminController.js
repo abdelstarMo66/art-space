@@ -228,5 +228,5 @@ module.exports = {
     deleteAdmin,
     search,
     login,
-    setProfileID
+    setProfileID,
 }
