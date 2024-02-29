@@ -11,6 +11,7 @@ const cloudinaryConnection = require("./config/cloudinaryConfig");
 const ApiError = require("./src/utils/apiError");
 const globalErrorMiddleware = require("./src/middlewares/globalErrorMiddleware")
 const mountRoutes = require("./src/routes");
+const {webhookCheckout} = require("./src/controllers/orderController");
 
 dotenv.config({path: "config/config.env",});
 dbConnection();
@@ -18,6 +19,9 @@ const app = express();
 
 app.use(cors());
 app.use(compression());
+
+app.post("/webhook-checkout", express.raw({type: 'application/json'}), webhookCheckout);
+
 app.use(express.json());
 app.use(express.static(join(__dirname, "uploads")));
 
