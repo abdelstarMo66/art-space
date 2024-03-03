@@ -67,7 +67,7 @@ exports.verifyEmailValidator = [
         .notEmpty()
         .withMessage("activateCode must not be empty")
         .custom((val) => {
-            if (val.length !== 6) {
+            if (val.length !== 4) {
                 return Promise.reject(new Error(`activate code must be 6 characters long`));
             }
             return true;
