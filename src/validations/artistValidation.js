@@ -35,7 +35,10 @@ exports.updateArtistValidation = [
             return true;
         }),
 
-    body("name").optional().isLength({min: 3}).withMessage("name too short"),
+    body("name")
+        .optional()
+        .isLength({min: 3})
+        .withMessage("name too short"),
 
     body("gender")
         .optional()
@@ -67,31 +70,30 @@ exports.changeArtistPasswordValidation = [
         .notEmpty()
         .withMessage("currentPassword must not be empty"),
 
-    body("password").notEmpty().withMessage("password must not be empty"),
+    body("password")
+        .notEmpty()
+        .withMessage("password must not be empty")
+        .custom(async (val, {req}) => {
+            const {currentPassword, confirmPassword} = req.body;
+
+            const artist = await ArtistModel.findById(req.loggedUser._id);
+
+            const isCorrectPassword = await bcrypt.compare(currentPassword, artist.password);
+
+            if (!isCorrectPassword) {
+                return Promise.reject(new ApiError("Incorrect Current Password", 400));
+            }
+
+            if (val !== confirmPassword) {
+                return Promise.reject(new ApiError("Please make sure passwords match", 400));
+            }
+
+            return true;
+        }),
 
     body("confirmPassword")
         .notEmpty()
         .withMessage("confirmPassword must not be empty"),
-
-    body("password").custom(async (val, {req}) => {
-        const {currentPassword, confirmPassword} = req.body;
-
-        const artist = await ArtistModel.findById(req.loggedUser._id);
-
-        const isCorrectPassword = await bcrypt.compare(currentPassword, artist.password);
-
-        if (!isCorrectPassword) {
-            return Promise.reject(new ApiError("Incorrect Current Password", 400));
-        }
-
-        if (val !== confirmPassword) {
-            return Promise.reject(
-                new ApiError("Please make sure passwords match", 400)
-            );
-        }
-
-        return true;
-    }),
 ];
 
 exports.addArtistAddressValidation = [

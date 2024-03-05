@@ -60,8 +60,6 @@ router.delete("/deleteProfile",
     allowedToUser(),
     permissionValidate,
     setProfileID,
-    deleteUserValidation,
-    validationMiddleware,
     deleteUser,
 );
 
@@ -93,24 +91,13 @@ router.delete("/address/:addressId",
     removeUserAddress,
 )
 
-router.get("/",
-    allowedToAdmins("IT"),
-    permissionValidate,
-    getAllUsers,
-);
+router.get("/", allowedToAdmins("IT"), permissionValidate, getAllUsers);
 
-router.get("/search",
-    allowedToAdmins("IT"),
-    permissionValidate,
-    searchValidation,
-    validationMiddleware,
-    search,
-)
+router.get("/search", allowedToAdmins("IT"), permissionValidate, searchValidation, validationMiddleware, search)
 
 router.route("/:id")
     .get(allowedToAdmins("IT"), permissionValidate, getUserValidation, validationMiddleware, getUser)
     .patch(allowedToAdmins("IT"), permissionValidate, updateUserValidation, validationMiddleware, updateUser)
     .delete(allowedToAdmins("IT"), permissionValidate, deleteUserValidation, validationMiddleware, deleteUser);
-
 
 module.exports = router

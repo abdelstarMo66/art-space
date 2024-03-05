@@ -35,7 +35,7 @@ router.use(verifyToken, allowedToAdmins("CEO"), permissionValidate);
 
 router.route("/")
     .get(getAdmins)
-    .post(uploadProfileImage, createAdminValidation, validationMiddleware,uploadToHost, createAdmin);
+    .post(uploadProfileImage, uploadToHost, createAdminValidation, validationMiddleware, createAdmin);
 
 router.get("/search", searchValidation, validationMiddleware, search)
 
@@ -44,6 +44,6 @@ router.route("/:id")
     .patch(updateAdminValidation, validationMiddleware, updateAdmin)
     .delete(deleteAdminValidation, validationMiddleware, deleteAdmin);
 
-router.put("/updateImgProfile/:id",uploadProfileImage, uploadToHost , updateImgProfile)
+router.put("/updateImgProfile/:id", uploadProfileImage, uploadToHost, updateImgProfile)
 
 module.exports = router;

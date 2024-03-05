@@ -25,9 +25,9 @@ const router = express.Router();
 
 router.post("/signup",
     uploadProfileImage,
+    uploadToHost,
     signupValidator,
     validationMiddleware,
-    uploadToHost,
     signup
 );
 

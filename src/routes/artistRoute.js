@@ -47,7 +47,6 @@ router.patch("/updateProfile",
     updateArtist,
 );
 
-
 router.put("/updateImage",
     allowedToArtist(),
     permissionValidate,
@@ -61,8 +60,6 @@ router.delete("/deleteProfile",
     allowedToArtist(),
     permissionValidate,
     setProfileID,
-    deleteArtistValidation,
-    validationMiddleware,
     deleteArtist,
 );
 
@@ -73,7 +70,6 @@ router.patch("/changePassword",
     validationMiddleware,
     changePassword,
 )
-
 
 router.route("/address")
     .post(
@@ -95,14 +91,13 @@ router.delete("/address/:addressId",
     removeArtistAddress,
 )
 
-router.get("/", allowedToAdmins("IT"), permissionValidate, getAllArtists,);
+router.get("/", allowedToAdmins("IT"), permissionValidate, getAllArtists);
 
-router.get("/search", allowedToAdmins("IT"), permissionValidate, searchValidation, validationMiddleware, search,)
+router.get("/search", allowedToAdmins("IT"), permissionValidate, searchValidation, validationMiddleware, search)
 
 router.route("/:id")
     .get(allowedToAdmins("IT"), permissionValidate, getArtistValidation, validationMiddleware, getArtist)
     .patch(allowedToAdmins("IT"), permissionValidate, updateArtistValidation, validationMiddleware, updateArtist)
     .delete(allowedToAdmins("IT"), permissionValidate, deleteArtistValidation, validationMiddleware, deleteArtist);
-
 
 module.exports = router

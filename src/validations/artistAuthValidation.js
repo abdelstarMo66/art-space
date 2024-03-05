@@ -26,9 +26,7 @@ exports.signupValidator = [
         .notEmpty()
         .withMessage("password must not be empty")
         .isLength({min: 8})
-        .withMessage(
-            "password too short, please enter password at least 8 characters"
-        )
+        .withMessage("password too short, please enter password at least 8 characters")
         .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
         .withMessage("please enter strong password")
         .custom((password, {req}) => {
@@ -49,10 +47,6 @@ exports.signupValidator = [
         .withMessage("phone must not be empty")
         .matches(/^\+?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
         .withMessage("please enter invalid phone"),
-
-    body("profileImg")
-        .notEmpty()
-        .withMessage("profileImg must not be empty")
 ];
 
 exports.verifyEmailValidator = [
@@ -74,9 +68,9 @@ exports.verifyEmailValidator = [
         .notEmpty()
         .withMessage("activateCode must not be empty")
         .custom((val) => {
-            if (val.length !== 6) {
+            if (val.length !== 4) {
                 return Promise.reject(
-                    new Error(`activate code must be 6 characters long`)
+                    new Error(`activate code must be 4 characters long`)
                 );
             }
             return true;
@@ -136,7 +130,7 @@ exports.verifyCodeValidator = [
         .custom((val) => {
             if (val.length !== 4) {
                 return Promise.reject(
-                    new Error(`reset code must be 6 characters long`)
+                    new Error(`reset code must be 4 characters long`)
                 );
             }
             return true;

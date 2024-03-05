@@ -14,11 +14,13 @@ exports.signupValidator = [
         .withMessage("email must not be empty")
         .isEmail()
         .withMessage("invalid email address")
-        .custom((val) => UserModel.findOne({email: val}).then((user) => {
-            if (user) {
-                return Promise.reject(new Error(`this email already use, please enter other email or login`));
-            }
-        })),
+        .custom((val) =>
+            UserModel.findOne({email: val}).then((user) => {
+                if (user) {
+                    return Promise.reject(new Error(`this email already use, please enter other email or login`));
+                }
+            })
+        ),
 
     body("password")
         .notEmpty()
@@ -36,7 +38,8 @@ exports.signupValidator = [
             return true;
         }),
 
-    body("passwordConfirm").notEmpty()
+    body("passwordConfirm")
+        .notEmpty()
         .withMessage("password confirmation required"),
 
     body("phone")
@@ -44,10 +47,6 @@ exports.signupValidator = [
         .withMessage("phone must not be empty")
         .matches(/^\+?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
         .withMessage("please enter invalid phone"),
-
-    body("profileImg")
-        .notEmpty()
-        .withMessage("profileImg must not be empty")
 ]
 
 exports.verifyEmailValidator = [
@@ -68,7 +67,7 @@ exports.verifyEmailValidator = [
         .withMessage("activateCode must not be empty")
         .custom((val) => {
             if (val.length !== 4) {
-                return Promise.reject(new Error(`activate code must be 6 characters long`));
+                return Promise.reject(new Error(`activate code must be 4 characters long`));
             }
             return true;
         }),
@@ -119,8 +118,8 @@ exports.verifyCodeValidator = [
         .notEmpty()
         .withMessage("resetCode must not be empty")
         .custom((val) => {
-            if (val.length !== 6) {
-                return Promise.reject(new Error(`reset code must be 6 characters long`));
+            if (val.length !== 4) {
+                return Promise.reject(new Error(`reset code must be 4 characters long`));
             }
             return true;
         }),

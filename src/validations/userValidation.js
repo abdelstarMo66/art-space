@@ -72,13 +72,7 @@ exports.changeUserPasswordValidation = [
 
     body("password")
         .notEmpty()
-        .withMessage("password must not be empty"),
-
-    body("confirmPassword")
-        .notEmpty()
-        .withMessage("confirmPassword must not be empty"),
-
-    body("password")
+        .withMessage("password must not be empty")
         .custom(async (val, {req}) => {
             const {currentPassword, confirmPassword} = req.body;
 
@@ -96,6 +90,10 @@ exports.changeUserPasswordValidation = [
 
             return true;
         }),
+
+    body("confirmPassword")
+        .notEmpty()
+        .withMessage("confirmPassword must not be empty"),
 ];
 
 exports.addUserAddressValidation = [

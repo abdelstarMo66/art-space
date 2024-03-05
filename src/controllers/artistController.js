@@ -77,7 +77,6 @@ const updateArtist = asyncHandler(async (req, res) => {
     await ArtistModel.findByIdAndUpdate(id, {
         name: req.body.name,
         phone: req.body.phone,
-        address: req.body.address,
         gender: req.body.gender,
     }, {
         new: true,

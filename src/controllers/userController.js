@@ -1,5 +1,3 @@
-const fs = require("fs");
-
 const bcrypt = require("bcrypt");
 const cloudinary = require("cloudinary").v2;
 
@@ -83,7 +81,6 @@ const updateUser = asyncHandler(async (req, res) => {
     await UserModel.findByIdAndUpdate(id, {
         name: req.body.name,
         phone: req.body.phone,
-        address: req.body.address,
         gender: req.body.gender,
     }, {
         new: true,
