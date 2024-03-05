@@ -98,16 +98,17 @@ const updateUser = asyncHandler(async (req, res) => {
 const uploadProfileImage = uploadSingleImage("profileImg", "user");
 
 const uploadToHost = asyncHandler(async (req, res, next) => {
-    const options = {
-        folder: "user",
-        public_id: req.file.filename,
-        use_filename: true,
-        resource_type: "image",
-        format: "jpg",
-    };
+    if (req.file) {
+        const options = {
+            folder: "user",
+            public_id: req.file.filename,
+            use_filename: true,
+            resource_type: "image",
+            format: "jpg",
+        };
 
-    req.body.profileImg = await cloudinary.uploader.upload(req.file.path, options);
-
+        req.body.profileImg = await cloudinary.uploader.upload(req.file.path, options);
+    }
     next();
 });
 
