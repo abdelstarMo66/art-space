@@ -41,13 +41,13 @@ app.all("*", (req, res, next) => {
 app.use(globalErrorMiddleware);
 
 const PORT = process.env.PORT || 4000
-const server = app.listen(PORT, "localhost", () => {
+const index = app.listen(PORT, "localhost", () => {
     console.log(`App running on port ${PORT}`);
 });
 
 process.on("unhandledRejection", (error) => {
     console.error(`unhandledRejection Error: ${error.name} | ${error.message}`);
-    server.close(() => {
+    index.close(() => {
         console.error(`shutting down...`);
         process.exit(1);
     });
