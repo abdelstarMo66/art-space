@@ -1,5 +1,4 @@
 const {param, body, check} = require("express-validator");
-const bcrypt = require("bcrypt")
 
 const ApiError = require("../utils/apiError");
 const AdminModel = require("../models/adminModel");
@@ -12,7 +11,7 @@ exports.getAdminValidation = [
             const admin = await AdminModel.findById(val);
 
             if (!admin) {
-                return Promise.reject(new ApiError(`no admin for this id ${val}`, 404));
+                return Promise.reject(new ApiError(`No Admin For This Id ${val}`, 404));
             }
             return true;
         }),
@@ -21,12 +20,12 @@ exports.getAdminValidation = [
 exports.createAdminValidation = [
     body("nId")
         .notEmpty()
-        .withMessage("national ID must not be empty")
-        .custom(async (val, req) => {
+        .withMessage("National ID Must Not be Empty")
+        .custom(async (val) => {
             const admin = await AdminModel.findOne({nId: val});
 
             if (admin) {
-                return Promise.reject(new ApiError("national ID already in use", 400));
+                return Promise.reject(new ApiError("National ID Already in Use", 400));
             }
 
             return true;
@@ -34,20 +33,20 @@ exports.createAdminValidation = [
 
     body("name")
         .notEmpty()
-        .withMessage("name must not be empty")
+        .withMessage("Name Must Not be Empty")
         .isLength({min: 3})
-        .withMessage("name too short"),
+        .withMessage("Name Too Short"),
 
     body("username")
         .notEmpty()
-        .withMessage("username must not be empty")
+        .withMessage("Username Must Not be Empty")
         .isLength({min: 6})
-        .withMessage("username too short")
-        .custom(async (val, req) => {
+        .withMessage("Username too Short")
+        .custom(async (val) => {
             const admin = await AdminModel.findOne({username: val});
 
             if (admin) {
-                return Promise.reject(new ApiError("username already in use", 400));
+                return Promise.reject(new ApiError("Username Already in Use", 400));
             }
 
             return true;
@@ -55,34 +54,34 @@ exports.createAdminValidation = [
 
     body("password")
         .notEmpty()
-        .withMessage("password must not be empty")
+        .withMessage("Password Must Not be Empty")
         .isLength({min: 8})
-        .withMessage("password too short, please enter password at least 8 characters")
-        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
-        .withMessage("please enter strong password")
+        .withMessage("Password too Short, Please Enter Password at least 8 Characters")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&])[A-Za-z\d#@$!%*?&]{8,}$/, "i")
+        .withMessage("Please Enter Strong Password")
         .custom((password, {req}) => {
             const {passwordConfirm} = req.body
 
             if (password !== passwordConfirm) {
-                return Promise.reject(new Error("password confirmation incorrect"));
+                return Promise.reject(new Error("Password Confirmation Incorrect"));
             }
             return true;
         }),
 
 
     body("passwordConfirm").notEmpty()
-        .withMessage("password confirmation required"),
+        .withMessage("Password Confirmation Required"),
 
     body("phone")
         .notEmpty()
-        .withMessage("phone must not be empty")
+        .withMessage("Phone Must Not be Empty")
         .matches(/^\+?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
-        .withMessage("please enter invalid phone")
-        .custom(async (val, req) => {
+        .withMessage("Please Enter Invalid Phone")
+        .custom(async (val) => {
             const admin = await AdminModel.findOne({phone: val});
 
             if (admin) {
-                return Promise.reject(new ApiError("phone already in use", 400));
+                return Promise.reject(new ApiError("Phone Already in Use", 400));
             }
 
             return true;
@@ -91,13 +90,13 @@ exports.createAdminValidation = [
     body("gender")
         .optional()
         .isIn(["male", "female"])
-        .withMessage("gender must be male or female"),
+        .withMessage("Gender Must be Male or Female"),
 
     body("role")
         .notEmpty()
-        .withMessage("role must be IT or Tracker")
+        .withMessage("Role Must be IT or Tracker")
         .isIn(["IT", "Tracker"])
-        .withMessage("role must be IT or Tracker"),
+        .withMessage("Role Must be IT or Tracker"),
 ];
 
 exports.updateAdminValidation = [
@@ -108,7 +107,7 @@ exports.updateAdminValidation = [
             const admin = await AdminModel.findById(val);
 
             if (!admin) {
-                return Promise.reject(new ApiError(`no admin for this id ${val}`, 404));
+                return Promise.reject(new ApiError(`No Admin For this Id ${val}`, 404));
             }
             return true;
         }),
@@ -116,29 +115,29 @@ exports.updateAdminValidation = [
     body("name")
         .optional()
         .isLength({min: 3})
-        .withMessage("name too short"),
+        .withMessage("Name too Short"),
 
     body("gender")
         .optional()
         .isIn(["male", "female"])
-        .withMessage("gender must be male or female"),
+        .withMessage("Gender Must be Male or Female"),
 
     body("role")
         .optional()
-        .isIn(["CEO", "IT", "Tracker"])
-        .withMessage("role must be one of the following (CEO, IT and Tracker)"),
+        .isIn(["IT", "Tracker"])
+        .withMessage("Role Must be One of the Following (IT and Tracker)"),
 
     body("phone")
         .optional()
         .matches(/^\+?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
-        .withMessage("please enter invalid phone"),
+        .withMessage("Please Enter Invalid Phone"),
 
     body("password")
         .optional()
         .isLength({min: 8})
-        .withMessage("password too short, please enter password at least 8 characters")
-        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
-        .withMessage("please enter strong password"),
+        .withMessage("Password too Short, Please Enter Password at least 8 Characters")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&])[A-Za-z\d#@$!%*?&]{8,}$/, "i")
+        .withMessage("Please Enter Strong Password"),
 
 ];
 
@@ -150,24 +149,24 @@ exports.deleteAdminValidation = [
             const admin = await AdminModel.findById(val);
 
             if (!admin) {
-                return Promise.reject(new ApiError(`no admin for this id ${val}`, 404));
+                return Promise.reject(new ApiError(`No Admin For this Id ${val}`, 404));
             }
             return true;
         }),
 ];
 
 exports.searchValidation = [
-    check("keyword").notEmpty().withMessage("keyword search must be not empty"),
+    check("keyword").notEmpty().withMessage("Keyword Search Must be Not Empty"),
 ]
 
 exports.loginValidator = [
     body("username")
         .notEmpty()
-        .withMessage("username must not be empty"),
+        .withMessage("Username Must Not be Empty"),
 
     body("password")
         .notEmpty()
-        .withMessage("password must not be empty")
+        .withMessage("Password Must Not be Empty")
         .isLength({min: 8})
-        .withMessage("password too short, please enter password at least 8 characters"),
+        .withMessage("Password too Short, Please Enter Password at least 8 Characters"),
 ]

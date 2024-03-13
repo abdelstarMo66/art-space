@@ -32,7 +32,7 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(',').join(" ");
     }
 
-    const selectedField = "name email phone profileImg addresses gender accountActive";
+    const selectedField = "name email phone addresses gender accountActive";
 
     const users = await UserModel
         .find()

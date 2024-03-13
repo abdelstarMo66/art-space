@@ -27,7 +27,7 @@ exports.signupValidator = [
         .withMessage("password must not be empty")
         .isLength({min: 8})
         .withMessage("password too short, please enter password at least 8 characters")
-        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&])[A-Za-z\d#@$!%*?&]{8,}$/, "i")
         .withMessage("please enter strong password")
         .custom((password, {req}) => {
             const {passwordConfirm} = req.body;
@@ -119,18 +119,18 @@ exports.verifyCodeValidator = [
             const artist = await ArtistModel.findOne({email: val});
             if (!artist) {
                 return Promise.reject(
-                    new Error(`There are not email address match: ${val}`)
+                    new Error(`There are not Email Address Match: ${val}`)
                 );
             }
         }),
 
     body("resetCode")
         .notEmpty()
-        .withMessage("resetCode must not be empty")
+        .withMessage("Reset Code must not be Empty")
         .custom((val) => {
             if (val.length !== 4) {
                 return Promise.reject(
-                    new Error(`reset code must be 4 characters long`)
+                    new Error(`Reset Code Must be 4 Characters Long`)
                 );
             }
             return true;
@@ -140,36 +140,36 @@ exports.verifyCodeValidator = [
 exports.resetPasswordValidator = [
     body("email")
         .notEmpty()
-        .withMessage("email must not be empty")
+        .withMessage("Email Must Not be Empty")
         .isEmail()
-        .withMessage("invalid email address")
+        .withMessage("Invalid Email Address")
         .custom(async (val) => {
             const artist = await ArtistModel.findOne({email: val});
             if (!artist) {
                 return Promise.reject(
-                    new Error(`There are not email address match: ${val}`)
+                    new Error(`There are not Email Address Match: ${val}`)
                 );
             }
         }),
 
     body("password")
         .notEmpty()
-        .withMessage("password must not be empty")
+        .withMessage("Password Must Not be Empty")
         .isLength({min: 8})
         .withMessage(
-            "password too short, please enter password at least 8 characters"
+            "Password too Short, Please Enter Password at least 8 Characters"
         )
-        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
-        .withMessage("please enter strong password")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&])[A-Za-z\d#@$!%*?&]{8,}$/, "i")
+        .withMessage("Please Enter Strong Password")
         .custom((password, {req}) => {
             const {passwordConfirm} = req.body;
             if (password !== passwordConfirm) {
-                return Promise.reject(new Error("password confirmation incorrect"));
+                return Promise.reject(new Error("Password Confirmation Incorrect"));
             }
             return true;
         }),
 
     body("passwordConfirm")
         .notEmpty()
-        .withMessage("password confirmation required"),
+        .withMessage("Password Confirmation Required"),
 ];

@@ -33,7 +33,7 @@ const createAdmin = asyncHandler(async (req, res) => {
 
     return res.status(201).json(
         apiSuccess(
-            "registration successfully..",
+            "Registration Successfully..",
             201,
             null,
         ));
@@ -63,7 +63,7 @@ const getAdmins = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(',').join(" ");
     }
 
-    const selectedField = "nId name username phone profileImg gender role";
+    const selectedField = "nId name username phone gender role";
 
     const admins = await AdminModel
         .find()
@@ -73,12 +73,12 @@ const getAdmins = asyncHandler(async (req, res, next) => {
         .select(selectedField);
 
     if (!admins) {
-        return next(new ApiError(`No admins found`, 404));
+        return next(new ApiError(`No Admins Found`, 404));
     }
 
     return res.status(200).json(
         apiSuccess(
-            `admins Found`,
+            `Admins Found`,
             200,
             {
                 pagination,
@@ -96,7 +96,7 @@ const getAdmin = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         apiSuccess(
-            "admin found successfully",
+            "Admin Found Successfully",
             200,
             {admin}
         ))
@@ -121,7 +121,7 @@ const updateAdmin = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         apiSuccess(
-            `admin updated successfully`,
+            `Admin Updated Successfully`,
             200,
             null
         ));
@@ -139,7 +139,7 @@ const updateImgProfile = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         apiSuccess(
-            `profile admin updated successfully`,
+            `Profile Image Updated Successfully`,
             200,
             null
         ));
@@ -154,7 +154,7 @@ const deleteAdmin = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         apiSuccess(
-            `admin deleted successfully`,
+            `Admin Deleted Successfully`,
             200,
             null
         ));
@@ -177,12 +177,12 @@ const search = asyncHandler(async (req, res, next) => {
     const admins = await AdminModel.find(queryObj, selectedField);
 
     if (!admins) {
-        return next(new ApiError(`No admins found matched this search key: ${keyword}`, 404));
+        return next(new ApiError(`No Admins Found Matched This Search Key: ${keyword}`, 404));
     }
 
     return res.status(200).json(
         apiSuccess(
-            `admins Found`,
+            `Admins Found`,
             200,
             {admins}
         ));
@@ -192,20 +192,22 @@ const login = asyncHandler(async (req, res, next) => {
     const admin = await AdminModel.findOne({username: req.body.username});
 
     if (!admin) {
-        return next(new ApiError("Incorrect username or password", 401));
+        return next(new ApiError("Incorrect Username or Password", 401));
     }
 
     const isPasswordCorrect = await bcrypt.compare(req.body.password, admin.password);
 
     if (!(isPasswordCorrect)) {
-        return next(new ApiError("Incorrect username or password", 401));
+        return next(new ApiError("Incorrect Username or Password", 401));
     }
 
     const token = await generateJWT({id: admin._id, role: "admin"});
 
+    const adminName = admin.name.split(" ")[0];
+
     return res.status(200).json(
         apiSuccess(
-            `login successfully, welcome ${admin.name}`,
+            `Login Successfully, Welcome ${adminName}`,
             200,
             {
                 token
@@ -216,6 +218,30 @@ const login = asyncHandler(async (req, res, next) => {
 const setProfileID = asyncHandler(async (req, res, next) => {
     req.params.id = req.loggedUser._id;
     next();
+});
+
+const updateProfile = asyncHandler(async (req, res) => {
+    const {id} = req.params;
+
+    const admin = await AdminModel.findByIdAndUpdate(id, {
+        name: req.body.name,
+        phone: req.body.phone,
+        gender: req.body.gender,
+    }, {
+        new: true,
+    });
+
+    if (req.body.password) {
+        admin.password = await bcrypt.hash(admin.password, 12)
+        admin.save();
+    }
+
+    return res.status(200).json(
+        apiSuccess(
+            `Profile Updated Successfully`,
+            200,
+            null
+        ));
 });
 
 module.exports = {
@@ -230,4 +256,5 @@ module.exports = {
     search,
     login,
     setProfileID,
+    updateProfile,
 }

@@ -32,7 +32,7 @@ const getAllArtists = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(",").join(" ");
     }
 
-    const selectedField = "name email phone profileImg addresses gender accountActive";
+    const selectedField = "name email phone addresses gender accountActive";
 
     const artists = await ArtistModel.find()
         .limit(limit)
@@ -41,12 +41,12 @@ const getAllArtists = asyncHandler(async (req, res, next) => {
         .select(selectedField);
 
     if (!artists) {
-        return next(new ApiError(`No artists found`, 404));
+        return next(new ApiError(`No Artists Found`, 404));
     }
 
     return res.status(200).json(
         apiSuccess(
-            `artists Found`,
+            `Artists Found`,
             200,
             {
                 pagination,
@@ -63,12 +63,12 @@ const getArtist = asyncHandler(async (req, res, next) => {
     const artist = await ArtistModel.findById(id, selectedField);
 
     if (!artist) {
-        return next(new ApiError(`no artist for this id ${id}`, 404));
+        return next(new ApiError(`No Artist for this Id ${id}`, 404));
     }
 
     return res
         .status(200)
-        .json(apiSuccess("artist found successfully", 200, artist));
+        .json(apiSuccess("Artist Found Successfully", 200, artist));
 });
 
 const updateArtist = asyncHandler(async (req, res) => {
@@ -84,7 +84,7 @@ const updateArtist = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(apiSuccess(`artist updated successfully`, 200, null));
+        .json(apiSuccess(`Artist Updated Successfully`, 200, null));
 });
 
 const uploadProfileImage = uploadSingleImage("profileImg", "artist");
@@ -111,7 +111,7 @@ const updateProfileImage = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         apiSuccess(
-            "profile image updated successfully",
+            "Profile Image Updated Successfully",
             200,
             null,
         ));
@@ -134,10 +134,10 @@ const search = asyncHandler(async (req, res, next) => {
     const artists = await ArtistModel.find(queryObj, selectedField);
 
     if (!artists) {
-        return next(new ApiError(`No artists found matched this search key: ${keyword}`, 404));
+        return next(new ApiError(`No Artists Found Matched this Search Key: ${keyword}`, 404));
     }
 
-    return res.status(200).json(apiSuccess(`artists Found`, 200, artists));
+    return res.status(200).json(apiSuccess(`Artists Found`, 200, artists));
 });
 
 const deleteArtist = asyncHandler(async (req, res) => {
@@ -149,7 +149,7 @@ const deleteArtist = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(apiSuccess(`artist deleted successfully`, 200, null));
+        .json(apiSuccess(`Artist Deleted Successfully`, 200, null));
 });
 
 const setProfileID = asyncHandler(async (req, res, next) => {
@@ -170,7 +170,7 @@ const changePassword = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(apiSuccess(`password changed successfully`, 200, {token}));
+        .json(apiSuccess(`Password Changed Successfully`, 200, {token}));
 });
 
 const addArtistAddress = asyncHandler(async (req, res) => {
@@ -182,7 +182,7 @@ const addArtistAddress = asyncHandler(async (req, res) => {
             || JSON.stringify(req.body) === JSON.stringify(artist.addresses[i], ["alias", "street", "region", "city", "country", "phone",]) || JSON.stringify(req.body) === JSON.stringify(artist.addresses[i], ["alias", "street", "region", "city", "country",])) {
             return res
                 .status(200)
-                .json(apiSuccess("this address is already in the list of addresses", 200, null));
+                .json(apiSuccess("This Address is Already in the List of Addresses", 200, null));
         }
     }
 
@@ -192,7 +192,7 @@ const addArtistAddress = asyncHandler(async (req, res) => {
 
     return res
         .status(201)
-        .json(apiSuccess("Address added successfully", 200, null));
+        .json(apiSuccess("Address Added Successfully", 200, null));
 });
 
 const removeArtistAddress = asyncHandler(async (req, res) => {
@@ -204,7 +204,7 @@ const removeArtistAddress = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(apiSuccess("Address removed successfully", 200, artist.addresses));
+        .json(apiSuccess("Address Removed Successfully", 200, artist.addresses));
 });
 
 const getProfileAddresses = asyncHandler(async (req, res) => {
@@ -212,7 +212,7 @@ const getProfileAddresses = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(apiSuccess("Address Founded successfully", 200, {address: artist.addresses}));
+        .json(apiSuccess("Address Founded Successfully", 200, {address: artist.addresses}));
 });
 
 module.exports = {

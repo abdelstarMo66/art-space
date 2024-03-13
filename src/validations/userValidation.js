@@ -73,6 +73,10 @@ exports.changeUserPasswordValidation = [
     body("password")
         .notEmpty()
         .withMessage("password must not be empty")
+        .isLength({min: 8})
+        .withMessage("password too short, please enter password at least 8 characters")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&])[A-Za-z\d#@$!%*?&]{8,}$/, "i")
+        .withMessage("please enter strong password")
         .custom(async (val, {req}) => {
             const {currentPassword, confirmPassword} = req.body;
 

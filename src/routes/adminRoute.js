@@ -31,6 +31,12 @@ router.post("/login", loginValidator, validationMiddleware, login)
 
 router.get("/getProfile", verifyToken, allowedToAdmins("IT", "Tracker", "CEO"), permissionValidate, setProfileID, getAdmin);
 
+router.patch("/updateProfile", verifyToken, allowedToAdmins("IT", "Tracker", "CEO"), permissionValidate, setProfileID, updateAdmin)
+
+router.delete("/deleteProfile", verifyToken, allowedToAdmins("IT", "Tracker", "CEO"), permissionValidate, setProfileID, deleteAdmin);
+
+router.put("/updateImgProfile", verifyToken, allowedToAdmins("IT", "Tracker", "CEO"), permissionValidate, setProfileID, uploadProfileImage, uploadToHost, updateImgProfile)
+
 router.use(verifyToken, allowedToAdmins("CEO"), permissionValidate);
 
 router.route("/")

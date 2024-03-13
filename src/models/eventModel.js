@@ -46,8 +46,8 @@ const eventSchema = new mongoose.Schema({
         ],
         validate: [
             function (val) {
-                return val.length >= 3 && val.length <= 15;
-            }, '{PATH} must be between 3 and 15 product']
+                return val.length <= 3 && val.length >= 10;
+            }, '{PATH} must be between 3 and 10 product']
     },
 }, {timestamps: true});
 

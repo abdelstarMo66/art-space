@@ -27,7 +27,7 @@ exports.signupValidator = [
         .withMessage("password must not be empty")
         .isLength({min: 8})
         .withMessage("password too short, please enter password at least 8 characters")
-        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&])[A-Za-z\d#@$!%*?&]{8,}$/, "i")
         .withMessage("please enter strong password")
         .custom((password, {req}) => {
             const {passwordConfirm} = req.body;
@@ -143,7 +143,7 @@ exports.resetPasswordValidator = [
         .withMessage("password must not be empty")
         .isLength({min: 8})
         .withMessage("password too short, please enter password at least 8 characters")
-        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/, "i")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&])[A-Za-z\d#@$!%*?&]{8,}$/, "i")
         .withMessage("please enter strong password")
         .custom((password, {req}) => {
             const {passwordConfirm} = req.body;
