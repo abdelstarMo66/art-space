@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "node server.js",
+  "installCommand": "npm install",
   "rewrites": [
     {
       "source": "/(.*)",
