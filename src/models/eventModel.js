@@ -37,19 +37,21 @@ const eventSchema = new mongoose.Schema({
         type: Date,
     },
 
-    products: {
-        type: [
-            {
-                type: mongoose.Schema.ObjectId,
-                ref: "product",
-            }
-        ],
-        validate: [
-            function (val) {
-                return val.length <= 3 && val.length >= 10;
-            }, '{PATH} must be between 3 and 10 product']
-    },
+    products: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: "product",
+        }
+    ],
 }, {timestamps: true});
+
+eventSchema.pre(/^find/, function (next) {
+    this.populate({
+        path: "products",
+        select: "title price coverImage"
+    });
+    next();
+});
 
 const EventModel = mongoose.model("event", eventSchema);
 

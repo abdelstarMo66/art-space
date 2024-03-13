@@ -9,15 +9,7 @@ const createEvent = asyncHandler(async (req, res) => {
     req.body.end = began.setDate(began.getDate() + req.body.duration);
     req.body.owner = req.loggedUser._id;
 
-    // await EventModel.create(req.body);
-    await EventModel.create({
-        title: req.body.title,
-        description: req.body.description,
-        duration: req.body.duration,
-        began: req.body.began,
-        end: req.body.end,
-        owner: req.loggedUser._id,
-    });
+    await EventModel.create(req.body);
 
     return res.status(201).json(
         apiSuccess(

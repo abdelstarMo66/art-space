@@ -30,6 +30,21 @@ exports.createEventValidation = [
         .withMessage("launch date of event is required")
         .isDate()
         .withMessage("launch date of event must be invalid date ex: (2024-01-18)"),
+
+    body("products")
+        .notEmpty()
+        .withMessage("Product of event is required")
+        .isArray({min: 3, max: 10})
+        .withMessage("Products must be between 3 and 10 product")
+        .custom(async (val, {req}) => {
+            for (let i = 0; i < val.length; i++) {
+                const product = await ProductModel.findById(val[i]);
+
+                if (product.owner._id.toString() !== req.loggedUser._id.toString()) {
+                    return Promise.reject(new ApiError(`this product ${val[i]} not belong to this artist`, 400));
+                }
+            }
+        })
 ];
 
 exports.getEventValidation = [
