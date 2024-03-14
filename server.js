@@ -45,8 +45,6 @@ const server = app.listen(PORT, "localhost", () => {
     console.log(`App running on port ${PORT}`);
 });
 
-module.exports = app
-
 process.on("unhandledRejection", (error) => {
     console.error(`unhandledRejection Error: ${error.name} | ${error.message}`);
     server.close(() => {
@@ -54,3 +52,5 @@ process.on("unhandledRejection", (error) => {
         process.exit(1);
     });
 });
+
+module.exports = app
