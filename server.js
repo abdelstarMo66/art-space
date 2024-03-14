@@ -41,7 +41,7 @@ app.all("*", (req, res, next) => {
 app.use(globalErrorMiddleware);
 
 const PORT = process.env.PORT || 4000
-const server = app.listen(PORT, "localhost", () => {
+const server = app.listen(PORT, () => {
     console.log(`App running on port ${PORT}`);
 });
 
