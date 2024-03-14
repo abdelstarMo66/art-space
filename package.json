@@ -6,7 +6,8 @@
   "scripts": {
     "start:dev": "nodemon server.js",
     "start:stage": "SET NODE_ENV=production & nodemon server.js",
-    "start:prod": "SET NODE_ENV=production & node server.js"
+    "start:prod": "SET NODE_ENV=production & node server.js",
+    "start": "SET NODE_ENV=production & node server.js"
   },
   "engines": {
     "node": "18.17.0"
