@@ -1,7 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "npm run start:prod",
-  "installCommand": "npm install",
   "rewrites": [
     {
       "source": "/(.*)",
