@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "node server.js",
+  "buildCommand": "npm run start:prod",
   "installCommand": "npm install",
   "rewrites": [
     {
