@@ -23,7 +23,7 @@ exports.createProductValidation = [
     body("price")
         .notEmpty()
         .withMessage("Product price is required")
-        .isNumeric()
+        .isDecimal()
         .withMessage("Product price must be a number"),
 
     body("category")
@@ -68,26 +68,24 @@ exports.createProductValidation = [
     body("height")
         .notEmpty()
         .withMessage("Product height is required")
-        .isNumeric()
+        .isDecimal()
         .withMessage("Product height must be a number"),
 
     body("width")
         .notEmpty()
         .withMessage("Product width is required")
-        .isNumeric()
+        .isDecimal()
         .withMessage("Product width must be a number"),
 
     body("depth")
         .notEmpty()
         .withMessage("Product depth is required")
-        .isNumeric()
+        .isDecimal()
         .withMessage("Product depth must be a number"),
 
     body("coverImage")
         .notEmpty()
-        .withMessage("Product Image Cover is required")
-        .isNumeric()
-        .withMessage("Product depth must be a number"),
+        .withMessage("Product Image Cover is required"),
 
     body("images")
         .optional()
@@ -144,7 +142,7 @@ exports.updateProductValidation = [
 
     body("price")
         .optional()
-        .isNumeric()
+        .isDecimal()
         .withMessage("Product price must be a number"),
 
     body("category")
@@ -185,17 +183,17 @@ exports.updateProductValidation = [
 
     body("height")
         .optional()
-        .isNumeric()
+        .isDecimal()
         .withMessage("Product height must be a number"),
 
     body("width")
         .optional()
-        .isNumeric()
+        .isDecimal()
         .withMessage("Product width must be a number"),
 
     body("depth")
         .optional()
-        .isNumeric()
+        .isDecimal()
         .withMessage("Product depth must be a number"),
 
     body("material").optional(),
@@ -264,7 +262,7 @@ exports.updateMeProductValidation = [
 
     body("price")
         .optional()
-        .isNumeric()
+        .isDecimal()
         .withMessage("Product price must be a number"),
 
     body("category")
@@ -305,17 +303,17 @@ exports.updateMeProductValidation = [
 
     body("height")
         .optional()
-        .isNumeric()
+        .isDecimal()
         .withMessage("Product height must be a number"),
 
     body("width")
         .optional()
-        .isNumeric()
+        .isDecimal()
         .withMessage("Product width must be a number"),
 
     body("depth")
         .optional()
-        .isNumeric()
+        .isDecimal()
         .withMessage("Product depth must be a number"),
 
     body("material").optional(),
