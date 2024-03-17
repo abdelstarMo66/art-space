@@ -5,7 +5,6 @@ const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const {uploadMixOfImage} = require("../middlewares/cloudinaryUploadImage");
 const ProductModel = require("../models/productModel");
-const fs = require("fs");
 
 const uploadProductImages = uploadMixOfImage([
         {name: "coverImage", maxCount: 1},

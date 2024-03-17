@@ -244,6 +244,30 @@ const updateProfile = asyncHandler(async (req, res) => {
         ));
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+    const id = req.loggedUser._id;
+
+    const admin = await AdminModel.findByIdAndUpdate(
+        id,
+        {
+            password: await bcrypt.hash(req.body.password, 12),
+            passwordChangedAt: Date.now(),
+        },
+        {
+            new: true,
+        }
+    );
+
+    const token = await generateJWT({id: admin._id, role: "admin"});
+
+    return res.status(200).json(
+        apiSuccess(
+            `password changed successfully`,
+            200,
+            {token}
+        ));
+})
+
 module.exports = {
     createAdmin,
     uploadProfileImage,
@@ -257,4 +281,5 @@ module.exports = {
     login,
     setProfileID,
     updateProfile,
+    changePassword,
 }

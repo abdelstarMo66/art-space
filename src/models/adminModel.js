@@ -40,7 +40,8 @@ const adminSchema = new mongoose.Schema({
         type: String,
         required: [true, "role is required"],
         enum: ["IT", "Tracker"],
-    }
+    },
+    passwordChangedAt: Date,
 }, {timestamps: true,});
 
 const AdminModel = mongoose.model("admin", adminSchema);

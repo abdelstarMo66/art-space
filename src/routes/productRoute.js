@@ -27,7 +27,6 @@ const {
 const validationMiddleware = require("../middlewares/validationMiddleware");
 const verifyToken = require("../middlewares/verifyToken");
 const {allowedToAdmins, allowedToUser, allowedToArtist, permissionValidate} = require("../middlewares/allowTo");
-const {body} = require("express-validator");
 
 const router = express.Router();
 
@@ -44,9 +43,9 @@ router.route("/")
         allowedToArtist(),
         permissionValidate,
         uploadProductImages,
+        uploadToHost,
         createProductValidation,
         validationMiddleware,
-        uploadToHost,
         createProduct,
     )
 

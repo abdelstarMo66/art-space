@@ -12,6 +12,8 @@ const {
     search,
     login,
     setProfileID,
+    changePassword,
+    updateProfile,
 } = require("../controllers/adminController");
 const {
     createAdminValidation,
@@ -19,7 +21,8 @@ const {
     updateAdminValidation,
     deleteAdminValidation,
     searchValidation,
-    loginValidator
+    loginValidator,
+    changeAdminPasswordValidation,
 } = require("../validations/adminValidation");
 const validationMiddleware = require("../middlewares/validationMiddleware")
 const verifyToken = require("../middlewares/verifyToken");
@@ -31,11 +34,13 @@ router.post("/login", loginValidator, validationMiddleware, login)
 
 router.get("/getProfile", verifyToken, allowedToAdmins("IT", "Tracker", "CEO"), permissionValidate, setProfileID, getAdmin);
 
-router.patch("/updateProfile", verifyToken, allowedToAdmins("IT", "Tracker", "CEO"), permissionValidate, setProfileID, updateAdmin)
+router.patch("/updateProfile", verifyToken, allowedToAdmins("IT", "Tracker", "CEO"), permissionValidate, setProfileID, updateProfile)
 
 router.delete("/deleteProfile", verifyToken, allowedToAdmins("IT", "Tracker", "CEO"), permissionValidate, setProfileID, deleteAdmin);
 
 router.put("/updateImgProfile", verifyToken, allowedToAdmins("IT", "Tracker", "CEO"), permissionValidate, setProfileID, uploadProfileImage, uploadToHost, updateImgProfile)
+
+router.patch("/changePassword", verifyToken, allowedToAdmins("IT", "Tracker", "CEO"), permissionValidate, changeAdminPasswordValidation, validationMiddleware, changePassword)
 
 router.use(verifyToken, allowedToAdmins("CEO"), permissionValidate);
 

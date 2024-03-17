@@ -83,6 +83,12 @@ exports.createProductValidation = [
         .isNumeric()
         .withMessage("Product depth must be a number"),
 
+    body("coverImage")
+        .notEmpty()
+        .withMessage("Product Image Cover is required")
+        .isNumeric()
+        .withMessage("Product depth must be a number"),
+
     body("images")
         .optional()
         .isArray()

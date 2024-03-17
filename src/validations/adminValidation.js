@@ -2,6 +2,7 @@ const {param, body, check} = require("express-validator");
 
 const ApiError = require("../utils/apiError");
 const AdminModel = require("../models/adminModel");
+const bcrypt = require("bcrypt");
 
 exports.getAdminValidation = [
     param("id")
@@ -157,7 +158,7 @@ exports.deleteAdminValidation = [
 
 exports.searchValidation = [
     check("keyword").notEmpty().withMessage("Keyword Search Must be Not Empty"),
-]
+];
 
 exports.loginValidator = [
     body("username")
@@ -169,4 +170,39 @@ exports.loginValidator = [
         .withMessage("Password Must Not be Empty")
         .isLength({min: 8})
         .withMessage("Password too Short, Please Enter Password at least 8 Characters"),
-]
+];
+
+exports.changeAdminPasswordValidation = [
+    body("currentPassword")
+        .notEmpty()
+        .withMessage("currentPassword must not be empty"),
+
+    body("password")
+        .notEmpty()
+        .withMessage("password must not be empty")
+        .isLength({min: 8})
+        .withMessage("password too short, please enter password at least 8 characters")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&])[A-Za-z\d#@$!%*?&]{8,}$/, "i")
+        .withMessage("please enter strong password")
+        .custom(async (val, {req}) => {
+            const {currentPassword, confirmPassword} = req.body;
+
+            const admin = await AdminModel.findById(req.loggedUser._id);
+
+            const isCorrectPassword = await bcrypt.compare(currentPassword, admin.password);
+
+            if (!isCorrectPassword) {
+                return Promise.reject(new ApiError("Incorrect Current Password", 400));
+            }
+
+            if (val !== confirmPassword) {
+                return Promise.reject(new ApiError("Please make sure passwords match", 400));
+            }
+
+            return true;
+        }),
+
+    body("confirmPassword")
+        .notEmpty()
+        .withMessage("confirmPassword must not be empty"),
+];

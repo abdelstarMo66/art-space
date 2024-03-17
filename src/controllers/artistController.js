@@ -7,6 +7,8 @@ const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const generateJWT = require("../utils/generateJWT");
 const ArtistModel = require("../models/artistModel");
+const ProductModel = require("../models/productModel");
+const EventModel = require("../models/eventModel");
 
 const getAllArtists = asyncHandler(async (req, res, next) => {
     const artistsCount = await ArtistModel.countDocuments();
@@ -107,7 +109,9 @@ const uploadToHost = asyncHandler(async (req, res, next) => {
 const updateProfileImage = asyncHandler(async (req, res) => {
     const artist = await ArtistModel.findByIdAndUpdate(req.loggedUser._id, {profileImg: req.body.profileImg});
 
-    await cloudinary.uploader.destroy(artist.profileImg.public_id);
+    if (artist.profileImg.public_id) {
+        await cloudinary.uploader.destroy(artist.profileImg.public_id);
+    }
 
     return res.status(200).json(
         apiSuccess(
@@ -145,7 +149,28 @@ const deleteArtist = asyncHandler(async (req, res) => {
 
     const artist = await ArtistModel.findByIdAndDelete(id);
 
-    await cloudinary.uploader.destroy(artist.profileImg.public_id);
+    if (artist.profileImg.public_id) {
+        await cloudinary.uploader.destroy(artist.profileImg.public_id);
+    }
+
+    const products = await ProductModel.find({owner: id});
+
+    products.forEach(async (oneProduct) => {
+        const product = await ProductModel.findByIdAndDelete(oneProduct._id);
+
+        const images = [...(product.images)]
+        images.push(product.coverImage);
+
+        for (let image in images) {
+            await cloudinary.uploader.destroy(image.public_id);
+        }
+    });
+
+    const events = await EventModel.find({owner: id});
+
+    events.forEach(async (event) => {
+        await EventModel.findByIdAndDelete(event._id);
+    });
 
     return res
         .status(200)
