@@ -251,7 +251,9 @@ const changeCoverImage = asyncHandler(async (req, res, next) => {
         return next(new ApiError(`No product found`, 404));
     }
 
-    await cloudinary.uploader.destroy(product.coverImage.publicId);
+    if (product.coverImage.publicId) {
+        await cloudinary.uploader.destroy(product.coverImage.publicId);
+    }
 
     return res.status(200).json(
         apiSuccess(

@@ -115,7 +115,9 @@ const uploadToHost = asyncHandler(async (req, res, next) => {
 const updateProfileImage = asyncHandler(async (req, res) => {
     const user = await UserModel.findByIdAndUpdate(req.loggedUser._id, {profileImg: req.body.profileImg});
 
-    await cloudinary.uploader.destroy(user.profileImg.public_id);
+    if (user.profileImg.public_id) {
+        await cloudinary.uploader.destroy(user.profileImg.public_id);
+    }
 
     return res.status(200).json(
         apiSuccess(
@@ -158,7 +160,9 @@ const deleteUser = asyncHandler(async (req, res) => {
 
     const user = await UserModel.findByIdAndDelete(id);
 
-    await cloudinary.uploader.destroy(user.profileImg.public_id);
+    if (user.profileImg.public_id) {
+        await cloudinary.uploader.destroy(user.profileImg.public_id);
+    }
 
     return res.status(200).json(
         apiSuccess(

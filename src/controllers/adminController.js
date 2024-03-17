@@ -135,7 +135,9 @@ const updateImgProfile = asyncHandler(async (req, res) => {
         profileImg: req.body.profileImg,
     });
 
-    await cloudinary.uploader.destroy(admin.profileImg.public_id);
+    if(admin.profileImg.public_id){
+        await cloudinary.uploader.destroy(admin.profileImg.public_id);
+    }
 
     return res.status(200).json(
         apiSuccess(
@@ -150,7 +152,9 @@ const deleteAdmin = asyncHandler(async (req, res) => {
 
     const admin = await AdminModel.findByIdAndDelete(id);
 
-    await cloudinary.uploader.destroy(admin.profileImg.public_id);
+    if(admin.profileImg.public_id){
+        await cloudinary.uploader.destroy(admin.profileImg.public_id);
+    }
 
     return res.status(200).json(
         apiSuccess(
