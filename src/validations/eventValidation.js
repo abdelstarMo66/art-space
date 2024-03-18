@@ -43,6 +43,10 @@ exports.createEventValidation = [
                 if (product.owner._id.toString() !== req.loggedUser._id.toString()) {
                     return Promise.reject(new ApiError(`this product ${val[i]} not belong to this artist`, 400));
                 }
+
+                if(!product.isAvailable){
+                    return Promise.reject(new ApiError(`this product ${val[i]} not available yet`, 400));
+                }
             }
         })
 ];

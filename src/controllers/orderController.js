@@ -7,6 +7,7 @@ const asyncHandler = require("../middlewares/asyncHandler");
 const ApiError = require("../utils/apiError");
 const apiSuccess = require("../utils/apiSuccess");
 const convertCurrency = require("../utils/convertCurrency");
+const {orderData, allOrderData} = require("../utils/responseModelData");
 const ProductModel = require("../models/productModel");
 const CartModel = require("../models/cartModel");
 const OrderModel = require("../models/orderModel");
@@ -78,7 +79,6 @@ const getOrders = asyncHandler(async (req, res, next) => {
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select("-__v -createdAt -updatedAt");
 
     if (!orders) {
         return next(new ApiError(`No orders found`, 404));
@@ -90,7 +90,7 @@ const getOrders = asyncHandler(async (req, res, next) => {
             200,
             {
                 pagination,
-                orders
+                orders: allOrderData(orders),
             }
         ));
 });
@@ -124,7 +124,6 @@ const getMyOrders = asyncHandler(async (req, res, next) => {
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select("-__v -createdAt -updatedAt");
 
     if (!orders) {
         return next(new ApiError(`No orders found`, 404));
@@ -136,7 +135,7 @@ const getMyOrders = asyncHandler(async (req, res, next) => {
             200,
             {
                 pagination,
-                orders
+                orders: allOrderData(orders),
             }
         ));
 });
@@ -150,7 +149,7 @@ const getOrder = asyncHandler(async (req, res) => {
         apiSuccess(
             "order found successfully",
             200,
-            {order},
+            orderData(order),
         ));
 });
 

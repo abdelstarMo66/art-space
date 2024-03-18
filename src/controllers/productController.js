@@ -4,6 +4,7 @@ const asyncHandler = require("../middlewares/asyncHandler");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const {uploadMixOfImage} = require("../middlewares/cloudinaryUploadImage");
+const {productData, allProductData} = require("../utils/responseModelData")
 const ProductModel = require("../models/productModel");
 
 const uploadProductImages = uploadMixOfImage([
@@ -89,7 +90,6 @@ const getProducts = asyncHandler(async (req, res, next) => {
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select("-__v -createdAt -updatedAt");
 
     if (!products) {
         return next(new ApiError(`No products found`, 404));
@@ -101,7 +101,7 @@ const getProducts = asyncHandler(async (req, res, next) => {
             200,
             {
                 pagination,
-                products
+                products: allProductData(products),
             }
         ));
 });
@@ -115,7 +115,7 @@ const getProduct = asyncHandler(async (req, res) => {
         apiSuccess(
             "product found successfully",
             200,
-            {product},
+            productData(product),
         ));
 });
 
@@ -143,7 +143,7 @@ const updateProduct = asyncHandler(async (req, res) => {
         apiSuccess(
             "product updated successfully",
             200,
-            {product},
+            null,
         ));
 
 });
@@ -192,7 +192,9 @@ const search = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `products Found`,
             200,
-            {products}
+            {
+                products: allProductData(products)
+            }
         ));
 });
 
@@ -225,7 +227,6 @@ const getMeProducts = asyncHandler(async (req, res, next) => {
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select("-__v -createdAt -updatedAt");
 
     if (!products) {
         return next(new ApiError(`No products found`, 404));
@@ -237,7 +238,7 @@ const getMeProducts = asyncHandler(async (req, res, next) => {
             200,
             {
                 pagination,
-                products
+                products: allProductData(products),
             }
         ));
 });

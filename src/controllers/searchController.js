@@ -1,6 +1,7 @@
 const asyncHandler = require("../middlewares/asyncHandler");
 const ApiError = require("../utils/apiError");
 const apiSuccess = require("../utils/apiSuccess");
+const {searchData} = require("../utils/responseModelData");
 const ArtistModel = require("../models/artistModel");
 const ProductModel = require("../models/productModel");
 const EventModel = require("../models/eventModel");
@@ -44,12 +45,7 @@ const userSearch = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `result found`,
             200,
-            {
-                resultCount: artists.length + products.length + events.length,
-                products,
-                artists,
-                events,
-            }
+            searchData(artists, products, events)
         ));
 });
 

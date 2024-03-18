@@ -1,6 +1,7 @@
 const asyncHandler = require("../middlewares/asyncHandler");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
+const {eventData, allEventData, productInEventData, allProductInEventData} = require("../utils/responseModelData")
 const EventModel = require("../models/eventModel");
 
 const createEvent = asyncHandler(async (req, res) => {
@@ -43,17 +44,12 @@ const getEvents = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(',').join(" ");
     }
 
-    let limitField = "-__v";
-    if (req.query.fields) {
-        limitField = req.query.fields.split(",").join(" ");
-    }
 
     const events = await EventModel
         .find()
         .limit(limit)
         .skip(skip)
-        .sort(sortBy)
-        .select(limitField);
+        .sort(sortBy);
 
     if (!events) {
         return next(new ApiError(`No events found`, 404));
@@ -65,7 +61,7 @@ const getEvents = asyncHandler(async (req, res, next) => {
             200,
             {
                 pagination,
-                events
+                events: allEventData(events),
             }
         ));
 });
@@ -79,8 +75,25 @@ const getEvent = asyncHandler(async (req, res) => {
         apiSuccess(
             "event found successfully",
             200,
-            {event},
+            eventData(event),
         ));
+});
+
+const getProductsInEvent = asyncHandler(async (req, res) => {
+    const {id} = req.params;
+
+    const event = await EventModel.findById(id);
+
+    return res.status(200).json(
+        apiSuccess(
+            "event found successfully",
+            200,
+            productInEventData(event.products),
+        ));
+});
+
+const getProductInEvent = asyncHandler(async (req, res) => {
+    // TODO: This controller include the socket.io to handle the auction
 });
 
 const updateEvent = asyncHandler(async (req, res, next) => {
@@ -113,7 +126,7 @@ const updateEvent = asyncHandler(async (req, res, next) => {
         apiSuccess(
             "event updated successfully",
             200,
-            {event},
+            null,
         ));
 
 });
@@ -152,7 +165,9 @@ const search = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `events Found`,
             200,
-            {events}
+            {
+                events: allEventData(events),
+            }
         ));
 });
 
@@ -180,17 +195,12 @@ const getMeEvents = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(',').join(" ");
     }
 
-    let limitField = "-__v";
-    if (req.query.fields) {
-        limitField = req.query.fields.split(",").join(" ");
-    }
 
     const events = await EventModel
         .find({owner: req.loggedUser._id})
         .limit(limit)
         .skip(skip)
-        .sort(sortBy)
-        .select(limitField);
+        .sort(sortBy);
 
     if (!events) {
         return next(new ApiError(`No events found`, 404));
@@ -202,7 +212,7 @@ const getMeEvents = asyncHandler(async (req, res, next) => {
             200,
             {
                 pagination,
-                events
+                events: allEventData(events),
             }
         ));
 });
@@ -223,11 +233,11 @@ const addProductToMyEvent = asyncHandler(async (req, res, next) => {
         apiSuccess(
             "product added successfully",
             200,
-            {event},
+            null,
         ));
 })
 
-const removeProductFromMyEvent = asyncHandler(async (req,res,next)=>{
+const removeProductFromMyEvent = asyncHandler(async (req, res, next) => {
     const {id} = req.params;
 
     const event = await EventModel.findByIdAndUpdate(id,
@@ -243,7 +253,7 @@ const removeProductFromMyEvent = asyncHandler(async (req,res,next)=>{
         apiSuccess(
             "product removed successfully",
             200,
-            {event},
+            null,
         ));
 });
 

@@ -1,6 +1,7 @@
 const asyncHandler = require("../middlewares/asyncHandler")
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
+const {cartData} = require("../utils/responseModelData");
 const ProductModel = require("../models/productModel");
 const CartModel = require("../models/cartModel");
 
@@ -13,7 +14,7 @@ const calculateTotalCartPrice = (cart) => {
     cart.totalCartPrice = totalPrice;
 }
 
-const addProductToCart = asyncHandler(async (req, res, next) => {
+const addProductToCart = asyncHandler(async (req, res) => {
     const {productId} = req.body;
 
     const product = await ProductModel.findById(productId);
@@ -67,14 +68,11 @@ const getMyCart = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `cart Found`,
             200,
-            {
-                itemCount: cart.cartItems.length,
-                cart
-            }
+            cartData(cart),
         ));
 })
 
-const deleteSpecificProductFromCart = asyncHandler(async (req, res, next) => {
+const deleteSpecificProductFromCart = asyncHandler(async (req, res) => {
     const {itemId} = req.params
 
     const cart = await CartModel.findOneAndUpdate(
@@ -90,14 +88,11 @@ const deleteSpecificProductFromCart = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `cart Found`,
             200,
-            {
-                itemCount: cart.cartItems.length,
-                cart
-            }
+            cartData(cart),
         ));
 })
 
-const clearCart = asyncHandler(async (req, res, next) => {
+const clearCart = asyncHandler(async (req, res) => {
     await CartModel.findOneAndDelete({user: req.loggedUser._id});
 
     return res.status(200).json(

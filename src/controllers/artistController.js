@@ -6,6 +6,7 @@ const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const generateJWT = require("../utils/generateJWT");
+const {artistData, allArtistData, allAddresses} = require("../utils/responseModelData");
 const ArtistModel = require("../models/artistModel");
 const ProductModel = require("../models/productModel");
 const EventModel = require("../models/eventModel");
@@ -34,13 +35,11 @@ const getAllArtists = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(",").join(" ");
     }
 
-    const selectedField = "name email phone addresses gender accountActive";
-
     const artists = await ArtistModel.find()
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select(selectedField);
+
 
     if (!artists) {
         return next(new ApiError(`No Artists Found`, 404));
@@ -52,7 +51,7 @@ const getAllArtists = asyncHandler(async (req, res, next) => {
             200,
             {
                 pagination,
-                artists,
+                artists: allArtistData(artists),
             }
         ));
 });
@@ -60,9 +59,7 @@ const getAllArtists = asyncHandler(async (req, res, next) => {
 const getArtist = asyncHandler(async (req, res, next) => {
     const {id} = req.params;
 
-    const selectedField = "name email phone profileImg addresses gender accountActive";
-
-    const artist = await ArtistModel.findById(id, selectedField);
+    const artist = await ArtistModel.findById(id);
 
     if (!artist) {
         return next(new ApiError(`No Artist for this Id ${id}`, 404));
@@ -70,7 +67,11 @@ const getArtist = asyncHandler(async (req, res, next) => {
 
     return res
         .status(200)
-        .json(apiSuccess("Artist Found Successfully", 200, artist));
+        .json(apiSuccess(
+            "Artist Found Successfully",
+            200,
+            artistData(artist)
+        ));
 });
 
 const updateArtist = asyncHandler(async (req, res) => {
@@ -133,15 +134,20 @@ const search = asyncHandler(async (req, res, next) => {
         {address: {$regex: keyword, $options: "i"}}
     ];
 
-    const selectedField = "name email phone profileImg addresses gender accountActive";
-
-    const artists = await ArtistModel.find(queryObj, selectedField);
+    const artists = await ArtistModel.find(queryObj);
 
     if (!artists) {
         return next(new ApiError(`No Artists Found Matched this Search Key: ${keyword}`, 404));
     }
 
-    return res.status(200).json(apiSuccess(`Artists Found`, 200, artists));
+    return res.status(200).json(
+        apiSuccess(
+            `Artists Found`,
+            200,
+            {
+                artists: allArtistData(artists),
+            }
+        ));
 });
 
 const deleteArtist = asyncHandler(async (req, res) => {
@@ -229,15 +235,23 @@ const removeArtistAddress = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(apiSuccess("Address Removed Successfully", 200, artist.addresses));
+        .json(apiSuccess(
+            "Address Removed Successfully",
+            200,
+            {addresses: allAddresses(artist.addresses)}
+        ));
 });
 
 const getProfileAddresses = asyncHandler(async (req, res) => {
-    const artist = await ArtistModel.findById(req.loggedUser._id).populate("addresses");
+    const artist = await ArtistModel.findById(req.loggedUser._id);
 
     return res
         .status(200)
-        .json(apiSuccess("Address Founded Successfully", 200, {address: artist.addresses}));
+        .json(apiSuccess(
+            "Address Founded Successfully",
+            200,
+            {addresses: allAddresses(artist.addresses)}
+        ));
 });
 
 module.exports = {

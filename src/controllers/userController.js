@@ -6,7 +6,9 @@ const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const generateJWT = require("../utils/generateJWT");
+const {userData, allUserData, allAddresses} = require("../utils/responseModelData");
 const UserModel = require("../models/userModel");
+const CartModel = require("../models/cartModel");
 
 const getAllUsers = asyncHandler(async (req, res, next) => {
     const usersCount = await UserModel.countDocuments();
@@ -32,14 +34,11 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(',').join(" ");
     }
 
-    const selectedField = "name email phone addresses gender accountActive";
-
     const users = await UserModel
         .find()
         .limit(limit)
         .skip(skip)
-        .sort(sortBy)
-        .select(selectedField);
+        .sort(sortBy);
 
     if (!users) {
         return next(new ApiError(`no users found`, 404));
@@ -51,7 +50,7 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
             200,
             {
                 pagination,
-                users
+                users: allUserData(users),
             }
         ));
 });
@@ -59,9 +58,8 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
 const getUser = asyncHandler(async (req, res, next) => {
     const {id} = req.params;
 
-    const selectedField = "name email phone profileImg addresses gender accountActive";
 
-    const user = await UserModel.findById(id, selectedField);
+    const user = await UserModel.findById(id);
 
     if (!user) {
         return next(new ApiError(`no user for this id ${id}`, 404))
@@ -71,7 +69,7 @@ const getUser = asyncHandler(async (req, res, next) => {
         apiSuccess(
             "user found successfully",
             200,
-            user
+            userData(user)
         ));
 });
 
@@ -139,9 +137,8 @@ const search = asyncHandler(async (req, res, next) => {
         {address: {$regex: keyword, $options: "i"},}
     ]
 
-    const selectedField = "name email phone profileImg addresses gender accountActive";
 
-    const users = await UserModel.find(queryObj, selectedField);
+    const users = await UserModel.find(queryObj);
 
     if (!users) {
         return next(new ApiError(`No users found matched this search key: ${keyword}`, 404));
@@ -149,9 +146,11 @@ const search = asyncHandler(async (req, res, next) => {
 
     return res.status(200).json(
         apiSuccess(
-            `users Found`,
+            `users found`,
             200,
-            users
+            {
+                users: allUserData(users),
+            }
         ));
 });
 
@@ -162,6 +161,12 @@ const deleteUser = asyncHandler(async (req, res) => {
 
     if (user.profileImg.public_id) {
         await cloudinary.uploader.destroy(user.profileImg.public_id);
+    }
+
+    const cart = await CartModel.findOne({user: user._id});
+
+    if (cart) {
+        await CartModel.deleteOne({user: user._id});
     }
 
     return res.status(200).json(
@@ -249,18 +254,18 @@ const removeUserAddress = asyncHandler(async (req, res) => {
         apiSuccess(
             "Address removed successfully",
             200,
-            {address: user.addresses}
+            {addresses: allAddresses(user.addresses)}
         ));
 });
 
 const getProfileAddresses = asyncHandler(async (req, res) => {
-    const user = await UserModel.findById(req.loggedUser._id).populate("addresses");
+    const user = await UserModel.findById(req.loggedUser._id);
 
     return res.status(200).json(
         apiSuccess(
             "Address Founded successfully",
             200,
-            {address: user.addresses}
+            {addresses: allAddresses(user.addresses)}
         ));
 });
 

@@ -48,7 +48,6 @@ const eventSchema = new mongoose.Schema({
 eventSchema.pre(/^find/, function (next) {
     this.populate({
         path: "products",
-        select: "title price coverImage"
     });
     next();
 });

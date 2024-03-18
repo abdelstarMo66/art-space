@@ -6,6 +6,7 @@ const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
 const generateJWT = require("../utils/generateJWT");
+const {adminData, allAdminData} = require("../utils/responseModelData")
 const AdminModel = require("../models/adminModel");
 
 const uploadProfileImage = uploadSingleImage("profileImg", "admin");
@@ -63,14 +64,12 @@ const getAdmins = asyncHandler(async (req, res, next) => {
         sortBy = req.query.sort.split(',').join(" ");
     }
 
-    const selectedField = "nId name username phone gender role";
 
     const admins = await AdminModel
         .find()
         .limit(limit)
         .skip(skip)
         .sort(sortBy)
-        .select(selectedField);
 
     if (!admins) {
         return next(new ApiError(`No Admins Found`, 404));
@@ -82,7 +81,7 @@ const getAdmins = asyncHandler(async (req, res, next) => {
             200,
             {
                 pagination,
-                admins
+                admins: allAdminData(admins),
             }
         ));
 });
@@ -98,7 +97,7 @@ const getAdmin = asyncHandler(async (req, res) => {
         apiSuccess(
             "Admin Found Successfully",
             200,
-            {admin}
+            adminData(admin),
         ))
 });
 
@@ -135,7 +134,7 @@ const updateImgProfile = asyncHandler(async (req, res) => {
         profileImg: req.body.profileImg,
     });
 
-    if(admin.profileImg.public_id){
+    if (admin.profileImg.public_id) {
         await cloudinary.uploader.destroy(admin.profileImg.public_id);
     }
 
@@ -152,7 +151,7 @@ const deleteAdmin = asyncHandler(async (req, res) => {
 
     const admin = await AdminModel.findByIdAndDelete(id);
 
-    if(admin.profileImg.public_id){
+    if (admin.profileImg.public_id) {
         await cloudinary.uploader.destroy(admin.profileImg.public_id);
     }
 
@@ -188,7 +187,9 @@ const search = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `Admins Found`,
             200,
-            {admins}
+            {
+                admins: allAdminData(admins),
+            }
         ));
 });
 
