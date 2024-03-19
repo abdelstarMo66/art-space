@@ -1,4 +1,3 @@
-const mongoose = require("mongoose");
 exports.artistData = (artist) => {
     return {
         id: artist._id,
