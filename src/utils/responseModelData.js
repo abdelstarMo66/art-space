@@ -1,3 +1,4 @@
+
 exports.artistData = (artist) => {
     return {
         id: artist._id,
