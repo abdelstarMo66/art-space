@@ -26,6 +26,7 @@ const productSchema = new mongoose.Schema({
         default: true
     },
 
+
     owner: {
         type: mongoose.Schema.ObjectId,
         ref: "artist",
