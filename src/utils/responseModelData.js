@@ -1,5 +1,3 @@
-
-
 exports.artistData = (artist) => {
     return {
         id: artist._id,
@@ -483,6 +481,31 @@ exports.allOrderData = (orders) => {
             orderState: order.orderState,
             isDelivered: order.isDelivered,
             deliveredAt: order.deliveredAt ?? null,
+        }
+    })
+}
+
+exports.allComplaintData = (complaints) => {
+    return complaints.map((complaint) => {
+        return {
+            id: complaint._id,
+            user: complaint.sender.user ? {
+                id: complaint.sender.user._id,
+                name: complaint.sender.user.name,
+                email: complaint.sender.user.email,
+                phone: complaint.sender.user.phone,
+                gender: complaint.sender.user.gender ?? null,
+            } : undefined,
+            artist: complaint.sender.artist ? {
+                id: complaint.sender.artist._id,
+                name: complaint.sender.artist.name,
+                email: complaint.sender.artist.email,
+                phone: complaint.sender.artist.phone,
+                gender: complaint.sender.artist.gender ?? null,
+            } : undefined,
+            message: complaint.message,
+            imageId: complaint.attachment.public_id,
+            attachment: complaint.attachment.secure_url ?? null,
         }
     })
 }

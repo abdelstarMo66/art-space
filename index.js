@@ -10,7 +10,7 @@ const dbConnection = require("./config/dbConnection.js");
 const cloudinaryConnection = require("./config/cloudinaryConfig");
 const ApiError = require("./src/utils/apiError");
 const globalErrorMiddleware = require("./src/middlewares/globalErrorMiddleware")
-const mountRoutes = require("./src/routes");
+const mountRoutes = require("./src/routes/app");
 const {webhookCheckout} = require("./src/controllers/orderController");
 
 dotenv.config({path: "config/config.env",});
@@ -41,13 +41,13 @@ app.all("*", (req, res, next) => {
 app.use(globalErrorMiddleware);
 
 const PORT = process.env.PORT || 4000
-const server = app.listen(PORT, () => {
+const index = app.listen(PORT, () => {
     console.log(`App running on port ${PORT}`);
 });
 
 process.on("unhandledRejection", (error) => {
     console.error(`unhandledRejection Error: ${error.name} | ${error.message}`);
-    server.close(() => {
+    index.close(() => {
         console.error(`shutting down...`);
         process.exit(1);
     });
