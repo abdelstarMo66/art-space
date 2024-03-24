@@ -12,6 +12,7 @@ const cartRoute = require("./cartRoute");
 const searchRoute = require("./searchRoute");
 const orderRoute = require("./orderRoute");
 const complaintRoute = require("./complaintRoute");
+const auctionRoute = require("./auctionRoute");
 
 const mountRoutes = (app) => {
     app.use("/api/v1/userAuth", userAuthRoute);
@@ -28,6 +29,7 @@ const mountRoutes = (app) => {
     app.use("/api/v1/search", searchRoute);
     app.use("/api/v1/order", orderRoute);
     app.use("/api/v1/complaint", complaintRoute);
+    app.use("/api/v1/auction", auctionRoute);
 }
 
 module.exports = mountRoutes;

@@ -11,6 +11,7 @@ const cloudinaryConnection = require("./config/cloudinaryConfig");
 const ApiError = require("./src/utils/apiError");
 const globalErrorMiddleware = require("./src/middlewares/globalErrorMiddleware")
 const mountRoutes = require("./src/routes/app");
+const {initSocketIO} = require("./src/middlewares/socketIO")
 const {webhookCheckout} = require("./src/controllers/orderController");
 
 dotenv.config({path: "config/config.env",});
@@ -41,13 +42,15 @@ app.all("*", (req, res, next) => {
 app.use(globalErrorMiddleware);
 
 const PORT = process.env.PORT || 4000
-const index = app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`App running on port ${PORT}`);
 });
 
+initSocketIO(server);
+
 process.on("unhandledRejection", (error) => {
     console.error(`unhandledRejection Error: ${error.name} | ${error.message}`);
-    index.close(() => {
+    server.close(() => {
         console.error(`shutting down...`);
         process.exit(1);
     });

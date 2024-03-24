@@ -509,3 +509,69 @@ exports.allComplaintData = (complaints) => {
         }
     })
 }
+
+exports.allAuctionData = (auctions) => {
+    return auctions.map((auction) => {
+        return {
+            id: auction._id,
+            title: auction.title,
+            description: auction.description,
+            price: auction.price,
+            isAvailable: auction.isAvailable,
+            artist: {
+                id: auction.artist._id,
+                name: auction.artist.name,
+            },
+            category: auction.category.title,
+            style: auction.style.title,
+            subject: auction.subject.title,
+            size: `${auction.height}h * ${auction.width}w * ${auction.depth}d`,
+            coverImage: {
+                imageId: auction.coverImage.public_id,
+                profileImg: auction.coverImage.secure_url ?? null,
+            },
+            images: auction.images.map(image => {
+                return {
+                    imageId: image.public_id,
+                    profileImg: image.secure_url ?? null,
+                }
+            }),
+            material: auction.material ?? null,
+            duration: auction.duration,
+            began: auction.began,
+            end: auction.end,
+        }
+    })
+}
+
+exports.productFromAuctionData = (auction) => {
+    return {
+        id: auction._id,
+        title: auction.title,
+        description: auction.description,
+        price: auction.price,
+        isAvailable: auction.isAvailable,
+        artist: {
+            id: auction.artist._id,
+            name: auction.artist.name,
+        },
+        category: auction.category.title,
+        style: auction.style.title,
+        subject: auction.subject.title,
+        size: `${auction.height}h * ${auction.width}w * ${auction.depth}d`,
+        coverImage: {
+            imageId: auction.coverImage.public_id,
+            profileImg: auction.coverImage.secure_url ?? null,
+        },
+        images: auction.images.map(image => {
+            return {
+                imageId: image.public_id,
+                profileImg: image.secure_url ?? null,
+            }
+        }),
+        material: auction.material ?? null,
+        duration: auction.duration,
+        began: auction.began,
+        end: auction.end,
+    };
+}
