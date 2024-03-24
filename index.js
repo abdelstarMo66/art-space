@@ -35,6 +35,10 @@ if (process.env.NODE_ENV === "development") {
 
 mountRoutes(app);
 
+app.get("/", (req,res) => {
+    res.send("<h1>Welcome In Art-Space App</h1>");
+});
+
 app.all("*", (req, res, next) => {
     next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
 });
