@@ -10,6 +10,7 @@ exports.artistData = (artist) => {
         accountActive: artist.accountActive,
         addresses: artist.addresses.map(address => {
             return {
+                id: address._id,
                 alias: address.alias,
                 street: address.street,
                 region: address.region,
@@ -33,6 +34,7 @@ exports.allArtistData = (artists) => {
             accountActive: artist.accountActive,
             addresses: artist.addresses.map(address => {
                 return {
+                    id: address._id,
                     alias: address.alias,
                     street: address.street,
                     region: address.region,
@@ -58,6 +60,7 @@ exports.userData = (user) => {
         accountActive: user.accountActive,
         addresses: user.addresses.map(address => {
             return {
+                id: address._id,
                 alias: address.alias,
                 street: address.street,
                 region: address.region,
@@ -81,6 +84,7 @@ exports.allUserData = (users) => {
             accountActive: user.accountActive,
             addresses: user.addresses.map(address => {
                 return {
+                    id: address._id,
                     alias: address.alias,
                     street: address.street,
                     region: address.region,
@@ -97,6 +101,7 @@ exports.allUserData = (users) => {
 exports.allAddresses = (addresses) => {
     return addresses.map(address => {
         return {
+            id: address._id,
             alias: address.alias,
             street: address.street,
             region: address.region,
@@ -321,6 +326,7 @@ exports.searchData = (artists, products, events) => {
                 accountActive: artist.accountActive,
                 addresses: artist.addresses.map(address => {
                     return {
+                        id: address._id,
                         alias: address.alias,
                         street: address.street,
                         region: address.region,

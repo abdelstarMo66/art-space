@@ -254,7 +254,7 @@ const removeUserAddress = asyncHandler(async (req, res) => {
         apiSuccess(
             "Address removed successfully",
             200,
-            {addresses: allAddresses(user.addresses)}
+            null
         ));
 });
 
