@@ -310,10 +310,8 @@ exports.searchData = (artists, products, events) => {
                     id: product.owner._id,
                     name: product.owner.name,
                 },
-                coverImage: {
-                    imageId: product.coverImage.public_id,
-                    profileImg: product.coverImage.secure_url ?? null,
-                },
+                category: product.category.title,
+                profileImg: product.coverImage.secure_url ?? null,
             }
         }),
         artists: artists.map(artist => {
@@ -321,25 +319,13 @@ exports.searchData = (artists, products, events) => {
                 id: artist._id,
                 name: artist.name,
                 email: artist.email,
-                phone: artist.phone,
-                gender: artist.gender ?? null,
+                profileImg: artist.profileImg.secure_url ?? null,
                 accountActive: artist.accountActive,
-                addresses: artist.addresses.map(address => {
-                    return {
-                        id: address._id,
-                        alias: address.alias,
-                        street: address.street,
-                        region: address.region,
-                        city: address.city,
-                        country: address.country,
-                        postalCode: address.postalCode ?? null,
-                        phone: address.phone ?? null,
-                    }
-                }),
             }
         }),
         events: events.map(event => {
             return {
+                id: event._id,
                 title: event.title,
                 description: event.description,
                 owner: {
