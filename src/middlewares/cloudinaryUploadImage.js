@@ -12,7 +12,7 @@ const multerOptions = (prefixFile) => {
     });
 
     const multerFilter = function (req, file, cb) {
-        if (file.mimetype.startsWith("image")) {
+        if (file.mimetype.startsWith("image/")) {
             cb(null, true);
         } else {
             cb(new ApiError("only image allowed", 400), false);
