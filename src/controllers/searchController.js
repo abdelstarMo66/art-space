@@ -6,7 +6,6 @@ const ArtistModel = require("../models/artistModel");
 const ProductModel = require("../models/productModel");
 const EventModel = require("../models/eventModel");
 
-
 const userSearch = asyncHandler(async (req, res, next) => {
     const {keyword} = req.query;
 

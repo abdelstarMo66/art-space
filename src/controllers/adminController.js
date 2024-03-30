@@ -8,6 +8,8 @@ const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
 const generateJWT = require("../utils/generateJWT");
 const {adminData, allAdminData} = require("../utils/responseModelData")
 const AdminModel = require("../models/adminModel");
+const ApiFeatures = require("../utils/apiFeatures");
+const ProductModel = require("../models/productModel");
 
 const uploadProfileImage = uploadSingleImage("profileImg", "admin");
 
@@ -42,34 +44,15 @@ const createAdmin = asyncHandler(async (req, res) => {
 
 const getAdmins = asyncHandler(async (req, res, next) => {
     const adminsCount = await AdminModel.countDocuments();
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(adminsCount / limit);
-    pagination.totalResults = adminsCount;
-    if (endIndex < adminsCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
-    }
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
+    const apiFeatures = new ApiFeatures(AdminModel.find(), req.query)
+        .paginate(adminsCount)
+        .filter()
+        .sort()
 
+    const {paginationResult, mongooseQuery} = apiFeatures;
 
-    const admins = await AdminModel
-        .find()
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy)
+    const admins = await mongooseQuery;
 
     if (!admins) {
         return next(new ApiError(`No Admins Found`, 404));
@@ -80,7 +63,7 @@ const getAdmins = asyncHandler(async (req, res, next) => {
             `Admins Found`,
             200,
             {
-                pagination,
+                pagination: paginationResult,
                 admins: allAdminData(admins),
             }
         ));
@@ -89,9 +72,7 @@ const getAdmins = asyncHandler(async (req, res, next) => {
 const getAdmin = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
-    const selectedField = "nId name username phone profileImg gender role";
-
-    const admin = await AdminModel.findById(id, selectedField);
+    const admin = await AdminModel.findById(id);
 
     return res.status(200).json(
         apiSuccess(
@@ -175,9 +156,7 @@ const search = asyncHandler(async (req, res, next) => {
         {nId: {$regex: keyword, $options: "i"},},
     ]
 
-    const selectedField = "nId name username phone profileImg gender role";
-
-    const admins = await AdminModel.find(queryObj, selectedField);
+    const admins = await AdminModel.find(queryObj);
 
     if (!admins) {
         return next(new ApiError(`No Admins Found Matched This Search Key: ${keyword}`, 404));

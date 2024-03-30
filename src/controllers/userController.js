@@ -7,38 +7,21 @@ const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const generateJWT = require("../utils/generateJWT");
 const {userData, allUserData, allAddresses} = require("../utils/responseModelData");
+const ApiFeatures = require("../utils/apiFeatures");
 const UserModel = require("../models/userModel");
 const CartModel = require("../models/cartModel");
 
 const getAllUsers = asyncHandler(async (req, res, next) => {
     const usersCount = await UserModel.countDocuments();
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(usersCount / limit);
-    pagination.totalResults = usersCount;
-    if (endIndex < usersCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
-    }
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
+    const apiFeatures = new ApiFeatures(UserModel.find(), req.query)
+        .paginate(usersCount)
+        .filter()
+        .sort()
 
-    const users = await UserModel
-        .find()
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy);
+    const {paginationResult, mongooseQuery} = apiFeatures;
+
+    const users = await mongooseQuery;
 
     if (!users) {
         return next(new ApiError(`no users found`, 404));
@@ -49,7 +32,7 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
             `users found`,
             200,
             {
-                pagination,
+                pagination: paginationResult,
                 users: allUserData(users),
             }
         ));
@@ -242,7 +225,7 @@ const addUserAddress = asyncHandler(async (req, res) => {
 const removeUserAddress = asyncHandler(async (req, res) => {
     const {addressId} = req.params;
 
-    const user = await UserModel.findByIdAndUpdate(
+    await UserModel.findByIdAndUpdate(
         req.loggedUser._id,
         {
             $pull: {addresses: {_id: addressId}},

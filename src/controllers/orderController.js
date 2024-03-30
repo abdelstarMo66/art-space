@@ -8,6 +8,7 @@ const ApiError = require("../utils/apiError");
 const apiSuccess = require("../utils/apiSuccess");
 const convertCurrency = require("../utils/convertCurrency");
 const {orderData, allOrderData} = require("../utils/responseModelData");
+const ApiFeatures = require("../utils/apiFeatures");
 const ProductModel = require("../models/productModel");
 const CartModel = require("../models/cartModel");
 const OrderModel = require("../models/orderModel");
@@ -52,33 +53,14 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
 
 const getOrders = asyncHandler(async (req, res, next) => {
     const ordersCount = await OrderModel.countDocuments();
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(ordersCount / limit);
-    pagination.totalResults = ordersCount;
-    if (endIndex < ordersCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
-    }
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
+    const apiFeatures = new ApiFeatures(OrderModel.find(), req.query)
+        .paginate(ordersCount)
+        .sort()
 
-    const orders = await OrderModel
-        .find()
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy)
+    const {paginationResult, mongooseQuery} = apiFeatures;
+
+    const orders = await mongooseQuery;
 
     if (!orders) {
         return next(new ApiError(`No orders found`, 404));
@@ -89,7 +71,7 @@ const getOrders = asyncHandler(async (req, res, next) => {
             `orders Found`,
             200,
             {
-                pagination,
+                pagination: paginationResult,
                 orders: allOrderData(orders),
             }
         ));

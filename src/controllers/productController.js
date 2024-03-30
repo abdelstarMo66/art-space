@@ -6,6 +6,7 @@ const ApiError = require("../utils/apiError");
 const {uploadMixOfImage} = require("../middlewares/cloudinaryUploadImage");
 const {productData, allProductData} = require("../utils/responseModelData")
 const ProductModel = require("../models/productModel");
+const ApiFeatures = require("../utils/apiFeatures");
 
 const uploadProductImages = uploadMixOfImage([
         {name: "coverImage", maxCount: 1},
@@ -62,34 +63,21 @@ const createProduct = asyncHandler(async (req, res) => {
 });
 
 const getProducts = asyncHandler(async (req, res, next) => {
-    const productsCount = await ProductModel.countDocuments();
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(productsCount / limit);
-    pagination.totalResults = productsCount;
-    if (endIndex < productsCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
+    let filter = {};
+    if (req.filterObj) {
+        filter = req.filterObj;
     }
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
+    const productsCount = await ProductModel.countDocuments(filter);
 
-    const products = await ProductModel
-        .find()
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy)
+    const apiFeatures = new ApiFeatures(ProductModel.find(filter), req.query)
+        .paginate(productsCount)
+        .filter()
+        .sort()
+
+    const {paginationResult, mongooseQuery} = apiFeatures;
+
+    const products = await mongooseQuery;
 
     if (!products) {
         return next(new ApiError(`No products found`, 404));
@@ -100,7 +88,7 @@ const getProducts = asyncHandler(async (req, res, next) => {
             `products Found`,
             200,
             {
-                pagination,
+                pagination: paginationResult,
                 products: allProductData(products),
             }
         ));
@@ -122,7 +110,7 @@ const getProduct = asyncHandler(async (req, res) => {
 const updateProduct = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
-    const product = await ProductModel.findByIdAndUpdate(id,
+    await ProductModel.findByIdAndUpdate(id,
         {
             title: req.body.title,
             description: req.body.description,
@@ -182,7 +170,7 @@ const search = asyncHandler(async (req, res, next) => {
         {material: {$regex: keyword, $options: "i"},},
     ]
 
-    const products = await ProductModel.find(queryObj, "-__v -createdAt -updatedAt");
+    const products = await ProductModel.find(queryObj);
 
     if (!products) {
         return next(new ApiError(`No products found matched this search key: ${keyword}`, 404));
@@ -199,54 +187,16 @@ const search = asyncHandler(async (req, res, next) => {
 });
 
 const getMeProducts = asyncHandler(async (req, res, next) => {
-    const productsCount = await ProductModel.countDocuments({owner: req.loggedUser._id});
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(productsCount / limit);
-    pagination.totalResults = productsCount;
-    if (endIndex < productsCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
-    }
+    req.filterObj = {owner: req.loggedUser._id};
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
-
-    const products = await ProductModel
-        .find({owner: req.loggedUser._id})
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy)
-
-    if (!products) {
-        return next(new ApiError(`No products found`, 404));
-    }
-
-    return res.status(200).json(
-        apiSuccess(
-            `products Found`,
-            200,
-            {
-                pagination,
-                products: allProductData(products),
-            }
-        ));
+    next();
 });
 
 const changeCoverImage = asyncHandler(async (req, res, next) => {
     const {coverImage} = req.body;
+    const {productId} = req.params;
 
-    const product = await ProductModel.findOneAndUpdate(req.params.productId, {coverImage});
+    const product = await ProductModel.findOneAndUpdate(productId, {coverImage});
 
     if (!product) {
         return next(new ApiError(`No product found`, 404));

@@ -7,39 +7,22 @@ const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const generateJWT = require("../utils/generateJWT");
 const {artistData, allArtistData, allAddresses} = require("../utils/responseModelData");
+const ApiFeatures = require("../utils/apiFeatures");
 const ArtistModel = require("../models/artistModel");
 const ProductModel = require("../models/productModel");
 const EventModel = require("../models/eventModel");
 
 const getAllArtists = asyncHandler(async (req, res, next) => {
     const artistsCount = await ArtistModel.countDocuments();
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(artistsCount / limit);
-    pagination.totalResults = artistsCount;
-    if (endIndex < artistsCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
-    }
 
-    let sortBy = "createdAt";
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(",").join(" ");
-    }
+    const apiFeatures = new ApiFeatures(ArtistModel.find(), req.query)
+        .paginate(artistsCount)
+        .filter()
+        .sort()
 
-    const artists = await ArtistModel.find()
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy)
+    const {paginationResult, mongooseQuery} = apiFeatures;
 
+    const artists = await mongooseQuery;
 
     if (!artists) {
         return next(new ApiError(`No Artists Found`, 404));

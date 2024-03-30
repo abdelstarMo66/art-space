@@ -1,8 +1,10 @@
 const asyncHandler = require("../middlewares/asyncHandler");
 
-const StyleModel = require("../models/styleModel");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
+const ApiFeatures = require("../utils/apiFeatures");
+const {allStyleData} = require("../utils/responseModelData");
+const StyleModel = require("../models/styleModel");
 
 const createStyle = asyncHandler(async (req, res) => {
     await StyleModel.create(req.body);
@@ -16,37 +18,11 @@ const createStyle = asyncHandler(async (req, res) => {
 });
 
 const getStyles = asyncHandler(async (req, res, next) => {
-    const stylesCount = await StyleModel.countDocuments();
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(stylesCount / limit);
-    pagination.totalResults = stylesCount;
-    if (endIndex < stylesCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
-    }
+    const apiFeatures = new ApiFeatures(StyleModel.find(), req.query).sort();
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
+    const {mongooseQuery} = apiFeatures;
 
-    const selectedField = "title slug";
-
-    const styles = await StyleModel
-        .find()
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy)
-        .select(selectedField);
+    const styles = await mongooseQuery;
 
     if (!styles) {
         return next(new ApiError(`No styles found`, 404));
@@ -57,8 +33,7 @@ const getStyles = asyncHandler(async (req, res, next) => {
             `styles Found`,
             200,
             {
-                pagination,
-                styles
+                styles: allStyleData(styles)
             }
         ));
 });

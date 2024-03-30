@@ -1,8 +1,10 @@
 const asyncHandler = require("../middlewares/asyncHandler");
 
-const CategoryModel = require("../models/categoryModel");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
+const ApiFeatures = require("../utils/apiFeatures");
+const {allCategoryData} = require("../utils/responseModelData");
+const CategoryModel = require("../models/categoryModel");
 
 const createCategory = asyncHandler(async (req, res) => {
     await CategoryModel.create(req.body);
@@ -16,37 +18,12 @@ const createCategory = asyncHandler(async (req, res) => {
 });
 
 const getCategories = asyncHandler(async (req, res, next) => {
-    const categoriesCount = await CategoryModel.countDocuments();
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(categoriesCount / limit);
-    pagination.totalResults = categoriesCount;
-    if (endIndex < categoriesCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
-    }
+    const apiFeatures = new ApiFeatures(CategoryModel.find(), req.query).sort();
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
+    const {mongooseQuery} = apiFeatures;
 
-    const selectedField = "title slug";
+    const categories = await mongooseQuery;
 
-    const categories = await CategoryModel
-        .find()
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy)
-        .select(selectedField);
 
     if (!categories) {
         return next(new ApiError(`No categories found`, 404));
@@ -57,8 +34,7 @@ const getCategories = asyncHandler(async (req, res, next) => {
             `categories Found`,
             200,
             {
-                pagination,
-                categories
+                categories: allCategoryData(categories)
             }
         ));
 });

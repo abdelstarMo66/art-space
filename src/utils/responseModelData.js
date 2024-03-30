@@ -180,17 +180,20 @@ exports.productData = (product) => {
         category: product.category.title,
         style: product.style.title,
         subject: product.subject.title,
+        height: product.height,
+        width: product.width,
+        depth: product.depth,
         size: `${product.height}h * ${product.width}w * ${product.depth}d`,
         coverImage: {
             imageId: product.coverImage.public_id,
             profileImg: product.coverImage.secure_url ?? null,
         },
-        images: product.images.map(image => {
+        images: product.images ? product.images.map(image => {
             return {
                 imageId: image.public_id,
-                profileImg: image.secure_url ?? null,
+                profileImg: image.secure_url,
             }
-        }),
+        }) : [],
         material: product.material ?? null,
     }
 }
@@ -566,4 +569,31 @@ exports.productFromAuctionData = (auction) => {
         began: auction.began,
         end: auction.end,
     };
+}
+
+exports.allCategoryData = (categories) => {
+    return categories.map((category) => {
+        return {
+            id: category._id,
+            title: category.title,
+        }
+    })
+}
+
+exports.allStyleData = (styles) => {
+    return styles.map((style) => {
+        return {
+            id: style._id,
+            title: style.title,
+        }
+    })
+}
+
+exports.allSubjectData = (subjects) => {
+    return subjects.map((subject) => {
+        return {
+            id: subject._id,
+            title: subject.title,
+        }
+    })
 }

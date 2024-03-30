@@ -1,6 +1,3 @@
-const UserModel = require("../models/userModel");
-const querystring = require("querystring");
-
 class ApiFeatures {
     // mongooseQuery: query mongoose that is used to access to DataBase ex: "Model.find()"
     // queryString: query string that is get from user ex: "req.query"
@@ -45,28 +42,18 @@ class ApiFeatures {
         return this;
     };
 
-    limitField() {
-        if (this.queryString.fields) {
-            const fields = this.queryString.fields.split(",").join(" ");
-            this.mongooseQuery = this.mongooseQuery.select(fields);
-        } else {
-            this.mongooseQuery = this.mongooseQuery.select("-__v -password");
-        }
+    filter(){
+        const queryStringObj = {...this.queryString}
+        const excludesFields = ["page", "limit", "sort", "fields", "keyword"];
+        excludesFields.forEach(field => delete queryStringObj[field]);
+
+        let queryStr = JSON.stringify(queryStringObj);
+        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+        this.mongooseQuery = this.mongooseQuery.find(JSON.parse(queryStr));
+
         return this;
     }
-
-    // filter(){
-    //     const queryStringObj = {...this.queryString}
-    //     const excludesFields = ["page", "limit", "sort", "fields", "keyword"];
-    //     excludesFields.forEach(field => delete queryStringObj[field]);
-    //
-    //     let queryStr = JSON.stringify(queryStringObj);
-    //     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    //
-    //     this.mongooseQuery = this.mongooseQuery.find(JSON.parse(queryStr));
-    //
-    //     return this;
-    // }
 }
 
 module.exports = ApiFeatures

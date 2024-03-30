@@ -49,7 +49,7 @@ router.route("/")
         createProduct,
     )
 
-router.get("/me", allowedToArtist(), permissionValidate, getMeProducts)
+router.get("/me", allowedToArtist(), permissionValidate, getMeProducts, getProducts)
 
 router.route("/:id")
     .get(

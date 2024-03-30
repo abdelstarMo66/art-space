@@ -1,8 +1,10 @@
 const asyncHandler = require("../middlewares/asyncHandler");
 
-const SubjectModel = require("../models/subjectModel");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
+const ApiFeatures = require("../utils/apiFeatures");
+const {allSubjectData} = require("../utils/responseModelData");
+const SubjectModel = require("../models/subjectModel");
 
 const createSubject = asyncHandler(async (req, res) => {
     await SubjectModel.create(req.body);
@@ -16,37 +18,11 @@ const createSubject = asyncHandler(async (req, res) => {
 });
 
 const getSubjects = asyncHandler(async (req, res, next) => {
-    const subjectsCount = await SubjectModel.countDocuments();
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(subjectsCount / limit);
-    pagination.totalResults = subjectsCount;
-    if (endIndex < subjectsCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
-    }
+    const apiFeatures = new ApiFeatures(SubjectModel.find(), req.query).sort();
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
+    const {mongooseQuery} = apiFeatures;
 
-    const selectedField = "title slug";
-
-    const subjects = await SubjectModel
-        .find()
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy)
-        .select(selectedField);
+    const subjects = await mongooseQuery;
 
     if (!subjects) {
         return next(new ApiError(`No subjects found`, 404));
@@ -57,8 +33,7 @@ const getSubjects = asyncHandler(async (req, res, next) => {
             `subjects Found`,
             200,
             {
-                pagination,
-                subjects
+                subjects: allSubjectData(subjects),
             }
         ));
 });

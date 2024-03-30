@@ -5,6 +5,7 @@ const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const {allComplaintData} = require("../utils/responseModelData")
+const ApiFeatures = require("../utils/apiFeatures");
 const ComplaintModel = require("../models/complaintModel")
 
 const uploadAttachmentImage = uploadSingleImage("attachment", "complaint");
@@ -24,7 +25,7 @@ const uploadToHost = asyncHandler(async (req, res, next) => {
     next();
 });
 
-const sendUserComplaint = asyncHandler(async (req, res, next) => {
+const sendUserComplaint = asyncHandler(async (req, res) => {
     await ComplaintModel.create({
         sender: {
             user: req.loggedUser._id,
@@ -41,7 +42,7 @@ const sendUserComplaint = asyncHandler(async (req, res, next) => {
         ));
 });
 
-const sendArtistComplaint = asyncHandler(async (req, res, next) => {
+const sendArtistComplaint = asyncHandler(async (req, res) => {
     await ComplaintModel.create({
         sender: {
             artist: req.loggedUser._id,
@@ -60,34 +61,15 @@ const sendArtistComplaint = asyncHandler(async (req, res, next) => {
 
 const getComplaints = asyncHandler(async (req, res, next) => {
     const complaintsCount = await ComplaintModel.countDocuments();
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(complaintsCount / limit);
-    pagination.totalResults = complaintsCount;
-    if (endIndex < complaintsCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
-    }
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
+    const apiFeatures = new ApiFeatures(ComplaintModel.find(), req.query)
+        .paginate(complaintsCount)
+        .filter()
+        .sort()
 
+    const {paginationResult, mongooseQuery} = apiFeatures;
 
-    const complaints = await ComplaintModel
-        .find()
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy);
+    const complaints = await mongooseQuery;
 
     if (!complaints) {
         return next(new ApiError(`No complaint found`, 404));
@@ -98,7 +80,7 @@ const getComplaints = asyncHandler(async (req, res, next) => {
             `complaint Found`,
             200,
             {
-                pagination,
+                pagination: paginationResult,
                 complaint: allComplaintData(complaints),
             }
         ));
