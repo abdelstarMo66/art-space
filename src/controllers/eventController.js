@@ -1,16 +1,43 @@
+const {v2: cloudinary} = require("cloudinary");
+
 const asyncHandler = require("../middlewares/asyncHandler");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
-const {eventData, allEventData, productInEventData, allProductInEventData} = require("../utils/responseModelData")
+const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
+const {eventData, allEventData} = require("../utils/responseModelData")
+const ApiFeatures = require("../utils/apiFeatures");
 const EventModel = require("../models/eventModel");
+
+const uploadCoverImage = uploadSingleImage("coverImage", "event");
+
+const uploadToHost = asyncHandler(async (req, res, next) => {
+    if (req.file) {
+        const options = {
+            folder: "event",
+            public_id: req.file.filename,
+            use_filename: true,
+            resource_type: "image",
+            format: "jpg",
+        };
+
+        req.body.coverImage = await cloudinary.uploader.upload(req.file.path, options);
+    }
+
+    next();
+});
 
 const createEvent = asyncHandler(async (req, res) => {
     const began = new Date(`${req.body.began}`);
 
-    req.body.end = began.setDate(began.getDate() + req.body.duration);
-    req.body.owner = req.loggedUser._id;
-
-    await EventModel.create(req.body);
+    await EventModel.create({
+        title: req.body.title,
+        description: req.body.description,
+        owner: req.loggedUser._id,
+        duration: parseInt(req.body.duration),
+        began: req.body.began,
+        end: began.setDate(began.getDate() + req.body.duration),
+        coverImage: req.body.coverImage,
+    });
 
     return res.status(201).json(
         apiSuccess(
@@ -21,35 +48,21 @@ const createEvent = asyncHandler(async (req, res) => {
 });
 
 const getEvents = asyncHandler(async (req, res, next) => {
-    const eventsCount = await EventModel.countDocuments();
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(eventsCount / limit);
-    pagination.totalResults = eventsCount;
-    if (endIndex < eventsCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
+    let filter = {};
+    if (req.filterObj) {
+        filter = req.filterObj;
     }
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
+    const eventsCount = await EventModel.countDocuments(filter);
 
+    const apiFeatures = new ApiFeatures(EventModel.find(filter), req.query)
+        .paginate(eventsCount)
+        .filter()
+        .sort()
 
-    const events = await EventModel
-        .find()
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy);
+    const {paginationResult, mongooseQuery} = apiFeatures;
+
+    const events = await mongooseQuery;
 
     if (!events) {
         return next(new ApiError(`No events found`, 404));
@@ -60,7 +73,7 @@ const getEvents = asyncHandler(async (req, res, next) => {
             `events Found`,
             200,
             {
-                pagination,
+                pagination: paginationResult,
                 events: allEventData(events),
             }
         ));
@@ -79,23 +92,6 @@ const getEvent = asyncHandler(async (req, res) => {
         ));
 });
 
-const getProductsInEvent = asyncHandler(async (req, res) => {
-    const {id} = req.params;
-
-    const event = await EventModel.findById(id);
-
-    return res.status(200).json(
-        apiSuccess(
-            "event found successfully",
-            200,
-            productInEventData(event.products),
-        ));
-});
-
-const getProductInEvent = asyncHandler(async (req, res) => {
-    // TODO: This controller include the socket.io to handle the auction
-});
-
 const updateEvent = asyncHandler(async (req, res, next) => {
     const {id} = req.params;
 
@@ -109,7 +105,7 @@ const updateEvent = asyncHandler(async (req, res, next) => {
         {
             title: req.body.title,
             description: req.body.description,
-            duration: req.body.duration,
+            duration: parseInt(req.body.duration),
             began: req.body.began,
         },
         {new: true},
@@ -134,7 +130,11 @@ const updateEvent = asyncHandler(async (req, res, next) => {
 const deleteEvent = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
-    await EventModel.findByIdAndDelete(id);
+    const event = await EventModel.findByIdAndDelete(id);
+
+    if (event.coverImage.public_id) {
+        await cloudinary.uploader.destroy(event.coverImage.public_id);
+    }
 
     return res.status(200).json(
         apiSuccess(
@@ -172,58 +172,41 @@ const search = asyncHandler(async (req, res, next) => {
 });
 
 const getMeEvents = asyncHandler(async (req, res, next) => {
-    const eventsCount = await EventModel.countDocuments({owner: req.loggedUser._id});
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(eventsCount / limit);
-    pagination.totalResults = eventsCount;
-    if (endIndex < eventsCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
+    req.filterObj = {owner: req.loggedUser._id};
+
+    next();
+});
+
+const changeCoverImage = asyncHandler(async (req, res, next) => {
+    const {coverImage} = req.body;
+    const {eventId} = req.params;
+
+    const event = await EventModel.findOneAndUpdate(eventId, {coverImage});
+
+    if (!event) {
+        return next(new ApiError(`No product found`, 404));
     }
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
-
-
-    const events = await EventModel
-        .find({owner: req.loggedUser._id})
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy);
-
-    if (!events) {
-        return next(new ApiError(`No events found`, 404));
+    if (event.coverImage.publicId) {
+        await cloudinary.uploader.destroy(event.coverImage.publicId);
     }
 
     return res.status(200).json(
         apiSuccess(
-            `events Found`,
+            "Cover Image updated successfully",
             200,
-            {
-                pagination,
-                events: allEventData(events),
-            }
+            null,
         ));
 });
 
-const addProductToMyEvent = asyncHandler(async (req, res, next) => {
+const addProductToMyEvent = asyncHandler(async (req, res) => {
     const {id} = req.params;
+    const {productId} = req.body;
 
-    const event = await EventModel.findByIdAndUpdate(id,
+    await EventModel.findByIdAndUpdate(id,
         {
             $addToSet: {
-                products: req.body.productId
+                products: productId
             }
         },
         {new: true},
@@ -237,13 +220,14 @@ const addProductToMyEvent = asyncHandler(async (req, res, next) => {
         ));
 })
 
-const removeProductFromMyEvent = asyncHandler(async (req, res, next) => {
+const removeProductFromMyEvent = asyncHandler(async (req, res) => {
     const {id} = req.params;
+    const {productId} = req.body
 
-    const event = await EventModel.findByIdAndUpdate(id,
+    await EventModel.findByIdAndUpdate(id,
         {
             $pull: {
-                products: req.body.productId
+                products: productId
             }
         },
         {new: true},
@@ -258,6 +242,8 @@ const removeProductFromMyEvent = asyncHandler(async (req, res, next) => {
 });
 
 module.exports = {
+    uploadCoverImage,
+    uploadToHost,
     createEvent,
     getEvents,
     getEvent,
@@ -265,6 +251,7 @@ module.exports = {
     deleteEvent,
     search,
     getMeEvents,
+    changeCoverImage,
     addProductToMyEvent,
     removeProductFromMyEvent
 }

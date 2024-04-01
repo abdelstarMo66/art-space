@@ -13,6 +13,7 @@ const globalErrorMiddleware = require("./src/middlewares/globalErrorMiddleware")
 const mountRoutes = require("./src/routes/app");
 const {initSocketIO} = require("./src/middlewares/socketIO")
 const {webhookCheckout} = require("./src/controllers/orderController");
+const {eventJob, auctionJob} = require("./src/utils/cronScheduler")
 
 dotenv.config({path: "config/config.env",});
 dbConnection();
@@ -44,6 +45,9 @@ app.all("*", (req, res, next) => {
 });
 
 app.use(globalErrorMiddleware);
+
+eventJob();
+auctionJob();
 
 const PORT = process.env.PORT || 4000
 const server = app.listen(PORT, () => {

@@ -29,26 +29,16 @@ exports.createEventValidation = [
         .notEmpty()
         .withMessage("launch date of event is required")
         .isDate()
-        .withMessage("launch date of event must be invalid date ex: (2024-01-18)"),
+        .withMessage("launch date of event must be invalid date ex: (2024-01-18)")
+        .custom((val) => {
+            const began = new Date(`${val}`);
 
-    body("products")
-        .notEmpty()
-        .withMessage("Product of event is required")
-        .isArray({min: 3, max: 10})
-        .withMessage("Products must be between 3 and 10 product")
-        .custom(async (val, {req}) => {
-            for (let i = 0; i < val.length; i++) {
-                const product = await ProductModel.findById(val[i]);
-
-                if (product.owner._id.toString() !== req.loggedUser._id.toString()) {
-                    return Promise.reject(new ApiError(`this product ${val[i]} not belong to this artist`, 400));
-                }
-
-                if(!product.isAvailable){
-                    return Promise.reject(new ApiError(`this product ${val[i]} not available yet`, 400));
-                }
+            if (began < Date.now()) {
+                return Promise.reject(new ApiError(`invalid began date`, 400));
             }
-        })
+
+            return true;
+        }),
 ];
 
 exports.getEventValidation = [
@@ -228,6 +218,14 @@ exports.ProductInMyEventValidation = [
 
             if (!product) {
                 return Promise.reject(new ApiError(`no product found for this id ${val}`, 404));
+            }
+
+            if (product.owner._id.toString() !== req.loggedUser._id.toString()) {
+                return Promise.reject(new ApiError(`this product ${val} not belong to this artist`, 400));
+            }
+
+            if (!product.inEvent) {
+                return Promise.reject(new ApiError(`can not add this product to your event`, 400));
             }
 
             return true;

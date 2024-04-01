@@ -77,7 +77,7 @@ const deleteSpecificProductFromCart = asyncHandler(async (req, res) => {
 
     const cart = await CartModel.findOneAndUpdate(
         {user: req.loggedUser._id},
-        {$pull: {cartItems: {_id: itemId}}},
+        {$pull: {cartItems: {product: itemId}}},
         {new: true}
     );
 

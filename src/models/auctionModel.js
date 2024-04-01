@@ -111,6 +111,16 @@ const auctionSchema = new mongoose.Schema({
                 type: Number,
             },
         }],
+
+        isLaunch: {
+            type: Boolean,
+            default: false
+        },
+
+        isEnded: {
+            type: Boolean,
+            default: false
+        },
     },
     {timestamps: true},
 );

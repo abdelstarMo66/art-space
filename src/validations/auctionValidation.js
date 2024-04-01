@@ -241,8 +241,8 @@ exports.updateFinalPriceValidation = [
                 return Promise.reject(new ApiError(`no product found for this id ${val}`, 404));
             }
 
-            if (Date.now() < new Date(`${product.began}`)) {
-                return Promise.reject(new ApiError(`auction not start yet`, 404));
+            if (Date.now() < new Date(`${product.began}`) || product.isEnded) {
+                return Promise.reject(new ApiError(`auction not start yet or ended`, 404));
             }
 
             return true;

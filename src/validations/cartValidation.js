@@ -24,10 +24,10 @@ exports.deleteSpecificProductFromCartValidation = [
         .isMongoId()
         .withMessage("Invalid Cart Id")
         .custom(async (val) => {
-            const category = await CartModel.findById(val);
+            const product = await ProductModel.findById(val);
 
-            if (!category) {
-                return Promise.reject(new ApiError(`no cart for this id ${val}`, 404));
+            if (!product) {
+                return Promise.reject(new ApiError(`this product can't allowed to delete`, 404));
             }
             return true;
         }),

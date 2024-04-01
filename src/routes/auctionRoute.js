@@ -3,13 +3,11 @@ const express = require("express");
 const {
     uploadProductImages,
     uploadToHost,
-    auctionSubscription,
     addProductToActions,
     removeProductFromActions,
     updateProductFromSpecificAuction,
     getAuctions,
-    setProfileID,
-    getProductsFromSpecificAuction,
+    getMeAuction,
     getProductOfAuction,
     updatePrice,
     changeSpecificImage,
@@ -29,19 +27,11 @@ const router = express.Router();
 
 router.use(verifyToken);
 
-router.post("/subscriptions",
-    allowedToArtist(),
-    permissionValidate,
-    uploadProductImages,
-    uploadToHost,
-    auctionSubscription,
-);
-
 router.get("/me",
     allowedToArtist(),
     permissionValidate,
-    setProfileID,
-    getProductsFromSpecificAuction,
+    getMeAuction,
+    getAuctions,
 );
 
 router.route("/")
@@ -83,13 +73,6 @@ router.route("/product/:productId")
         validationMiddleware,
         removeProductFromActions,
     )
-
-router.get("/:artistId",
-    allowedToUser(),
-    allowedToAdmins("IT"),
-    permissionValidate,
-    getProductsFromSpecificAuction,
-);
 
 router.put("/changeCoverImage/:productId", uploadProductImages, uploadToHost, changeCoverImage);
 

@@ -43,6 +43,16 @@ const eventSchema = new mongoose.Schema({
             ref: "product",
         }
     ],
+
+    coverImage: {
+        public_id: String,
+        secure_url: String,
+    },
+
+    isLaunch: {
+        type: Boolean,
+        default: false
+    }
 }, {timestamps: true});
 
 eventSchema.pre(/^find/, function (next) {

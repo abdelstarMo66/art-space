@@ -7,6 +7,7 @@ const ApiError = require("../utils/apiError");
 const {allAuctionData, productFromAuctionData} = require("../utils/responseModelData")
 const {getSocketIO} = require("../middlewares/socketIO")
 const AuctionModel = require("../models/auctionModel")
+const ApiFeatures = require("../utils/apiFeatures");
 
 const uploadProductImages = uploadMixOfImage([
         {name: "coverImage", maxCount: 1},
@@ -48,17 +49,6 @@ const uploadToHost = asyncHandler(async (req, res, next) => {
     }
 
     next();
-});
-
-const auctionSubscription = asyncHandler(async (req, res) => {
-    await AuctionModel.create({artist: req.loggedUser._id});
-
-    return res.status(201).json(
-        apiSuccess(
-            `Auction Subscription successfully..`,
-            201,
-            null,
-        ));
 });
 
 const addProductToActions = asyncHandler(async (req, res) => {
@@ -139,35 +129,21 @@ const updateProductFromSpecificAuction = asyncHandler(async (req, res) => {
 });
 
 const getAuctions = asyncHandler(async (req, res, next) => {
+    let filter = {};
+    if (req.filterObj) {
+        filter = req.filterObj;
+    }
+
     const auctionsCount = await AuctionModel.countDocuments();
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(auctionsCount / limit);
-    pagination.totalResults = auctionsCount;
-    if (endIndex < auctionsCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
-    }
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
+    const apiFeatures = new ApiFeatures(AuctionModel.find(filter), req.query)
+        .paginate(auctionsCount)
+        .filter()
+        .sort()
 
+    const {paginationResult, mongooseQuery} = apiFeatures;
 
-    const auctions = await AuctionModel
-        .find()
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy);
+    const auctions = await mongooseQuery;
 
     if (!auctions) {
         return next(new ApiError(`No auctions found`, 404));
@@ -178,9 +154,8 @@ const getAuctions = asyncHandler(async (req, res, next) => {
             `auctions Found`,
             200,
             {
-                pagination,
+                pagination: paginationResult,
                 auctions: allAuctionData(auctions),
-                // auctions,
             }
         ));
 });
@@ -198,62 +173,17 @@ const getProductOfAuction = asyncHandler(async (req, res) => {
         ));
 });
 
-const getProductsFromSpecificAuction = asyncHandler(async (req, res, next) => {
-    const {artistId} = req.params;
+const getMeAuction = asyncHandler(async (req, res, next) => {
+    req.filterObj = {owner: req.loggedUser._id};
 
-    const auctionsCount = await AuctionModel.countDocuments({artist: artistId});
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(auctionsCount / limit);
-    pagination.totalResults = auctionsCount;
-    if (endIndex < auctionsCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
-    }
-
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
-
-    const auctions = await AuctionModel
-        .find({artist: artistId})
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy);
-
-    if (!auctions) {
-        return next(new ApiError(`No auctions found`, 404));
-    }
-
-    return res.status(200).json(
-        apiSuccess(
-            `auctions Found`,
-            200,
-            {
-                pagination,
-                auctions: allAuctionData(auctions),
-            }
-        ));
-});
-
-const setProfileID = asyncHandler(async (req, res, next) => {
-    req.params.artistId = req.loggedUser._id;
     next();
 });
 
 const changeCoverImage = asyncHandler(async (req, res, next) => {
     const {coverImage} = req.body;
+    const {productId} = req.params;
 
-    const product = await AuctionModel.findOneAndUpdate(req.params.productId, {coverImage});
+    const product = await AuctionModel.findOneAndUpdate(productId, {coverImage});
 
     if (!product) {
         return next(new ApiError(`No product found`, 404));
@@ -332,14 +262,12 @@ const updatePrice = asyncHandler(async (req, res) => {
 module.exports = {
     uploadProductImages,
     uploadToHost,
-    auctionSubscription,
     addProductToActions,
     removeProductFromActions,
     updateProductFromSpecificAuction,
     getAuctions,
     getProductOfAuction,
-    setProfileID,
-    getProductsFromSpecificAuction,
+    getMeAuction,
     updatePrice,
     changeCoverImage,
     changeSpecificImage,

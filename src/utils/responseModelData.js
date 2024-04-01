@@ -162,6 +162,7 @@ exports.allProductData = (products) => {
                 profileImg: product.coverImage.secure_url ?? null,
             },
             material: product.material ?? null,
+            inEvent: product.inEvent ?? false,
         }
     })
 }
@@ -200,6 +201,7 @@ exports.productData = (product) => {
 
 exports.eventData = (event) => {
     return {
+        id: event._id,
         title: event.title,
         description: event.description,
         owner: {
@@ -226,6 +228,7 @@ exports.eventData = (event) => {
 exports.allEventData = (events) => {
     return events.map(event => {
         return {
+            id: event._id,
             title: event.title,
             description: event.description,
             owner: {

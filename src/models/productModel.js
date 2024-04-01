@@ -82,6 +82,11 @@ const productSchema = new mongoose.Schema({
         required: [true, "material is required"],
         trim: true,
     },
+
+    inEvent: {
+        type: Boolean,
+        default: false
+    },
 }, {timestamps: true});
 
 productSchema.pre(/^find/, function (next) {

@@ -52,6 +52,11 @@ const uploadToHost = asyncHandler(async (req, res, next) => {
 
 const createProduct = asyncHandler(async (req, res) => {
     req.body.owner = req.loggedUser._id;
+
+    if (req.body.inEvent) {
+        req.body.inEvent = req.body.inEvent.toLowerCase() === 'true';
+    }
+
     await ProductModel.create(req.body);
 
     return res.status(201).json(
@@ -63,7 +68,9 @@ const createProduct = asyncHandler(async (req, res) => {
 });
 
 const getProducts = asyncHandler(async (req, res, next) => {
-    let filter = {};
+    let filter = {
+        inEvent: false,
+    };
     if (req.filterObj) {
         filter = req.filterObj;
     }
