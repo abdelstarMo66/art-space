@@ -294,9 +294,9 @@ const checkoutSession = asyncHandler(async (req, res) => {
 const registerToAuction = async (session) => {
     const {client_reference_id, payment_intent} = session;
     const email = session.customer_email;
-    print("555")
+
     const user = await UserModel.findOne({email});
-    print("666")
+
     await UserModel.findByIdAndUpdate(user._id, {
         $addToSet: {
             registerAuction: {auctionId: client_reference_id, refundId: payment_intent},
@@ -307,21 +307,15 @@ const registerToAuction = async (session) => {
 const registerAuctionWebhookCheckout = asyncHandler(async (req, res) => {
     const sig = req.headers['stripe-signature'];
 
-    console.log("11111")
-    console.log(`sig: ${req.headers['stripe-signature']}`);
-
     let event;
 
     try {
-        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-        console.log("22222")
+        event = stripe.webhooks.constructEvent(req.body, sig, process.env.Register_Auction_STRIPE_WEBHOOK_SECRET);
     } catch (err) {
-        console.log("333")
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
     if (event.type === "checkout.session.completed") {
-        console.log("4444")
         await registerToAuction(event.data.object);
     }
 
