@@ -1,3 +1,4 @@
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const schedule = require('node-schedule');
 
 const asyncHandler = require("../middlewares/asyncHandler");
@@ -5,6 +6,7 @@ const EventModel = require("../models/eventModel");
 const ProductModel = require("../models/productModel");
 const AuctionModel = require("../models/auctionModel");
 const CartModel = require("../models/cartModel");
+const UserModel = require("../models/userModel");
 
 const eventJob = () => {
     schedule.scheduleJob('0 0 0 * * *', async () => {
@@ -68,6 +70,36 @@ const addProductToCart = asyncHandler(async (product) => {
     await cart.save();
 })
 
+const refundRegisteredAuctions = asyncHandler(async (product) => {
+    const users = product.lastPrices.filter((user) =>
+        user.user._id.toString() !== product.finalUser.id.toString()
+    );
+
+    const idList = users.map(item => item.user._id.toString());
+    const uniqueIds = [...new Set(idList)];
+
+    for (const userId of uniqueIds) {
+        const user = await UserModel.findById(userId);
+
+        if (user.registerAuction.auctionId._id.toString() === product._id.toString()) {
+            const registeredAuctionId = user.registerAuction._id;
+            // refund 100$ to this user
+            await stripe.refunds.create({
+                payment_intent: user.registerAuction.refundId,
+                amount: 100 * 100,
+            });
+
+            // delete it from this user
+            await UserModel.findByIdAndUpdate(userId, {
+                $pull: {
+                    registerAuction: {_id: registeredAuctionId}
+                }
+            });
+
+        }
+    }
+})
+
 const auctionJob = () => {
     schedule.scheduleJob('0 0 0 * * *', async () => {
         const products = await AuctionModel.find();
@@ -90,6 +122,9 @@ const auctionJob = () => {
 
                 // add product to cart of finalUser
                 await addProductToCart(product);
+
+                // refund all registered auction to all users only user has win
+                await refundRegisteredAuctions(product);
             }
         }
     });

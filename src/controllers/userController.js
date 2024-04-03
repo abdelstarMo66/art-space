@@ -14,9 +14,6 @@ const {userData, allUserData, allAddresses} = require("../utils/responseModelDat
 const ApiFeatures = require("../utils/apiFeatures");
 const UserModel = require("../models/userModel");
 const CartModel = require("../models/cartModel");
-const OrderModel = require("../models/orderModel");
-const ProductModel = require("../models/productModel");
-const {findById} = require("../models/auctionModel");
 
 const getAllUsers = asyncHandler(async (req, res, next) => {
     const usersCount = await UserModel.countDocuments();
