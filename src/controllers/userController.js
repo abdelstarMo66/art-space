@@ -264,7 +264,7 @@ const checkoutSession = asyncHandler(async (req, res) => {
         line_items: [{
             price_data: {
                 currency: "USD",
-                unit_amount: 100,
+                unit_amount: 100 * 100,
                 product_data: {
                     name: auctionId,
                 },
