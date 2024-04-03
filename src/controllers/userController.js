@@ -1,3 +1,6 @@
+const dotenv = require("dotenv");
+dotenv.config({path: "config/config.env",});
+
 const bcrypt = require("bcrypt");
 const cloudinary = require("cloudinary").v2;
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
@@ -257,7 +260,7 @@ const getProfileAddresses = asyncHandler(async (req, res) => {
 });
 
 const checkoutSession = asyncHandler(async (req, res) => {
-    const {auctionId} = req.body;
+    const {auctionId} = req.params;
 
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
