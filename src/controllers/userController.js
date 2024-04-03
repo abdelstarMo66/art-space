@@ -307,21 +307,21 @@ const registerToAuction = async (session) => {
 const registerAuctionWebhookCheckout = asyncHandler(async (req, res) => {
     const sig = req.headers['stripe-signature'];
 
-    print("11111")
+    console.log("11111")
+    console.log(`sig: ${req.headers['stripe-signature']}`);
 
     let event;
 
     try {
         event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-        print("22222")
+        console.log("22222")
     } catch (err) {
-        print("333")
+        console.log("333")
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-
     if (event.type === "checkout.session.completed") {
-        print("4444")
+        console.log("4444")
         await registerToAuction(event.data.object);
     }
 
