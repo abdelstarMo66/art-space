@@ -101,7 +101,6 @@ productSchema.pre(/^find/, function (next) {
     });
     this.populate({
         path: "owner",
-        select: "name",
     });
     next();
 });

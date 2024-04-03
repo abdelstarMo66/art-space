@@ -12,7 +12,8 @@ const ApiError = require("./src/utils/apiError");
 const globalErrorMiddleware = require("./src/middlewares/globalErrorMiddleware")
 const mountRoutes = require("./src/routes/app");
 const {initSocketIO} = require("./src/middlewares/socketIO")
-const {webhookCheckout} = require("./src/controllers/orderController");
+const {orderWebhookCheckout} = require("./src/controllers/orderController");
+const {registerAuctionWebhookCheckout} = require("./src/controllers/userController");
 const {eventJob, auctionJob} = require("./src/utils/cronScheduler")
 
 dotenv.config({path: "config/config.env",});
@@ -22,7 +23,8 @@ const app = express();
 app.use(cors());
 app.use(compression());
 
-app.post("/webhook-checkout", express.raw({type: 'application/json'}), webhookCheckout);
+app.post("/order-webhook-checkout", express.raw({type: 'application/json'}), orderWebhookCheckout);
+app.post("/register-auction-webhook-checkout", express.raw({type: 'application/json'}), registerAuctionWebhookCheckout);
 
 app.use(express.json());
 app.use(express.static(join(__dirname, "uploads")));
@@ -36,7 +38,7 @@ if (process.env.NODE_ENV === "development") {
 
 mountRoutes(app);
 
-app.get("/", (req,res) => {
+app.get("/", (req, res) => {
     res.send("<h1>Welcome In Art-Space App</h1>");
 });
 

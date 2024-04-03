@@ -35,6 +35,15 @@ const userSchema = new mongoose.Schema({
             phone: String,
         },
     ],
+    registerAuction: [
+        {
+            auctionId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "auction",
+            },
+            refundId: String
+        },
+    ],
     gender: {
         type: String,
         enum: ["male", "female"],
@@ -50,6 +59,13 @@ const userSchema = new mongoose.Schema({
     passwordResetExpires: Date,
     passwordResetVerified: Boolean,
 }, {timestamps: true});
+
+userSchema.pre(/^find/, function (next) {
+    this.populate({
+        path: "registerAuction.auctionId",
+    });
+    next();
+});
 
 const UserModel = mongoose.model("user", userSchema);
 

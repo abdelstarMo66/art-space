@@ -276,7 +276,7 @@ const createCardOrder = async (session) => {
     await CartModel.findByIdAndDelete(cartId);
 }
 
-const webhookCheckout = asyncHandler(async (req, res) => {
+const orderWebhookCheckout = asyncHandler(async (req, res) => {
     const sig = req.headers['stripe-signature'];
 
     let event;
@@ -309,5 +309,5 @@ module.exports = {
     updateOrderToDelivered,
     updateOrderState,
     checkoutSession,
-    webhookCheckout,
+    orderWebhookCheckout,
 }

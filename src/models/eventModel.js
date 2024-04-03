@@ -59,6 +59,9 @@ eventSchema.pre(/^find/, function (next) {
     this.populate({
         path: "products",
     });
+    this.populate({
+        path: "owner",
+    })
     next();
 });
 

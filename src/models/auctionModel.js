@@ -138,6 +138,12 @@ auctionSchema.pre(/^find/, function (next) {
     this.populate({
         path: "artist",
     });
+    this.populate({
+        path: "finalUser",
+    });
+    this.populate({
+        path: "lastPrices.user",
+    });
     next();
 });
 

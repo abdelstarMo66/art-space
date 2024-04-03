@@ -177,6 +177,7 @@ exports.productData = (product) => {
         owner: {
             id: product.owner._id,
             name: product.owner.name,
+            profileImg: product.owner.profileImg.secure_url ?? null,
         },
         category: product.category.title,
         style: product.style.title,
@@ -234,6 +235,7 @@ exports.allEventData = (events) => {
             owner: {
                 id: event.owner._id,
                 name: event.owner.name,
+                profileImg: event.owner.profileImg.secure_url ?? null,
             },
             duration: event.duration,
             began: event.began,
@@ -348,6 +350,7 @@ exports.searchData = (artists, products, events) => {
 
 exports.cartData = (cart) => {
     return {
+        id: cart._id,
         itemCount: cart.cartItems.length,
         user: {
             id: cart.user._id,
@@ -383,6 +386,7 @@ exports.cartData = (cart) => {
 
 exports.orderData = (order) => {
     return {
+        id: order._id,
         user: {
             id: order.user._id,
             name: order.user.name,
@@ -434,6 +438,7 @@ exports.orderData = (order) => {
 exports.allOrderData = (orders) => {
     return orders.map((order) => {
         return {
+            id: order._id,
             user: {
                 id: order.user._id,
                 name: order.user.name,
