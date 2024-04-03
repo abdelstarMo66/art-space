@@ -48,7 +48,7 @@ const calculateTotalCartPrice = (cart) => {
     cart.totalCartPrice = totalPrice;
 }
 
-const addProductToCart = asyncHandler(async (product) => {
+const addProductToCart = async (product) => {
     let cart = await CartModel.findOne({user: product.finalUser});
 
     if (!cart) {
@@ -68,9 +68,9 @@ const addProductToCart = asyncHandler(async (product) => {
 
     calculateTotalCartPrice(cart);
     await cart.save();
-})
+}
 
-const refundRegisteredAuctions = asyncHandler(async (product) => {
+const refundRegisteredAuctions = async (product) => {
     const users = product.lastPrices.filter((user) =>
         user.user._id.toString() !== product.finalUser.id.toString()
     );
@@ -98,7 +98,7 @@ const refundRegisteredAuctions = asyncHandler(async (product) => {
 
         }
     }
-})
+}
 
 const auctionJob = () => {
     schedule.scheduleJob('0 0 0 * * *', async () => {
