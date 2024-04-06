@@ -1,5 +1,6 @@
 const fs = require('fs');
 const {stringify} = require("csv-stringify")
+const { Parser } = require('json2csv');
 
 const asyncHandler = require("../middlewares/asyncHandler")
 const apiSuccess = require("../utils/apiSuccess");

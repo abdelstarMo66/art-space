@@ -152,7 +152,9 @@ const deleteProduct = asyncHandler(async (req, res) => {
     images.push(product.coverImage);
 
     for (let image in images) {
-        await cloudinary.uploader.destroy(image.public_id);
+        if (image.public_id) {
+            await cloudinary.uploader.destroy(image.public_id);
+        }
     }
 
     return res.status(200).json(
