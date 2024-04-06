@@ -17,6 +17,7 @@ const sendEmail = async (options) => {
         to: options.email,
         subject: options.subject,
         text: options.text,
+        attachments: options.data ? [{'filename': 'attachment.csv', 'content': options.data}] : null,
     }
 
     await transporter.sendMail(mailOptions);

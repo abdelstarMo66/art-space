@@ -174,22 +174,22 @@ exports.productData = (product) => {
         description: product.description,
         price: product.price,
         isAvailable: product.isAvailable,
-        owner: {
-            id: product.owner._id,
+        owner: product.owner ? {
+            id: product.owner._id ?? null,
             name: product.owner.name,
             profileImg: product.owner.profileImg.secure_url ?? null,
-        },
-        category: product.category.title,
-        style: product.style.title,
-        subject: product.subject.title,
+        } : null,
+        category: product.category ? product.category.title : null,
+        style: product.style ? product.style.title : null,
+        subject: product.subject ? product.subject.title : null,
         height: product.height,
         width: product.width,
         depth: product.depth,
         size: `${product.height}h * ${product.width}w * ${product.depth}d`,
-        coverImage: {
+        coverImage: product.coverImage ? {
             imageId: product.coverImage.public_id,
             profileImg: product.coverImage.secure_url ?? null,
-        },
+        } : null,
         images: product.images ? product.images.map(image => {
             return {
                 imageId: image.public_id,
@@ -604,4 +604,22 @@ exports.allSubjectData = (subjects) => {
             title: subject.title,
         }
     })
+}
+
+exports.availableProductReport = (product) => {
+    return {
+        id: product._id,
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        owner: product.owner ? product.owner.name : null,
+        category: product.category ? product.category.title : null,
+        style: product.style ? product.style.title : null,
+        subject: product.subject ? product.subject.title : null,
+        material: product.material ?? null,
+        height: product.height,
+        width: product.width,
+        depth: product.depth,
+        inEvent: product.inEvent,
+    }
 }
