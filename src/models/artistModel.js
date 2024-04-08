@@ -6,6 +6,11 @@ const artistSchema = new mongoose.Schema({
         required: [true, "name is required"],
         trim: true,
     },
+    bio: {
+        type: String,
+        trim: true,
+        maxLength: [200, "bio must be less than 500 characters"],
+    },
     email: {
         type: String,
         lowercase: true,

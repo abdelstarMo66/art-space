@@ -2,6 +2,7 @@ exports.artistData = (artist) => {
     return {
         id: artist._id,
         name: artist.name,
+        bio: artist.bio ?? null,
         email: artist.email,
         phone: artist.phone,
         imageId: artist.profileImg.public_id,
@@ -28,6 +29,7 @@ exports.allArtistData = (artists) => {
         return {
             id: artist._id,
             name: artist.name,
+            bio: artist.bio ?? null,
             email: artist.email,
             phone: artist.phone,
             gender: artist.gender ?? null,

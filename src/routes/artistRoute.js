@@ -13,7 +13,8 @@ const {
     addArtistAddress,
     getProfileAddresses,
     removeArtistAddress,
-    updateProfileImage
+    updateProfileImage,
+    getArtistInfo,
 } = require("../controllers/artistController")
 const {
     getArtistValidation,
@@ -25,7 +26,7 @@ const {
 } = require("../validations/artistValidation");
 const validationMiddleware = require("../middlewares/validationMiddleware");
 const verifyToken = require("../middlewares/verifyToken");
-const {allowedToAdmins, allowedToArtist, permissionValidate} = require("../middlewares/allowTo");
+const {allowedToAdmins, allowedToArtist,allowedToUser, permissionValidate} = require("../middlewares/allowTo");
 
 const router = express.Router();
 
@@ -90,6 +91,8 @@ router.delete("/address/:addressId",
     permissionValidate,
     removeArtistAddress,
 )
+
+router.get("/info/:id", allowedToUser(), permissionValidate, getArtistInfo);
 
 router.get("/", allowedToAdmins("IT"), permissionValidate, getAllArtists);
 

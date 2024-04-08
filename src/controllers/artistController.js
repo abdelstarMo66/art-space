@@ -6,11 +6,19 @@ const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const generateJWT = require("../utils/generateJWT");
-const {artistData, allArtistData, allAddresses} = require("../utils/responseModelData");
+const {
+    artistData,
+    allArtistData,
+    allAddresses,
+    allProductData,
+    allEventData,
+    allAuctionData
+} = require("../utils/responseModelData");
 const ApiFeatures = require("../utils/apiFeatures");
 const ArtistModel = require("../models/artistModel");
 const ProductModel = require("../models/productModel");
 const EventModel = require("../models/eventModel");
+const AuctionModel = require("../models/auctionModel");
 
 const getAllArtists = asyncHandler(async (req, res, next) => {
     const artistsCount = await ArtistModel.countDocuments();
@@ -33,7 +41,7 @@ const getAllArtists = asyncHandler(async (req, res, next) => {
             `Artists Found`,
             200,
             {
-                pagination,
+                pagination: paginationResult,
                 artists: allArtistData(artists),
             }
         ));
@@ -63,7 +71,7 @@ const updateArtist = asyncHandler(async (req, res) => {
     await ArtistModel.findByIdAndUpdate(id, {
         name: req.body.name,
         phone: req.body.phone,
-        gender: req.body.gender,
+        bio: req.body.bio,
     }, {
         new: true,
     });
@@ -144,22 +152,45 @@ const deleteArtist = asyncHandler(async (req, res) => {
 
     const products = await ProductModel.find({owner: id});
 
-    products.forEach(async (oneProduct) => {
+    for (const oneProduct of products) {
         const product = await ProductModel.findByIdAndDelete(oneProduct._id);
 
         const images = [...(product.images)]
         images.push(product.coverImage);
 
-        for (let image in images) {
-            await cloudinary.uploader.destroy(image.public_id);
+        for (let image of images) {
+            if (image.public_id) {
+                await cloudinary.uploader.destroy(image.public_id);
+            }
         }
-    });
+    }
 
     const events = await EventModel.find({owner: id});
 
-    events.forEach(async (event) => {
+    for (const event of events) {
         await EventModel.findByIdAndDelete(event._id);
-    });
+
+        if (event.coverImage.public_id) {
+            await cloudinary.uploader.destroy(event.coverImage.public_id);
+        }
+
+    }
+
+    const auctions = await AuctionModel.find({artist: id});
+
+
+    for (const auction of auctions) {
+        const product = await AuctionModel.findByIdAndDelete(auction._id);
+
+        const images = [...(product.images)]
+        images.push(product.coverImage);
+
+        for (let image of images) {
+            if (image.public_id) {
+                await cloudinary.uploader.destroy(image.public_id);
+            }
+        }
+    }
 
     return res
         .status(200)
@@ -237,6 +268,35 @@ const getProfileAddresses = asyncHandler(async (req, res) => {
         ));
 });
 
+const getArtistInfo = asyncHandler(async (req, res, next) => {
+    const {id} = req.params;
+
+    const artist = await ArtistModel.findById(id);
+
+    if (!artist) {
+        return next(new ApiError(`No Artist for this Id ${id}`, 404));
+    }
+
+    const products = await ProductModel.find({owner: id});
+
+    const events = await EventModel.find({owner: id});
+
+    const auctions = await AuctionModel.find({artist: id});
+
+    return res
+        .status(200)
+        .json(apiSuccess(
+            "Artist Found Successfully",
+            200,
+            {
+                artist: artistData(artist),
+                products: allProductData(products),
+                events: allEventData(events),
+                auctions: allAuctionData(auctions),
+            }
+        ));
+});
+
 module.exports = {
     getAllArtists,
     getArtist,
@@ -250,5 +310,6 @@ module.exports = {
     addArtistAddress,
     removeArtistAddress,
     getProfileAddresses,
-    updateProfileImage
+    updateProfileImage,
+    getArtistInfo,
 };

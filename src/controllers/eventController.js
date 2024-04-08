@@ -133,9 +133,7 @@ const deleteEvent = asyncHandler(async (req, res) => {
     const event = await EventModel.findByIdAndDelete(id);
 
     if (event.coverImage.public_id) {
-        if (event.coverImage.public_id) {
-            await cloudinary.uploader.destroy(event.coverImage.public_id);
-        }
+        await cloudinary.uploader.destroy(event.coverImage.public_id);
     }
 
     return res.status(200).json(
