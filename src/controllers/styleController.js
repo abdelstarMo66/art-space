@@ -32,9 +32,7 @@ const getStyles = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `styles Found`,
             200,
-            {
-                styles: allStyleData(styles)
-            }
+            allStyleData(styles),
         ));
 });
 

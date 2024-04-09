@@ -32,9 +32,7 @@ const getSubjects = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `subjects Found`,
             200,
-            {
-                subjects: allSubjectData(subjects),
-            }
+            allSubjectData(subjects),
         ));
 });
 

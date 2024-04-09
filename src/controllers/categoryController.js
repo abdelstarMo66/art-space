@@ -33,9 +33,7 @@ const getCategories = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `categories Found`,
             200,
-            {
-                categories: allCategoryData(categories)
-            }
+            allCategoryData(categories),
         ));
 });
 
