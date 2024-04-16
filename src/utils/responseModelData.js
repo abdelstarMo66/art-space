@@ -221,6 +221,8 @@ exports.eventData = (event) => {
                 id: product._id,
                 title: product.title,
                 price: product.price,
+                coverImage: product.coverImage ? product.coverImage.secure_url ?? null : null,
+                category: product.category ? product.category.title : null,
                 owner: {
                     id: product.owner._id,
                     name: product.owner.name,
