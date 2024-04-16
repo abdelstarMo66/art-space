@@ -205,7 +205,7 @@ const changeCoverImage = asyncHandler(async (req, res, next) => {
     const {coverImage} = req.body;
     const {productId} = req.params;
 
-    const product = await ProductModel.findOneAndUpdate(productId, {coverImage});
+    const product = await ProductModel.findByIdAndUpdate(productId, {coverImage});
 
     if (!product) {
         return next(new ApiError(`No product found`, 404));

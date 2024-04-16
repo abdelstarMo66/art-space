@@ -181,7 +181,7 @@ const changeCoverImage = asyncHandler(async (req, res, next) => {
     const {coverImage} = req.body;
     const {eventId} = req.params;
 
-    const event = await EventModel.findOneAndUpdate(eventId, {coverImage});
+    const event = await EventModel.findByIdAndUpdate(eventId, {coverImage});
 
     if (!event) {
         return next(new ApiError(`No product found`, 404));

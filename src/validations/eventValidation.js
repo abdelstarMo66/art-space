@@ -231,3 +231,22 @@ exports.ProductInMyEventValidation = [
             return true;
         }),
 ];
+
+exports.meEventValidation = [
+    param("id")
+        .isMongoId()
+        .withMessage("Invalid event id")
+        .custom(async (val, {req}) => {
+            const event = await EventModel.findById(val);
+
+            if (!event) {
+                return Promise.reject(new ApiError(`no event found for this id ${val}`, 404));
+            }
+
+            if (event.owner._id.toString() !== req.loggedUser._id.toString()) {
+                return Promise.reject(new ApiError(`this event not belong to this artist`, 404));
+            }
+
+            return true;
+        }),
+]

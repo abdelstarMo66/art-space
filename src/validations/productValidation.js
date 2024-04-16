@@ -337,3 +337,22 @@ exports.deleteMeProductValidation = [
             return true;
         }),
 ];
+
+exports.meProductValidation = [
+    param("id")
+        .isMongoId()
+        .withMessage("Invalid product id")
+        .custom(async (val, {req}) => {
+            const product = await ProductModel.findById(val);
+
+            if (!product) {
+                return Promise.reject(new ApiError(`no product found for this id ${val}`, 404));
+            }
+
+            if (product.owner._id.toString() !== req.loggedUser._id.toString()) {
+                return Promise.reject(new ApiError(`this product not belong to this artist`, 404));
+            }
+
+            return true;
+        }),
+]

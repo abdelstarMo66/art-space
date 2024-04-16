@@ -22,6 +22,7 @@ const {
     getMeProductValidation,
     updateMeProductValidation,
     deleteMeProductValidation,
+    meProductValidation,
 
 } = require("../validations/productValidation")
 const validationMiddleware = require("../middlewares/validationMiddleware");
@@ -106,8 +107,8 @@ router.get("/search",
     search,
 )
 
-router.put("/changeCoverImage/:productId", uploadProductImages, uploadToHost, changeCoverImage)
+router.put("/changeCoverImage/:productId", meProductValidation, validationMiddleware, uploadProductImages, uploadToHost, changeCoverImage)
 
-router.put("/changeSpecificImage/:productId", uploadProductImages, uploadToHost, changeSpecificImage)
+router.put("/changeSpecificImage/:productId", meProductValidation, validationMiddleware, uploadProductImages, uploadToHost, changeSpecificImage)
 
 module.exports = router;

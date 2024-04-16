@@ -24,11 +24,11 @@ const {
     updateMeEventValidation,
     deleteMeEventValidation,
     ProductInMyEventValidation,
+    meEventValidation,
 } = require("../validations/eventValidation");
 const validationMiddleware = require("../middlewares/validationMiddleware");
 const verifyToken = require("../middlewares/verifyToken");
 const {allowedToArtist, permissionValidate, allowedToUser, allowedToAdmins} = require("../middlewares/allowTo");
-const {uploadProductImages} = require("../controllers/productController");
 
 const router = express.Router();
 
@@ -79,7 +79,9 @@ router.route("/:id/addProduct")
 router.put("/changeCoverImage/:eventId",
     allowedToArtist(),
     permissionValidate,
-    uploadProductImages,
+    meEventValidation,
+    validationMiddleware,
+    uploadCoverImage,
     uploadToHost,
     changeCoverImage,
 )
