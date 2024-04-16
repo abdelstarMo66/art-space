@@ -161,7 +161,7 @@ exports.allProductData = (products) => {
             size: `${product.height}h * ${product.width}w * ${product.depth}d`,
             coverImage: {
                 imageId: product.coverImage.public_id,
-                profileImg: product.coverImage.secure_url ?? null,
+                image: product.coverImage.secure_url ?? null,
             },
             material: product.material ?? null,
             inEvent: product.inEvent ?? false,
@@ -190,12 +190,12 @@ exports.productData = (product) => {
         size: `${product.height}h * ${product.width}w * ${product.depth}d`,
         coverImage: product.coverImage ? {
             imageId: product.coverImage.public_id,
-            profileImg: product.coverImage.secure_url ?? null,
+            image: product.coverImage.secure_url ?? null,
         } : null,
         images: product.images ? product.images.map(image => {
             return {
                 imageId: image.public_id,
-                profileImg: image.secure_url,
+                image: image.secure_url,
             }
         }) : [],
         material: product.material ?? null,
@@ -207,6 +207,8 @@ exports.eventData = (event) => {
         id: event._id,
         title: event.title,
         description: event.description,
+        imageId: event.coverImage.public_id,
+        coverImage: event.coverImage.secure_url ?? null,
         owner: {
             id: event.owner._id,
             name: event.owner.name,
@@ -234,6 +236,8 @@ exports.allEventData = (events) => {
             id: event._id,
             title: event.title,
             description: event.description,
+            imageId: event.coverImage.public_id,
+            coverImage: event.coverImage.secure_url ?? null,
             owner: {
                 id: event.owner._id,
                 name: event.owner.name,
@@ -264,12 +268,12 @@ exports.allProductInEventData = (products) => {
             size: `${product.height}h * ${product.width}w * ${product.depth}d`,
             coverImage: {
                 imageId: product.coverImage.public_id,
-                profileImg: product.coverImage.secure_url ?? null,
+                image: product.coverImage.secure_url ?? null,
             },
             images: product.images.map(image => {
                 return {
                     imageId: image.public_id,
-                    profileImg: image.secure_url ?? null,
+                    image: image.secure_url ?? null,
                 }
             }),
             material: product.material ?? null,
@@ -294,12 +298,12 @@ exports.productInEventData = (product) => {
         size: `${product.height}h * ${product.width}w * ${product.depth}d`,
         coverImage: {
             imageId: product.coverImage.public_id,
-            profileImg: product.coverImage.secure_url ?? null,
+            image: product.coverImage.secure_url ?? null,
         },
         images: product.images.map(image => {
             return {
                 imageId: image.public_id,
-                profileImg: image.secure_url ?? null,
+                image: image.secure_url ?? null,
             }
         }),
         material: product.material ?? null,
@@ -321,7 +325,7 @@ exports.searchData = (artists, products, events) => {
                     name: product.owner.name,
                 },
                 category: product.category.title,
-                profileImg: product.coverImage.secure_url ?? null,
+                coverImage: product.coverImage.secure_url ?? null,
             }
         }),
         artists: artists.map(artist => {
@@ -338,6 +342,7 @@ exports.searchData = (artists, products, events) => {
                 id: event._id,
                 title: event.title,
                 description: event.description,
+                coverImage: event.coverImage.secure_url ?? null,
                 owner: {
                     id: event.owner._id,
                     name: event.owner.name,
@@ -533,12 +538,12 @@ exports.allAuctionData = (auctions) => {
             size: `${auction.height}h * ${auction.width}w * ${auction.depth}d`,
             coverImage: {
                 imageId: auction.coverImage.public_id,
-                profileImg: auction.coverImage.secure_url ?? null,
+                image: auction.coverImage.secure_url ?? null,
             },
             images: auction.images.map(image => {
                 return {
                     imageId: image.public_id,
-                    profileImg: image.secure_url ?? null,
+                    image: image.secure_url ?? null,
                 }
             }),
             material: auction.material ?? null,
@@ -566,7 +571,7 @@ exports.productFromAuctionData = (auction) => {
         size: `${auction.height}h * ${auction.width}w * ${auction.depth}d`,
         coverImage: {
             imageId: auction.coverImage.public_id,
-            profileImg: auction.coverImage.secure_url ?? null,
+            image: auction.coverImage.secure_url ?? null,
         },
         images: auction.images.map(image => {
             return {
