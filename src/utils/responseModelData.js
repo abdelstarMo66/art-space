@@ -528,7 +528,7 @@ exports.allAuctionData = (auctions) => {
             id: auction._id,
             title: auction.title,
             description: auction.description,
-            price: auction.price,
+            price: auction.finalPrice,
             isAvailable: auction.isAvailable,
             artist: {
                 id: auction.artist._id,
@@ -552,6 +552,12 @@ exports.allAuctionData = (auctions) => {
             duration: auction.duration,
             began: auction.began,
             end: auction.end,
+            finalUser: {
+                id: auction.finalUser._id,
+                name: auction.finalUser.name,
+            },
+            isLaunch: auction.isLaunch,
+            isEnded: auction.isEnded,
         }
     })
 }
@@ -561,7 +567,7 @@ exports.productFromAuctionData = (auction) => {
         id: auction._id,
         title: auction.title,
         description: auction.description,
-        price: auction.price,
+        price: auction.finalPrice,
         isAvailable: auction.isAvailable,
         artist: {
             id: auction.artist._id,
@@ -585,6 +591,21 @@ exports.productFromAuctionData = (auction) => {
         duration: auction.duration,
         began: auction.began,
         end: auction.end,
+        finalUser: {
+            id: auction.finalUser._id,
+            name: auction.finalUser.name,
+        },
+        isLaunch: auction.isLaunch,
+        isEnded: auction.isEnded,
+        lastPrices: auction.lastPrices.map(lastPrice => {
+            return {
+                user: {
+                    id: lastPrice.user._id,
+                    name: lastPrice.user.name,
+                },
+                price: lastPrice.price,
+            }
+        })
     };
 }
 

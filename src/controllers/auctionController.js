@@ -10,11 +10,9 @@ const AuctionModel = require("../models/auctionModel")
 const ApiFeatures = require("../utils/apiFeatures");
 
 const uploadProductImages = uploadMixOfImage([
-        {name: "coverImage", maxCount: 1},
-        {name: "images", maxCount: 8},
-    ],
-    "product",
-)
+    {name: "coverImage", maxCount: 1},
+    {name: "images", maxCount: 8},
+], "product")
 
 const uploadToHost = asyncHandler(async (req, res, next) => {
     if (req.files.coverImage) {
