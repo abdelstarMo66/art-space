@@ -9,7 +9,7 @@ const CartModel = require("../models/cartModel");
 const UserModel = require("../models/userModel");
 
 const eventJob = () => {
-    schedule.scheduleJob('0 0 0 * * *', async () => {
+    schedule.scheduleJob('0 0 * * *', async () => {
         const events = await EventModel.find();
 
         for (const event of events) {
@@ -17,13 +17,13 @@ const eventJob = () => {
             const end = new Date(event.end);
 
             // Launch Event
-            if (began >= Date.now()) {
+            if (began <= new Date() && event.isLaunch === false) {
                 event.isLaunch = true;
                 await event.save();
             }
 
             // End Event
-            if (end >= Date.now()) {
+            if (end <= new Date() && event.isLaunch === true) {
                 event.isLaunch = false;
                 await event.save();
 
@@ -35,7 +35,6 @@ const eventJob = () => {
                 }
             }
         }
-
     });
 }
 
@@ -101,21 +100,21 @@ const refundRegisteredAuctions = async (product) => {
 }
 
 const auctionJob = () => {
-    schedule.scheduleJob('0 0 0 * * *', async () => {
+    schedule.scheduleJob('0 0 * * *', async () => {
         const products = await AuctionModel.find();
 
         for (const product of products) {
             const began = new Date(product.began);
             const end = new Date(product.end);
 
-            // Launch Event
-            if (began >= Date.now()) {
+            // Launch Auction
+            if (began <= new Date() && product.isLaunch === false) {
                 product.isLaunch = true;
                 await product.save();
             }
 
-            // End Event
-            if (end >= Date.now()) {
+            // End Auction
+            if (end <= new Date() && product.isLaunch === true) {
                 product.isLaunch = false;
                 product.isEnded = true;
                 await product.save();
