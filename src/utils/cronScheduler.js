@@ -9,21 +9,22 @@ const CartModel = require("../models/cartModel");
 const UserModel = require("../models/userModel");
 
 const eventJob = () => {
-    schedule.scheduleJob('0 0 * * *', async () => {
+    schedule.scheduleJob('0 0 0 * * *', async () => {
         const events = await EventModel.find();
-
         for (const event of events) {
             const began = new Date(event.began);
             const end = new Date(event.end);
 
             // Launch Event
-            if (began <= new Date() && event.isLaunch === false) {
+            if (began <= new Date() && end >= new Date() && event.isLaunch === false) {
+                console.log("Began event")
                 event.isLaunch = true;
                 await event.save();
             }
 
             // End Event
-            if (end <= new Date() && event.isLaunch === true) {
+            if (end < new Date() && end < new Date() && event.isLaunch === true) {
+                console.log("End event")
                 event.isLaunch = false;
                 await event.save();
 
@@ -100,7 +101,7 @@ const refundRegisteredAuctions = async (product) => {
 }
 
 const auctionJob = () => {
-    schedule.scheduleJob('0 0 * * *', async () => {
+    schedule.scheduleJob('0 0 0 * * *', async () => {
         const products = await AuctionModel.find();
 
         for (const product of products) {
@@ -108,13 +109,13 @@ const auctionJob = () => {
             const end = new Date(product.end);
 
             // Launch Auction
-            if (began <= new Date() && product.isLaunch === false) {
+            if (began <= new Date() && end >= new Date() && product.isLaunch === false) {
                 product.isLaunch = true;
                 await product.save();
             }
 
             // End Auction
-            if (end <= new Date() && product.isLaunch === true) {
+            if (end < new Date() && end < new Date() && product.isLaunch === true) {
                 product.isLaunch = false;
                 product.isEnded = true;
                 await product.save();

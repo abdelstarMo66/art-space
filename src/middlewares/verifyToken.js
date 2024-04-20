@@ -18,7 +18,7 @@ const verifyToken = asyncHandler(async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    console.log(decoded)
+
     if (decoded.role === "admin") {
         const currentUser = await AdminModel.findById(decoded.id);
 
