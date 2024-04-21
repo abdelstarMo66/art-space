@@ -584,7 +584,7 @@ exports.productFromAuctionData = (auction) => {
         images: auction.images.map(image => {
             return {
                 imageId: image.public_id,
-                profileImg: image.secure_url ?? null,
+                image: image.secure_url ?? null,
             }
         }),
         material: auction.material ?? null,
