@@ -209,10 +209,11 @@ exports.eventData = (event) => {
         description: event.description,
         imageId: event.coverImage.public_id,
         coverImage: event.coverImage.secure_url ?? null,
-        owner: {
+        owner: event.owner ? {
             id: event.owner._id,
             name: event.owner.name,
-        },
+            profileImg: event.owner.profileImg.secure_url ?? null,
+        } : null,
         duration: event.duration,
         began: event.began,
         end: event.end,
@@ -293,6 +294,7 @@ exports.productInEventData = (product) => {
         owner: {
             id: product.owner._id,
             name: product.owner.name,
+            profileImg: product.owner.profileImg.secure_url ?? null,
         },
         category: product.category.title,
         style: product.style.title,
@@ -552,10 +554,10 @@ exports.allAuctionData = (auctions) => {
             duration: auction.duration,
             began: auction.began,
             end: auction.end,
-            finalUser: auction.finalUser? {
+            finalUser: auction.finalUser ? {
                 id: auction.finalUser._id,
                 name: auction.finalUser.name,
-            }: null,
+            } : null,
             isLaunch: auction.isLaunch,
             isEnded: auction.isEnded,
         }
@@ -572,6 +574,7 @@ exports.productFromAuctionData = (auction) => {
         artist: {
             id: auction.artist._id,
             name: auction.artist.name,
+            profileImg: auction.artist.profileImg.secure_url ?? null,
         },
         category: auction.category.title,
         style: auction.style.title,
@@ -591,13 +594,13 @@ exports.productFromAuctionData = (auction) => {
         duration: auction.duration,
         began: auction.began,
         end: auction.end,
-        finalUser: auction.finalUser? {
+        finalUser: auction.finalUser ? {
             id: auction.finalUser._id,
             name: auction.finalUser.name,
-        }: null,
+        } : null,
         isLaunch: auction.isLaunch,
         isEnded: auction.isEnded,
-        lastPrices: auction.lastPrices? auction.lastPrices.map(lastPrice => {
+        lastPrices: auction.lastPrices ? auction.lastPrices.map(lastPrice => {
             return {
                 user: {
                     id: lastPrice.user._id,
@@ -605,7 +608,7 @@ exports.productFromAuctionData = (auction) => {
                 },
                 price: lastPrice.price,
             }
-        }): [],
+        }) : [],
     };
 }
 
