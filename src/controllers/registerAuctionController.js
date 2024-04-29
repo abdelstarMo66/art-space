@@ -51,7 +51,7 @@ const registerToAuction = async (session) => {
 
     let registerAuction = await RegisterAuctionModel.find({user: registerUser._id});
 
-    if (!registerAuction) {
+    if (registerAuction.length === 0) {
         await RegisterAuctionModel.create({user: registerUser._id});
     }
 

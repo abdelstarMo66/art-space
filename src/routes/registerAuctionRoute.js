@@ -2,7 +2,6 @@ const express = require('express');
 
 const {
     checkoutSession,
-    registerAuctionWebhookCheckout,
     getRegisterAuctions,
 } = require("../controllers/registerAuctionController")
 const {
@@ -25,6 +24,6 @@ router.get(
     checkoutSession,
 )
 
-router.get("registerAuctions", getRegisterAuctions)
+router.get("/registerAuctions", getRegisterAuctions)
 
 module.exports = router
