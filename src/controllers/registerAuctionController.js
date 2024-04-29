@@ -4,8 +4,8 @@ dotenv.config({path: "config/config.env",});
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const asyncHandler = require("../middlewares/asyncHandler");
-const AuctionModel = require("../models/auctionModel");
 const apiSuccess = require("../utils/apiSuccess");
+const AuctionModel = require("../models/auctionModel");
 const UserModel = require("../models/userModel");
 const RegisterAuctionModel = require("../models/registerAuctionModel")
 
@@ -55,7 +55,7 @@ const registerToAuction = async (session) => {
         await RegisterAuctionModel.create({user: registerUser._id});
     }
 
-    await RegisterAuctionModel.findByIdAndUpdate(registerUser._id, {
+    await RegisterAuctionModel.findOneAndUpdate({user: registerUser._id}, {
         $addToSet: {
             auctions: {auctionId: client_reference_id, refundId: payment_intent},
         }
