@@ -13,7 +13,7 @@ const globalErrorMiddleware = require("./src/middlewares/globalErrorMiddleware")
 const mountRoutes = require("./src/routes/app");
 const {initSocketIO} = require("./src/middlewares/socketIO")
 const {orderWebhookCheckout} = require("./src/controllers/orderController");
-const {registerAuctionWebhookCheckout} = require("./src/controllers/userController");
+const {registerAuctionWebhookCheckout} = require("./src/controllers/registerAuctionController");
 const {eventJob, auctionJob} = require("./src/utils/cronScheduler")
 
 dotenv.config({path: "config/config.env",});

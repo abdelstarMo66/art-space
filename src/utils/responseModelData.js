@@ -115,6 +115,46 @@ exports.allAddresses = (addresses) => {
     })
 }
 
+exports.allRegisterAuction = (auctions) => {
+    return auctions.map(auction => {
+        return {
+            id: auction._id,
+            title: auction.title,
+            description: auction.description,
+            price: auction.finalPrice,
+            isAvailable: auction.isAvailable,
+            artist: {
+                id: auction.artist._id,
+                name: auction.artist.name,
+            },
+            category: auction.category.title,
+            style: auction.style.title,
+            subject: auction.subject.title,
+            size: `${auction.height}h * ${auction.width}w * ${auction.depth}d`,
+            coverImage: {
+                imageId: auction.coverImage.public_id,
+                image: auction.coverImage.secure_url ?? null,
+            },
+            images: auction.images.map(image => {
+                return {
+                    imageId: image.public_id,
+                    image: image.secure_url ?? null,
+                }
+            }),
+            material: auction.material ?? null,
+            duration: auction.duration,
+            began: auction.began,
+            end: auction.end,
+            finalUser: auction.finalUser ? {
+                id: auction.finalUser._id,
+                name: auction.finalUser.name,
+            } : null,
+            isLaunch: auction.isLaunch,
+            isEnded: auction.isEnded,
+        }
+    });
+}
+
 exports.adminData = (admin) => {
     return {
         id: admin._id,

@@ -15,6 +15,7 @@ const {
     removeUserAddress,
     updateProfileImage,
     checkoutSession,
+    getRegisterAuctions,
 } = require("../controllers/userController")
 const {
     getUserValidation,
@@ -28,7 +29,6 @@ const {
 const validationMiddleware = require("../middlewares/validationMiddleware");
 const verifyToken = require("../middlewares/verifyToken");
 const {allowedToAdmins, allowedToUser, permissionValidate} = require("../middlewares/allowTo");
-const {createOrderValidation} = require("../validations/orderValidation");
 
 const router = express.Router();
 
@@ -92,15 +92,6 @@ router.delete("/address/:addressId",
     allowedToUser(),
     permissionValidate,
     removeUserAddress,
-)
-
-router.get(
-    "/checkoutSession/:auctionId",
-    allowedToUser(),
-    permissionValidate,
-    registerToAuctionValidation,
-    validationMiddleware,
-    checkoutSession,
 )
 
 router.get("/", allowedToAdmins("IT"), permissionValidate, getAllUsers);

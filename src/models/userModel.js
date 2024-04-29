@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema({
     },
     addresses: [
         {
+            _id: false,
             alias: String,
             street: String,
             region: String,
@@ -33,15 +34,6 @@ const userSchema = new mongoose.Schema({
             country: String,
             postalCode: String,
             phone: String,
-        },
-    ],
-    registerAuction: [
-        {
-            auctionId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "auction",
-            },
-            refundId: String
         },
     ],
     gender: {
@@ -59,13 +51,6 @@ const userSchema = new mongoose.Schema({
     passwordResetExpires: Date,
     passwordResetVerified: Boolean,
 }, {timestamps: true});
-
-userSchema.pre(/^find/, function (next) {
-    this.populate({
-        path: "registerAuction.auctionId",
-    });
-    next();
-});
 
 const UserModel = mongoose.model("user", userSchema);
 
