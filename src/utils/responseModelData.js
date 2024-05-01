@@ -716,6 +716,7 @@ exports.bookEventData = (bookEvent) => {
                 coverImage: event.coverImage.secure_url ?? null,
                 ownerId: event.owner._id,
                 ownerName: event.owner.name,
+                profileImg: event.owner.profileImg.secure_url ?? null,
             }
         }),
     }
