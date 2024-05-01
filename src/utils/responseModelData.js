@@ -682,9 +682,6 @@ exports.allSubjectData = (subjects) => {
 exports.registerAuctionData = (registerAuction) => {
     return {
         id: registerAuction._id,
-        userId: registerAuction.user._id,
-        userName: registerAuction.user.name,
-        profileImg: registerAuction.user.profileImg.secure_url ?? null,
         auctions: registerAuction.auctions.map(auction => {
             return {
                 refundId: auction.refundId,
@@ -693,6 +690,9 @@ exports.registerAuctionData = (registerAuction) => {
                 category: auction.auctionId.category.title,
                 duration: auction.auctionId.duration,
                 began: auction.auctionId.began,
+                artistId: auction.auctionId.artist._id,
+                artistName: auction.auctionId.artist.name,
+                profileImg: auction.auctionId.artist.profileImg.secure_url ?? null,
                 finalPrice: auction.auctionId.finalPrice,
                 isLaunch: auction.auctionId.isLaunch,
                 isEnded: auction.auctionId.isEnded,
@@ -704,9 +704,6 @@ exports.registerAuctionData = (registerAuction) => {
 exports.bookEventData = (bookEvent) => {
     return {
         id: bookEvent._id,
-        userId: bookEvent.user._id,
-        userName: bookEvent.user.name,
-        profileImg: bookEvent.user.profileImg.secure_url ?? null,
         events: bookEvent.events.map(event => {
             return {
                 id: event._id,
