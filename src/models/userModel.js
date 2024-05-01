@@ -26,7 +26,6 @@ const userSchema = new mongoose.Schema({
     },
     addresses: [
         {
-            _id: false,
             alias: String,
             street: String,
             region: String,
