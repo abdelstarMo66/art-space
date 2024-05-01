@@ -25,7 +25,7 @@ const {allowedToArtist, permissionValidate, allowedToUser, allowedToAdmins} = re
 
 const router = express.Router();
 
-// router.use(verifyToken);
+router.use(verifyToken);
 
 router.get("/me",
     allowedToArtist(),
@@ -36,9 +36,9 @@ router.get("/me",
 
 router.route("/")
     .get(
-        // allowedToUser(),
-        // allowedToAdmins("IT"),
-        // permissionValidate,
+        allowedToUser(),
+        allowedToAdmins("IT"),
+        permissionValidate,
         getAuctions,
     )
     .post(

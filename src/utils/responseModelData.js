@@ -690,6 +690,7 @@ exports.registerAuctionData = (registerAuction) => {
                 category: auction.auctionId.category.title,
                 duration: auction.auctionId.duration,
                 began: auction.auctionId.began,
+                coverImage: auction.auctionId.coverImage.secure_url ?? null,
                 artistId: auction.auctionId.artist._id,
                 artistName: auction.auctionId.artist.name,
                 profileImg: auction.auctionId.artist.profileImg.secure_url ?? null,
