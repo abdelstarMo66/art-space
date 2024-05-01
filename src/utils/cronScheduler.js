@@ -79,6 +79,7 @@ const refundRegisteredAuctions = async (product) => {
     const uniqueIds = [...new Set(idList)];
 
     for (const userId of uniqueIds) {
+        // TODO: this is change to new model "registerAuction"
         const user = await UserModel.findById(userId);
 
         if (user.registerAuction.auctionId._id.toString() === product._id.toString()) {

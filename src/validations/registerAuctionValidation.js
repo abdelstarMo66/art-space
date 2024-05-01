@@ -1,8 +1,7 @@
-const {param, body, check} = require("express-validator");
+const {param} = require("express-validator");
 
 const ApiError = require("../utils/apiError");
 const AuctionModel = require("../models/auctionModel");
-const UserModel = require("../models/userModel");
 
 exports.registerToAuctionValidation = [
     param("auctionId")

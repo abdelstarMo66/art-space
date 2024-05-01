@@ -14,6 +14,7 @@ const orderRoute = require("./orderRoute");
 const complaintRoute = require("./complaintRoute");
 const auctionRoute = require("./auctionRoute");
 const registerAuctionRoute = require("./registerAuctionRoute")
+const bookEventRoute = require("./bookEventRoute")
 const reportRoute = require("./reportRoute");
 
 const mountRoutes = (app) => {
@@ -33,6 +34,7 @@ const mountRoutes = (app) => {
     app.use("/api/v1/complaint", complaintRoute);
     app.use("/api/v1/auction", auctionRoute);
     app.use("/api/v1/registerAuction", registerAuctionRoute);
+    app.use("/api/v1/bookEvent", bookEventRoute);
     app.use("/api/v1/reports", reportRoute);
 }
 

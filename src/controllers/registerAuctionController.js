@@ -5,6 +5,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const asyncHandler = require("../middlewares/asyncHandler");
 const apiSuccess = require("../utils/apiSuccess");
+const {registerAuctionData} = require("../utils/responseModelData");
 const AuctionModel = require("../models/auctionModel");
 const UserModel = require("../models/userModel");
 const RegisterAuctionModel = require("../models/registerAuctionModel")
@@ -86,13 +87,13 @@ const registerAuctionWebhookCheckout = asyncHandler(async (req, res) => {
 });
 
 const getRegisterAuctions = asyncHandler(async (req, res) => {
-    const registerAuction = await RegisterAuctionModel.find({user: req.loggedUser._id});
+    const registerAuction = await RegisterAuctionModel.findOne({user: req.loggedUser._id});
 
     return res.status(200).json(
         apiSuccess(
             "Register Auction Founded successfully",
             200,
-            registerAuction
+            registerAuctionData(registerAuction),
         ));
 });
 

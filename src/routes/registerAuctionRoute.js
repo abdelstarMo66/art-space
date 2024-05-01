@@ -13,12 +13,11 @@ const {allowedToUser, permissionValidate} = require("../middlewares/allowTo");
 
 const router = express.Router();
 
-router.use(verifyToken);
+router.use(verifyToken ,   allowedToUser(),
+    permissionValidate,);
 
 router.get(
     "/checkoutSession/:auctionId",
-    allowedToUser(),
-    permissionValidate,
     registerToAuctionValidation,
     validationMiddleware,
     checkoutSession,

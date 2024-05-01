@@ -679,6 +679,51 @@ exports.allSubjectData = (subjects) => {
     })
 }
 
+exports.registerAuctionData = (registerAuction) => {
+    return {
+        id: registerAuction._id,
+        userId: registerAuction.user._id,
+        userName: registerAuction.user.name,
+        profileImg: registerAuction.user.profileImg.secure_url ?? null,
+        auctions: registerAuction.auctions.map(auction => {
+            return {
+                refundId: auction.refundId,
+                auctionId: auction.auctionId._id,
+                title: auction.auctionId.title,
+                category: auction.auctionId.category.title,
+                duration: auction.auctionId.duration,
+                began: auction.auctionId.began,
+                finalPrice: auction.auctionId.finalPrice,
+                isLaunch: auction.auctionId.isLaunch,
+                isEnded: auction.auctionId.isEnded,
+            }
+        }),
+    }
+}
+
+exports.bookEventData = (bookEvent) => {
+    return {
+        id: bookEvent._id,
+        userId: bookEvent.user._id,
+        userName: bookEvent.user.name,
+        profileImg: bookEvent.user.profileImg.secure_url ?? null,
+        events: bookEvent.events.map(event => {
+            return {
+                id: event._id,
+                title: event.title,
+                description: event.description,
+                duration: event.duration,
+                began: event.began,
+                end: event.end,
+                isLaunch: event.isLaunch,
+                coverImage: event.coverImage.secure_url ?? null,
+                ownerId: event.owner._id,
+                ownerName: event.owner.name,
+            }
+        }),
+    }
+}
+
 exports.availableProductReport = (product) => {
     return {
         id: product._id,
