@@ -20,7 +20,7 @@ exports.registerToAuctionValidation = [
                 auction: {$in: [{auctionId: val}]}
             });
 
-            if (check) {
+            if (check.length > 0) {
                 return Promise.reject(new ApiError(`you are already registered in this auction`, 400));
             }
 

@@ -17,7 +17,7 @@ exports.bookEventValidation = [
 
             const check = await BookEventModel.find({user: req.loggedUser._id, events: {$in: [val]}});
 
-            if (check) {
+            if (check.length > 0) {
                 return Promise.reject(new ApiError(`this event already booked`, 400));
             }
 
