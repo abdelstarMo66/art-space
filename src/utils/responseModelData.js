@@ -242,7 +242,7 @@ exports.productData = (product) => {
     }
 }
 
-exports.eventData = (event) => {
+exports.eventData = (event ,userBookedThisEvent) => {
     return {
         id: event._id,
         title: event.title,
@@ -257,6 +257,7 @@ exports.eventData = (event) => {
         duration: event.duration,
         began: event.began,
         end: event.end,
+        userBookedThisEvent: userBookedThisEvent,
         products: event.products.map(product => {
             return {
                 id: product._id,
@@ -604,7 +605,7 @@ exports.allAuctionData = (auctions) => {
     })
 }
 
-exports.productFromAuctionData = (auction) => {
+exports.productFromAuctionData = (auction,userRegisteredInThisAuction) => {
     return {
         id: auction._id,
         title: auction.title,
@@ -640,6 +641,7 @@ exports.productFromAuctionData = (auction) => {
         } : null,
         isLaunch: auction.isLaunch,
         isEnded: auction.isEnded,
+        userRegisteredInThisAuction: userRegisteredInThisAuction,
         lastPrices: auction.lastPrices ? auction.lastPrices.map(lastPrice => {
             return {
                 user: {

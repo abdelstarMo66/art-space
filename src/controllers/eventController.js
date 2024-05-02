@@ -7,6 +7,7 @@ const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
 const {eventData, allEventData} = require("../utils/responseModelData")
 const ApiFeatures = require("../utils/apiFeatures");
 const EventModel = require("../models/eventModel");
+const BookEventModel = require("../models/bookEventModel");
 
 const uploadCoverImage = uploadSingleImage("coverImage", "event");
 
@@ -84,11 +85,19 @@ const getEvent = asyncHandler(async (req, res) => {
 
     const event = await EventModel.findById(id);
 
+    const check = await BookEventModel.find({user: req.loggedUser._id, events: {$in: [id]}});
+
+    let userBookedThisEvent = false;
+
+    if (check.length > 0) {
+        userBookedThisEvent = true;
+    }
+
     return res.status(200).json(
         apiSuccess(
             "event found successfully",
             200,
-            eventData(event),
+            eventData(event, userBookedThisEvent),
         ));
 });
 

@@ -8,6 +8,7 @@ const {allAuctionData, productFromAuctionData} = require("../utils/responseModel
 const {getSocketIO} = require("../middlewares/socketIO")
 const AuctionModel = require("../models/auctionModel")
 const ApiFeatures = require("../utils/apiFeatures");
+const RegisterAuctionModel = require("../models/registerAuctionModel");
 
 const uploadProductImages = uploadMixOfImage([
     {name: "coverImage", maxCount: 1},
@@ -165,11 +166,19 @@ const getProductOfAuction = asyncHandler(async (req, res) => {
 
     const auction = await AuctionModel.findById(productId);
 
+    let userRegisteredInThisAuction = false;
+
+    const check = await RegisterAuctionModel.find({user: req.loggedUser._id, "auctions.auctionId": productId});
+
+    if (check.length > 0) {
+        userRegisteredInThisAuction = true;
+    }
+
     return res.status(200).json(
         apiSuccess(
             "auction found successfully",
             200,
-            productFromAuctionData(auction),
+            productFromAuctionData(auction, userRegisteredInThisAuction),
         ));
 });
 

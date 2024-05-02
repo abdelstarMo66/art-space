@@ -15,10 +15,7 @@ exports.registerToAuctionValidation = [
                 return Promise.reject(new ApiError(`no product found for this id ${val}`, 404));
             }
 
-            const check = await RegisterAuctionModel.find({
-                user: req.loggedUser._id,
-                auction: {$in: [{auctionId: val}]}
-            });
+            const check = await RegisterAuctionModel.find({user: req.loggedUser._id, "auctions.auctionId": val});
 
             if (check.length > 0) {
                 return Promise.reject(new ApiError(`you are already registered in this auction`, 400));
