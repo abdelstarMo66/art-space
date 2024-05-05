@@ -252,7 +252,7 @@ const getProfileAddresses = asyncHandler(async (req, res) => {
         apiSuccess(
             "Address Founded successfully",
             200,
-            {addresses: allAddresses(user.addresses)}
+            allAddresses(user.addresses)
         ));
 });
 
