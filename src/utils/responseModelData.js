@@ -126,6 +126,7 @@ exports.allRegisterAuction = (auctions) => {
             artist: {
                 id: auction.artist._id,
                 name: auction.artist.name,
+                profileImg: auction.artist.profileImg.secure_url ?? null,
             },
             category: auction.category.title,
             style: auction.style.title,
@@ -194,6 +195,7 @@ exports.allProductData = (products) => {
             owner: {
                 id: product.owner._id,
                 name: product.owner.name,
+                profileImg: product.owner.profileImg.secure_url ?? null,
             },
             category: product.category.title,
             style: product.style.title,
@@ -305,6 +307,7 @@ exports.allProductInEventData = (products) => {
             owner: {
                 id: product.owner._id,
                 name: product.owner.name,
+                profileImg: product.owner.profileImg.secure_url ?? null,
             },
             category: product.category.title,
             style: product.style.title,
@@ -368,6 +371,7 @@ exports.searchData = (artists, products, events) => {
                 owner: {
                     id: product.owner._id,
                     name: product.owner.name,
+                    profileImg: product.owner.profileImg.secure_url ?? null,
                 },
                 category: product.category.title,
                 coverImage: product.coverImage.secure_url ?? null,
@@ -391,6 +395,7 @@ exports.searchData = (artists, products, events) => {
                 owner: {
                     id: event.owner._id,
                     name: event.owner.name,
+                    profileImg: event.owner.profileImg.secure_url ?? null,
                 },
                 duration: event.duration,
                 began: event.began,
@@ -419,6 +424,7 @@ exports.cartData = (cart) => {
                     owner: {
                         id: item.product.owner._id,
                         name: item.product.owner.name,
+                        profileImg: item.product.owner.profileImg.secure_url ?? null,
                     },
                     category: item.product.category.title,
                     style: item.product.style.title,
@@ -462,6 +468,7 @@ exports.orderData = (order, address) => {
                     owner: {
                         id: item.product.owner._id,
                         name: item.product.owner.name,
+                        profileImg: item.product.owner.profileImg.secure_url ?? null,
                     },
                     category: item.product.category.title,
                     style: item.product.style.title,
@@ -505,6 +512,7 @@ exports.allOrderData = (orders) => {
                         owner: {
                             id: item.product.owner._id,
                             name: item.product.owner.name,
+                            profileImg: item.product.owner.profileImg.secure_url ?? null,
                         },
                         category: item.product.category.title,
                         style: item.product.style.title,
@@ -567,6 +575,7 @@ exports.allAuctionData = (auctions) => {
             artist: {
                 id: auction.artist._id,
                 name: auction.artist.name,
+                profileImg: auction.artist.profileImg.secure_url ?? null,
             },
             category: auction.category.title,
             style: auction.style.title,
