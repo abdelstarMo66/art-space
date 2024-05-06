@@ -432,7 +432,7 @@ exports.cartData = (cart) => {
                     size: `${item.product.height}h * ${item.product.width}w * ${item.product.depth}d`,
                     coverImage: {
                         imageId: item.product.coverImage.public_id,
-                        profileImg: item.product.coverImage.secure_url ?? null,
+                        image: item.product.coverImage.secure_url ?? null,
                     },
                     material: item.product.material ?? null,
                 },
@@ -476,7 +476,7 @@ exports.orderData = (order, address) => {
                     size: `${item.product.height}h * ${item.product.width}w * ${item.product.depth}d`,
                     coverImage: {
                         imageId: item.product.coverImage.public_id,
-                        profileImg: item.product.coverImage.secure_url ?? null,
+                        image: item.product.coverImage.secure_url ?? null,
                     },
                     material: item.product.material ?? null,
                 },
@@ -520,7 +520,7 @@ exports.allOrderData = (orders) => {
                         size: `${item.product.height}h * ${item.product.width}w * ${item.product.depth}d`,
                         coverImage: {
                             imageId: item.product.coverImage.public_id,
-                            profileImg: item.product.coverImage.secure_url ?? null,
+                            image: item.product.coverImage.secure_url ?? null,
                         },
                         material: item.product.material ?? null,
                     },
