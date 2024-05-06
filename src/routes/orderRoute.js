@@ -22,7 +22,7 @@ const router = express.Router();
 
 router.use(verifyToken);
 
-router.get("/me", allowedToUser, permissionValidate, getMyOrders)
+router.get("/me", allowedToUser(), permissionValidate, getMyOrders)
 
 router.post(
     "/cash/:cartId",
@@ -43,7 +43,7 @@ router.get(
 )
 
 router.get(
-    "/:cartId",
+    "/:orderId",
     allowedToUser(),
     allowedToAdmins("Tracker"),
     permissionValidate,

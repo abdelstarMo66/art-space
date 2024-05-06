@@ -60,16 +60,10 @@ const orderSchema = new mongoose.Schema({
 orderSchema.pre(/^find/, function (next) {
     this.populate({
         path: "user",
-        select: "name"
     });
 
     this.populate({
         path: "cartItems.product",
-        select: "title description price"
-    });
-
-    this.populate({
-        path: "shippingAddress",
     });
 
     next();

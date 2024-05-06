@@ -436,7 +436,7 @@ exports.cartData = (cart) => {
     }
 }
 
-exports.orderData = (order) => {
+exports.orderData = (order, address) => {
     return {
         id: order._id,
         user: {
@@ -444,13 +444,13 @@ exports.orderData = (order) => {
             name: order.user.name,
         },
         shippingAddress: {
-            alias: order.shippingAddress.alias,
-            street: order.shippingAddress.street,
-            region: order.shippingAddress.region,
-            city: order.shippingAddress.city,
-            country: order.shippingAddress.country,
-            postalCode: order.shippingAddress.postalCode ?? null,
-            phone: order.shippingAddress.phone ?? null,
+            alias: address.alias,
+            street: address.street,
+            region: address.region,
+            city: address.city,
+            country: address.country,
+            postalCode: address.postalCode ?? null,
+            phone: address.phone ?? null,
         },
         cartItems: order.cartItems.map(item => {
             return {
@@ -494,15 +494,6 @@ exports.allOrderData = (orders) => {
             user: {
                 id: order.user._id,
                 name: order.user.name,
-            },
-            shippingAddress: {
-                alias: order.shippingAddress.alias,
-                street: order.shippingAddress.street,
-                region: order.shippingAddress.region,
-                city: order.shippingAddress.city,
-                country: order.shippingAddress.country,
-                postalCode: order.shippingAddress.postalCode ?? null,
-                phone: order.shippingAddress.phone ?? null,
             },
             cartItems: order.cartItems.map(item => {
                 return {

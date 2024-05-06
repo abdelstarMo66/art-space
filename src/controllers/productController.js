@@ -70,7 +70,9 @@ const createProduct = asyncHandler(async (req, res) => {
 const getProducts = asyncHandler(async (req, res, next) => {
     let filter = {
         inEvent: false,
+        isAvailable: true,
     };
+
     if (req.filterObj) {
         filter = req.filterObj;
     }

@@ -1,7 +1,6 @@
 const {param, body} = require("express-validator");
 
 const ApiError = require("../utils/apiError");
-const CartModel = require("../models/cartModel");
 const ProductModel = require("../models/productModel");
 
 exports.addProductToCartValidation = [
@@ -10,12 +9,19 @@ exports.addProductToCartValidation = [
         .withMessage("Product is required")
         .isMongoId()
         .withMessage("product id not valid")
-        .custom((productId) =>
-            ProductModel.findById(productId).then((product) => {
+        .custom(async (productId) => {
+                const product = await ProductModel.findById(productId)
+
                 if (!product) {
                     return Promise.reject(new ApiError(`No product for this id: ${product}`, 404));
                 }
-            })
+
+                if (!product.isAvailable) {
+                    return Promise.reject(new ApiError(`this product not available`, 404));
+                }
+
+                return true;
+            }
         ),
 ]
 

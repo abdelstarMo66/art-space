@@ -52,15 +52,11 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
 });
 
 const getOrders = asyncHandler(async (req, res, next) => {
-    const ordersCount = await OrderModel.countDocuments();
-
     const apiFeatures = new ApiFeatures(OrderModel.find(), req.query)
-        .paginate(ordersCount)
-        .sort()
 
-    const {paginationResult, mongooseQuery} = apiFeatures;
+    const {mongooseQuery} = apiFeatures;
 
-    const orders = await mongooseQuery;
+    let orders = await mongooseQuery;
 
     if (!orders) {
         return next(new ApiError(`No orders found`, 404));
@@ -70,42 +66,16 @@ const getOrders = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `orders Found`,
             200,
-            {
-                pagination: paginationResult,
-                orders: allOrderData(orders),
-            }
+            allOrderData(orders)
         ));
 });
 
 const getMyOrders = asyncHandler(async (req, res, next) => {
-    const ordersCount = await OrderModel.countDocuments({user: req.loggedUser._id});
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 20;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
-    // pagination results
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numbersOfPages = Math.ceil(ordersCount / limit);
-    pagination.totalResults = ordersCount;
-    if (endIndex < ordersCount) {
-        pagination.nextPage = page + 1;
-    }
-    if (skip > 0) {
-        pagination.previousPage = page - 1;
-    }
+    const apiFeatures = new ApiFeatures(OrderModel.find({user: req.loggedUser._id}), req.query)
 
-    let sortBy = "createdAt"
-    if (req.query.sort) {
-        sortBy = req.query.sort.split(',').join(" ");
-    }
+    const {mongooseQuery} = apiFeatures;
 
-    const orders = await OrderModel
-        .find({user: req.loggedUser._id})
-        .limit(limit)
-        .skip(skip)
-        .sort(sortBy)
+    let orders = await mongooseQuery;
 
     if (!orders) {
         return next(new ApiError(`No orders found`, 404));
@@ -115,10 +85,7 @@ const getMyOrders = asyncHandler(async (req, res, next) => {
         apiSuccess(
             `orders Found`,
             200,
-            {
-                pagination,
-                orders: allOrderData(orders),
-            }
+            allOrderData(orders)
         ));
 });
 
@@ -127,11 +94,15 @@ const getOrder = asyncHandler(async (req, res) => {
 
     const order = await OrderModel.findById(orderId);
 
+    const user = await UserModel.findById(order.user);
+
+    const address = user.addresses.find(addr => addr._id.equals(order.shippingAddress));
+
     return res.status(200).json(
         apiSuccess(
             "order found successfully",
             200,
-            orderData(order),
+            orderData(order, address),
         ));
 });
 
