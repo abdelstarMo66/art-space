@@ -12,7 +12,6 @@ const userSearch = asyncHandler(async (req, res, next) => {
     const artistQueryObj = {};
     artistQueryObj.$or = [
         {name: {$regex: keyword, $options: "i"}},
-        {email: {$regex: keyword, $options: "i"},},
     ]
 
     const productQueryObj = {};

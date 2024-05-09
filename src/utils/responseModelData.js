@@ -449,7 +449,7 @@ exports.orderData = (order, address) => {
             id: order.user._id,
             name: order.user.name,
         },
-        shippingAddress: {
+        shippingAddress: address?{
             alias: address.alias,
             street: address.street,
             region: address.region,
@@ -457,7 +457,7 @@ exports.orderData = (order, address) => {
             country: address.country,
             postalCode: address.postalCode ?? null,
             phone: address.phone ?? null,
-        },
+        }: null,
         cartItems: order.cartItems.map(item => {
             return {
                 product: {

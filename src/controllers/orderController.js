@@ -200,7 +200,7 @@ const checkoutSession = asyncHandler(async (req, res) => {
             cart._id
         }`,
         cancel_url: `${req.protocol}://${req.get("host")}/api/v1/cart`,
-        customer: req.loggedUser._id,
+        // customer: req.loggedUser._id,
         customer_email: req.loggedUser.email,
         client_reference_id: cart._id.toString(),
         metadata: {shippingAddress},
