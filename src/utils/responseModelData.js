@@ -529,7 +529,7 @@ exports.allOrderData = (orders) => {
             }),
             totalOrderPrice: order.totalOrderPrice,
             paymentMethodType: order.paymentMethodType,
-            currency: order.currency,
+            currency: order.currency?? null,
             isPaid: order.isPaid,
             paidAt: order.paidAt ?? null,
             orderState: order.orderState,

@@ -25,6 +25,7 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
         user: req.loggedUser._id,
         shippingAddress: req.body.shippingAddress,
         cartItems: cart.cartItems,
+        currency: "USD",
         totalOrderPrice: orderPrice,
     })
 
@@ -174,7 +175,7 @@ const checkoutSession = asyncHandler(async (req, res) => {
     const cart = await CartModel.findById(cartId);
 
     const unitAmount = async (price) => currency ? await convertCurrency("USD", currency, price) : price;
-
+    console.log(unitAmount);
     let listItems = [];
 
     for (let i = 0; i < cart.cartItems.length; i++) {
