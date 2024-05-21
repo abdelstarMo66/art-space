@@ -2,9 +2,10 @@ const PDFDocument = require("pdfkit-table");
 
 const asyncHandler = require("../middlewares/asyncHandler")
 const apiSuccess = require("../utils/apiSuccess");
-const {allCategoryData} = require("../utils/responseModelData");
+const {availableProductReport} = require("../utils/responseModelData");
 const CategoryModel = require("../models/categoryModel")
 const sendEmail = require("../utils/sendEmail");
+const ProductModel = require("../models/productModel");
 
 const getAvailableProductReport = asyncHandler(async (req, res) => {
     let doc = new PDFDocument({margin: 30, size: 'A4'});
@@ -12,7 +13,7 @@ const getAvailableProductReport = asyncHandler(async (req, res) => {
     const categories = await CategoryModel.find();
     const availableCategories = [];
 
-    for (const category of categories){
+    for (const category of categories) {
         availableCategories.push({
             id: category._id.toString(),
             title: category.title,
@@ -61,6 +62,18 @@ const getAvailableProductReport = asyncHandler(async (req, res) => {
     ));
 });
 
+const getAvailableProductsReport = asyncHandler(async (req, res, next) => {
+    const products = await ProductModel.find({
+        isAvailable: true,
+    });
+
+    res.status(200).json(apiSuccess(
+        "All product generated successfully in report",
+        200,
+        availableProductReport(products),
+    ));
+});
+
 module.exports = {
-    getAvailableProductReport,
+    getAvailableProductsReport,
 }

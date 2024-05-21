@@ -36,7 +36,7 @@ const createEvent = asyncHandler(async (req, res) => {
         owner: req.loggedUser._id,
         duration: parseInt(req.body.duration),
         began: req.body.began,
-        end: began.setDate(began.getDate() + req.body.duration),
+        end: began.setDate(began.getDate() + +req.body.duration),
         coverImage: req.body.coverImage,
     });
 
@@ -123,7 +123,14 @@ const updateEvent = asyncHandler(async (req, res, next) => {
     if (req.body.duration) {
         const began = new Date(`${event.began}`);
 
-        event.end = began.setDate(began.getDate() + req.body.duration);
+        event.end = began.setDate(began.getDate() + +req.body.duration);
+        await event.save();
+    }
+
+    if (req.body.began) {
+        const began = new Date(`${req.body.began}`);
+
+        event.end = began.setDate(began.getDate() + +req.body.duration);
         await event.save();
     }
 

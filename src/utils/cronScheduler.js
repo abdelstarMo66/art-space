@@ -1,12 +1,11 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const schedule = require('node-schedule');
 
-const asyncHandler = require("../middlewares/asyncHandler");
 const EventModel = require("../models/eventModel");
 const ProductModel = require("../models/productModel");
 const AuctionModel = require("../models/auctionModel");
 const CartModel = require("../models/cartModel");
-const UserModel = require("../models/userModel");
+const RegisterAuctionModel = require("../models/registerAuctionModel");
 
 const eventJob = () => {
     schedule.scheduleJob('0 0 0 * * *', async () => {
@@ -79,24 +78,23 @@ const refundRegisteredAuctions = async (product) => {
     const uniqueIds = [...new Set(idList)];
 
     for (const userId of uniqueIds) {
-        // TODO: this is change to new model "registerAuction"
-        const user = await UserModel.findById(userId);
+        const registerAuctions = await RegisterAuctionModel.find({user: userId});
 
-        if (user.registerAuction.auctionId._id.toString() === product._id.toString()) {
-            const registeredAuctionId = user.registerAuction._id;
-            // refund 100$ to this user
-            await stripe.refunds.create({
-                payment_intent: user.registerAuction.refundId,
-                amount: 100 * 100,
-            });
+        for (const registerAuction of registerAuctions) {
+            if (registerAuction.auctionId.toString() === product.id.toString()) {
+                // refund 100$ to this user
+                await stripe.refunds.create({
+                    payment_intent: registerAuction.refundId,
+                    amount: 100 * 100,
+                });
 
-            // delete it from this user
-            await UserModel.findByIdAndUpdate(userId, {
-                $pull: {
-                    registerAuction: {_id: registeredAuctionId}
-                }
-            });
-
+                // delete it from this user
+                await RegisterAuctionModel.findByIdAndUpdate(userId, {
+                    $pull: {
+                        auctions: {auctionId: registerAuction.auctionId}
+                    }
+                });
+            }
         }
     }
 }

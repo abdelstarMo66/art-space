@@ -244,7 +244,7 @@ exports.productData = (product) => {
     }
 }
 
-exports.eventData = (event ,userBookedThisEvent) => {
+exports.eventData = (event, userBookedThisEvent) => {
     return {
         id: event._id,
         title: event.title,
@@ -449,7 +449,7 @@ exports.orderData = (order, address) => {
             id: order.user._id,
             name: order.user.name,
         },
-        shippingAddress: address?{
+        shippingAddress: address ? {
             alias: address.alias,
             street: address.street,
             region: address.region,
@@ -457,7 +457,7 @@ exports.orderData = (order, address) => {
             country: address.country,
             postalCode: address.postalCode ?? null,
             phone: address.phone ?? null,
-        }: null,
+        } : null,
         cartItems: order.cartItems.map(item => {
             return {
                 product: {
@@ -529,7 +529,7 @@ exports.allOrderData = (orders) => {
             }),
             totalOrderPrice: order.totalOrderPrice,
             paymentMethodType: order.paymentMethodType,
-            currency: order.currency?? null,
+            currency: order.currency ?? null,
             isPaid: order.isPaid,
             paidAt: order.paidAt ?? null,
             orderState: order.orderState,
@@ -605,7 +605,7 @@ exports.allAuctionData = (auctions) => {
     })
 }
 
-exports.productFromAuctionData = (auction,userRegisteredInThisAuction) => {
+exports.productFromAuctionData = (auction, userRegisteredInThisAuction) => {
     return {
         id: auction._id,
         title: auction.title,
@@ -725,20 +725,22 @@ exports.bookEventData = (bookEvent) => {
     }
 }
 
-exports.availableProductReport = (product) => {
-    return {
-        id: product._id,
-        title: product.title,
-        description: product.description,
-        price: product.price,
-        owner: product.owner ? product.owner.name : null,
-        category: product.category ? product.category.title : null,
-        style: product.style ? product.style.title : null,
-        subject: product.subject ? product.subject.title : null,
-        material: product.material ?? null,
-        height: product.height,
-        width: product.width,
-        depth: product.depth,
-        inEvent: product.inEvent,
-    }
+exports.availableProductReport = (products) => {
+    return products.map(product => {
+        return {
+            id: product._id,
+            title: product.title,
+            description: product.description,
+            price: product.price,
+            owner: product.owner ? product.owner.name : null,
+            category: product.category ? product.category.title : null,
+            style: product.style ? product.style.title : null,
+            subject: product.subject ? product.subject.title : null,
+            material: product.material ?? null,
+            height: product.height,
+            width: product.width,
+            depth: product.depth,
+            inEvent: product.inEvent,
+        }
+    })
 }

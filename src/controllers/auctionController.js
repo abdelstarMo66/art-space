@@ -110,14 +110,14 @@ const updateProductFromSpecificAuction = asyncHandler(async (req, res) => {
     if (req.body.duration) {
         const began = new Date(`${product.began}`);
 
-        product.end = began.setDate(began.getDate() + req.body.duration);
+        product.end = began.setDate(began.getDate() + +req.body.duration);
         await product.save();
     }
 
     if (req.body.began) {
         const began = new Date(`${req.body.began}`);
 
-        product.end = began.setDate(began.getDate() + req.body.duration);
+        product.end = began.setDate(began.getDate() + +req.body.duration);
         await product.save();
     }
 

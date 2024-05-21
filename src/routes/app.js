@@ -16,6 +16,7 @@ const auctionRoute = require("./auctionRoute");
 const registerAuctionRoute = require("./registerAuctionRoute")
 const bookEventRoute = require("./bookEventRoute")
 const reportRoute = require("./reportRoute");
+const testRoute = require("../test/testRoute");
 
 const mountRoutes = (app) => {
     app.use("/api/v1/userAuth", userAuthRoute);
@@ -36,6 +37,7 @@ const mountRoutes = (app) => {
     app.use("/api/v1/registerAuction", registerAuctionRoute);
     app.use("/api/v1/bookEvent", bookEventRoute);
     app.use("/api/v1/reports", reportRoute);
+    app.use("/api/v1/tests", testRoute);
 }
 
 module.exports = mountRoutes;
