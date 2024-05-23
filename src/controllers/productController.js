@@ -57,13 +57,15 @@ const createProduct = asyncHandler(async (req, res) => {
         req.body.inEvent = req.body.inEvent.toLowerCase() === 'true';
     }
 
-    await ProductModel.create(req.body);
+    const product = await ProductModel.create(req.body);
 
     return res.status(201).json(
         apiSuccess(
             `add product successfully..`,
             201,
-            null,
+            {
+                id: product._id
+            },
         ));
 });
 
