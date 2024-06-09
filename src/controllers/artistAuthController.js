@@ -7,7 +7,6 @@ const asyncHandler = require("../middlewares/asyncHandler");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
-const {verificationMessage, resetMessage, resendMessage} = require("../utils/emailMessages");
 const generateJWT = require("../utils/generateJWT");
 const sendEmail = require("../utils/sendEmail");
 const ArtistModel = require("../models/artistModel");
@@ -41,14 +40,11 @@ const signup = asyncHandler(async (req, res) => {
         .digest("hex");
     artist.AccountActivateExpires = Date.now() + 10 * 60 * 1000;
 
-    const message = verificationMessage(artist.name, activateCode);
-
     try {
         await sendEmail({
             email: artist.email,
-            subject: "Activating Your Account (valid for 10 minutes)",
-            text: message,
-        });
+            subject: "Reset Your Email (valid for 10 minutes)",
+        },{code: activateCode});
     } catch (error) {
         artist.accountActivateCode = undefined;
         artist.AccountActivateExpires = undefined;
@@ -125,20 +121,18 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 
     await artist.save();
 
-    const message = resetMessage(artist.name, resetCode);
-
     try {
         await sendEmail({
             email: artist.email,
-            subject: "Your password Reset Code (valid for 10 minutes)",
-            text: message,
-        });
+            subject: "Reset Your password (valid for 10 minutes)",
+        }, {code: resetCode});
     } catch (error) {
         artist.passwordResetCode = undefined;
         artist.passwordResetExpires = undefined;
         artist.passwordResetVerified = undefined;
 
         await artist.save();
+        console.log(error);
         return next(new ApiError("There is an error in sending email", 500));
     }
 
@@ -202,14 +196,12 @@ const resendCode = asyncHandler(async (req, res, next) => {
 
     artist.AccountActivateExpires = Date.now() + 10 * 60 * 1000;
 
-    const message = resendMessage(artist.name, code);
-
     try {
         await sendEmail({
             email: artist.email,
-            subject: "Activating Your Account (valid for 10 minutes)",
-            text: message,
-        });
+            subject: "get code again (valid for 10 minutes)",
+        },{code: code});
+        await artist.save();
     } catch (error) {
         artist.accountActivateCode = undefined;
         artist.AccountActivateExpires = undefined;

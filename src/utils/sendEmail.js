@@ -1,6 +1,12 @@
-const nodemailer = require("nodemailer");
+const path = require("path");
 
-const sendEmail = async (options) => {
+const nodemailer = require("nodemailer");
+const ejs = require('ejs');
+
+const sendEmail = async (options, variables) => {
+    const templatePath = path.join(__dirname, 'assets', `email.ejs`);
+    const html = await ejs.renderFile(templatePath, variables);
+
     const transporter = nodemailer.createTransport({
         service: process.env.SERVICE,
         host: process.env.EMAIL_HOST,
@@ -16,7 +22,7 @@ const sendEmail = async (options) => {
         from: "Art Space <testartspace2@gmail.com>",
         to: options.email,
         subject: options.subject,
-        text: options.text,
+        html: html,
         attachments: options.data ? [{'filename': 'attachment.pdf', 'content': options.data}] : null,
     }
 

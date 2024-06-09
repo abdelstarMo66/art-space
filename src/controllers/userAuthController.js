@@ -7,7 +7,6 @@ const asyncHandler = require("../middlewares/asyncHandler");
 const apiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const {uploadSingleImage} = require("../middlewares/cloudinaryUploadImage");
-const {verificationMessage, resetMessage, resendMessage} = require("../utils/emailMessages");
 const generateJWT = require("../utils/generateJWT");
 const sendEmail = require("../utils/sendEmail");
 const UserModel = require("../models/userModel");
@@ -42,14 +41,11 @@ const signup = asyncHandler(async (req, res) => {
         .digest("hex")
     user.AccountActivateExpires = Date.now() + 10 * 60 * 1000;
 
-    const message = verificationMessage(user.name, activateCode);
-
     try {
         await sendEmail({
             email: user.email,
             subject: "Activating Your Account (valid for 10 minutes)",
-            text: message,
-        });
+        },{code: activateCode});
     } catch (error) {
         user.accountActivateCode = undefined;
         user.AccountActivateExpires = undefined;
@@ -129,14 +125,11 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 
     await user.save();
 
-    const message = resetMessage(user.name, resetCode);
-
     try {
         await sendEmail({
             email: user.email,
-            subject: "Your password Reset Code (valid for 10 minutes)",
-            text: message,
-        });
+            subject: "Reset Your password (valid for 10 minutes)",
+        },{code: resetCode});
     } catch (error) {
         user.passwordResetCode = undefined;
         user.passwordResetExpires = undefined;
@@ -206,14 +199,11 @@ const resendCode = asyncHandler(async (req, res, next) => {
         .digest("hex")
     user.AccountActivateExpires = Date.now() + 10 * 60 * 1000;
 
-    const message = resendMessage(user.name, code);
-
     try {
         await sendEmail({
             email: user.email,
-            subject: "Verification Code (valid for 10 minutes)",
-            text: message,
-        });
+            subject: "get code again (valid for 10 minutes)",
+        },{code: code});
         await user.save();
     } catch (error) {
         user.accountActivateCode = undefined;
