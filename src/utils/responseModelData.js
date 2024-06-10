@@ -725,22 +725,225 @@ exports.bookEventData = (bookEvent) => {
     }
 }
 
-exports.availableProductReport = (products) => {
-    return products.map(product => {
+exports.availableProductsReport = (availableProducts) => {
+    return availableProducts.map(availableProduct => {
         return {
-            id: product._id,
-            title: product.title,
-            description: product.description,
-            price: product.price,
-            owner: product.owner ? product.owner.name : null,
-            category: product.category ? product.category.title : null,
-            style: product.style ? product.style.title : null,
-            subject: product.subject ? product.subject.title : null,
-            material: product.material ?? null,
-            height: product.height,
-            width: product.width,
-            depth: product.depth,
-            inEvent: product.inEvent,
+            id: availableProduct._id,
+            title: availableProduct.title,
+            description: availableProduct.description,
+            price: availableProduct.price,
+            owner: availableProduct.owner ? availableProduct.owner.name : null,
+            category: availableProduct.category ? availableProduct.category.title : null,
+            style: availableProduct.style ? availableProduct.style.title : null,
+            subject: availableProduct.subject ? availableProduct.subject.title : null,
+            material: availableProduct.material ?? null,
+            height: availableProduct.height,
+            width: availableProduct.width,
+            depth: availableProduct.depth,
+            createdAt: availableProduct.createdAt
+        }
+    })
+}
+
+exports.unavailableProductsReport = (unavailableProducts) => {
+    return unavailableProducts.map(unavailableProduct => {
+        return {
+            productId: unavailableProduct.product._id,
+            title: unavailableProduct.product.title,
+            description: unavailableProduct.product.description,
+            price: unavailableProduct.product.price,
+            owner: unavailableProduct.product.owner ? unavailableProduct.product.owner.name : null,
+            category: unavailableProduct.product.category ? unavailableProduct.product.category.title : null,
+            style: unavailableProduct.product.style ? unavailableProduct.product.style.title : null,
+            subject: unavailableProduct.product.subject ? unavailableProduct.product.subject.title : null,
+            material: unavailableProduct.product.material ?? null,
+            height: unavailableProduct.product.height,
+            width: unavailableProduct.product.width,
+            depth: unavailableProduct.product.depth,
+            productCreatedAt: unavailableProduct.product.createdAt,
+            orderId: unavailableProduct.order._id,
+            soldUserId: unavailableProduct.order.user._id,
+            soldUserName: unavailableProduct.order.user.name,
+            totalOrderPrice: unavailableProduct.order.totalOrderPrice,
+            paymentMethodType: unavailableProduct.order.paymentMethodType,
+            currency: unavailableProduct.order.currency,
+            isPaid: unavailableProduct.order.isPaid,
+            paidAt: unavailableProduct.order.paidAt ?? null,
+            orderState: unavailableProduct.order.orderState,
+            isDelivered: unavailableProduct.order.isDelivered,
+            deliveredAt: unavailableProduct.order.deliveredAt ?? null,
+        }
+    })
+}
+
+exports.artistStatisticReport = (artistsStatistic) => {
+    return artistsStatistic.map(artistStatistic => {
+        return {
+            id: artistStatistic.artist._id,
+            name: artistStatistic.artist.name,
+            bio: artistStatistic.artist.bio ?? null,
+            email: artistStatistic.artist.email,
+            phone: artistStatistic.artist.phone,
+            gender: artistStatistic.artist.gender ?? null,
+            accountActive: artistStatistic.artist.accountActive,
+            allProductsCount: artistStatistic.products,
+            allEventsCount: artistStatistic.events,
+            allAuctionsCount: artistStatistic.auctions,
+        }
+    });
+}
+
+exports.singleArtistStatisticReport = (artist, products, events, auctions) => {
+    return {
+        id: artist._id,
+        name: artist.name,
+        bio: artist.bio ?? null,
+        email: artist.email,
+        phone: artist.phone,
+        imageId: artist.profileImg.public_id,
+        profileImg: artist.profileImg.secure_url ?? null,
+        gender: artist.gender ?? null,
+        accountActive: artist.accountActive,
+        addresses: artist.addresses.map(address => {
+            return {
+                id: address._id,
+                alias: address.alias,
+                street: address.street,
+                region: address.region,
+                city: address.city,
+                country: address.country,
+                postalCode: address.postalCode ?? null,
+                phone: address.phone ?? null,
+            }
+        }),
+        availableProducts: products.map(product => {
+            return {
+                id: product._id,
+                title: product.title,
+                description: product.description,
+                price: product.price,
+                isAvailable: product.isAvailable,
+                category: product.category ? product.category.title : null,
+                style: product.style ? product.style.title : null,
+                subject: product.subject ? product.subject.title : null,
+                height: product.height,
+                width: product.width,
+                depth: product.depth,
+                size: `${product.height}h * ${product.width}w * ${product.depth}d`,
+                coverImage: product.coverImage ? {
+                    imageId: product.coverImage.public_id,
+                    image: product.coverImage.secure_url ?? null,
+                } : null,
+                images: product.images ? product.images.map(image => {
+                    return {
+                        imageId: image.public_id,
+                        image: image.secure_url,
+                    }
+                }) : [],
+                material: product.material ?? null,
+            }
+        }),
+        availableEvents: events.map(event => {
+            return {
+                id: event._id,
+                title: event.title,
+                description: event.description,
+                imageId: event.coverImage.public_id,
+                coverImage: event.coverImage.secure_url ?? null,
+                duration: event.duration,
+                began: event.began,
+                end: event.end,
+            }
+        }),
+        availableAuctions: auctions.map(auction => {
+            return {
+                id: auction._id,
+                title: auction.title,
+                description: auction.description,
+                price: auction.finalPrice,
+                isAvailable: auction.isAvailable,
+                category: auction.category.title,
+                style: auction.style.title,
+                subject: auction.subject.title,
+                size: `${auction.height}h * ${auction.width}w * ${auction.depth}d`,
+                coverImage: {
+                    imageId: auction.coverImage.public_id,
+                    image: auction.coverImage.secure_url ?? null,
+                },
+                images: auction.images.map(image => {
+                    return {
+                        imageId: image.public_id,
+                        image: image.secure_url ?? null,
+                    }
+                }),
+                material: auction.material ?? null,
+                duration: auction.duration,
+                began: auction.began,
+                end: auction.end,
+                finalUser: auction.finalUser ? {
+                    id: auction.finalUser._id,
+                    name: auction.finalUser.name,
+                } : null,
+                isLaunch: auction.isLaunch,
+                isEnded: auction.isEnded,
+                lastPrices: auction.lastPrices ? auction.lastPrices.map(lastPrice => {
+                    return {
+                        user: {
+                            id: lastPrice.user._id,
+                            name: lastPrice.user.name,
+                        },
+                        price: lastPrice.price,
+                    }
+                }) : [],
+            }
+        }),
+    }
+}
+
+exports.lastEventsReport = (events) => {
+    return events.map(event => {
+        return {
+            id: event._id,
+            title: event.title,
+            description: event.description,
+            imageId: event.coverImage.public_id,
+            coverImage: event.coverImage.secure_url ?? null,
+            ownerId: event.owner._id,
+            ownerName: event.owner.name,
+            ownerProfileImg: event.owner.profileImg.secure_url ?? null,
+            duration: event.duration,
+            began: event.began,
+            end: event.end,
+            launch: event.isLaunch
+        }
+    });
+}
+
+exports.lastAuctionsReport = (auctions) => {
+    return auctions.map((auction) => {
+        return {
+            id: auction._id,
+            title: auction.title,
+            description: auction.description,
+            price: auction.finalPrice,
+            isAvailable: auction.isAvailable,
+            artistId: auction.artist._id,
+            artistName: auction.artist.name,
+            artistProfileImg: auction.artist.profileImg.secure_url ?? null,
+            category: auction.category.title,
+            style: auction.style.title,
+            subject: auction.subject.title,
+            size: `${auction.height}h * ${auction.width}w * ${auction.depth}d`,
+            imageId: auction.coverImage.public_id,
+            coverImage: auction.coverImage.secure_url ?? null,
+            material: auction.material ?? null,
+            duration: auction.duration,
+            began: auction.began,
+            end: auction.end,
+            finalUserId: auction.finalUser ? auction.finalUser._id: null,
+            finalUserName: auction.finalUser ? auction.finalUser.name: null,
+            isLaunch: auction.isLaunch,
+            isEnded: auction.isEnded,
         }
     })
 }
