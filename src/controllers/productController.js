@@ -257,6 +257,32 @@ const changeSpecificImage = asyncHandler(async (req, res, next) => {
         ));
 })
 
+const deleteSpecificImage = asyncHandler(async (req, res, next) => {
+    const {publicId} = req.body;
+    const {productId} = req.params;
+
+    const product = await ProductModel.findByIdAndUpdate(productId, {
+        $pull: {
+            images: {
+                public_id: publicId
+            }
+        }
+    }, {new: true})
+
+    await cloudinary.uploader.destroy(publicId);
+
+    if (!product) {
+        return next(new ApiError(`No product found`, 404));
+    }
+
+    return res.status(200).json(
+        apiSuccess(
+            "Image deleted successfully",
+            200,
+            null,
+        ));
+})
+
 module.exports = {
     createProduct,
     getProducts,
@@ -268,5 +294,6 @@ module.exports = {
     uploadToHost,
     getMeProducts,
     changeCoverImage,
-    changeSpecificImage
+    changeSpecificImage,
+    deleteSpecificImage,
 }

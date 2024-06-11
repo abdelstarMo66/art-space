@@ -12,6 +12,7 @@ const {
     getMeProducts,
     changeSpecificImage,
     changeCoverImage,
+    deleteSpecificImage,
 } = require("../controllers/productController");
 const {
     createProductValidation,
@@ -23,7 +24,6 @@ const {
     updateMeProductValidation,
     deleteMeProductValidation,
     meProductValidation,
-
 } = require("../validations/productValidation")
 const validationMiddleware = require("../middlewares/validationMiddleware");
 const verifyToken = require("../middlewares/verifyToken");
@@ -110,5 +110,7 @@ router.get("/search",
 router.put("/changeCoverImage/:productId", meProductValidation, validationMiddleware, uploadProductImages, uploadToHost, changeCoverImage)
 
 router.put("/changeSpecificImage/:productId", meProductValidation, validationMiddleware, uploadProductImages, uploadToHost, changeSpecificImage)
+
+router.delete("/deleteSpecificImage/:productId", meProductValidation, validationMiddleware, deleteSpecificImage)
 
 module.exports = router;

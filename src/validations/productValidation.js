@@ -339,7 +339,7 @@ exports.deleteMeProductValidation = [
 ];
 
 exports.meProductValidation = [
-    param("id")
+    param("productId")
         .isMongoId()
         .withMessage("Invalid product id")
         .custom(async (val, {req}) => {
