@@ -211,7 +211,7 @@ exports.updateProductFromAuctionValidation = [
         .withMessage("launch date of event must be invalid date ex: (2024-01-18)"),
 ]
 
-exports.deleteProductFromAuctionValidation = [
+exports.meProductValidation = [
     param("productId")
         .isMongoId()
         .withMessage("Invalid product id")

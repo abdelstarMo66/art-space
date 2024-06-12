@@ -12,11 +12,12 @@ const {
     updatePrice,
     changeSpecificImage,
     changeCoverImage,
+    deleteSpecificImage,
 } = require("../controllers/auctionController");
 const {
     addProductToAuctionValidation,
     updateProductFromAuctionValidation,
-    deleteProductFromAuctionValidation,
+    meProductValidation,
     updateFinalPriceValidation
 } = require("../validations/auctionValidation");
 const validationMiddleware = require("../middlewares/validationMiddleware");
@@ -69,14 +70,16 @@ router.route("/product/:productId")
     .delete(
         allowedToArtist(),
         permissionValidate,
-        deleteProductFromAuctionValidation,
+        meProductValidation,
         validationMiddleware,
         removeProductFromActions,
     )
 
-router.put("/changeCoverImage/:productId", uploadProductImages, uploadToHost, changeCoverImage);
+router.put("/changeCoverImage/:productId", meProductValidation, validationMiddleware, uploadProductImages, uploadToHost, changeCoverImage);
 
-router.put("/changeSpecificImage/:productId", uploadProductImages, uploadToHost, changeSpecificImage);
+router.put("/changeSpecificImage/:productId", meProductValidation, validationMiddleware, uploadProductImages, uploadToHost, changeSpecificImage);
+
+router.delete("/deleteSpecificImage/:productId", meProductValidation, validationMiddleware, deleteSpecificImage);
 
 router.patch("/:productId/updatePrice",
     allowedToUser(),

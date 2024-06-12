@@ -9,6 +9,7 @@ const {getSocketIO} = require("../middlewares/socketIO")
 const AuctionModel = require("../models/auctionModel")
 const ApiFeatures = require("../utils/apiFeatures");
 const RegisterAuctionModel = require("../models/registerAuctionModel");
+const ProductModel = require("../models/productModel");
 
 const uploadProductImages = uploadMixOfImage([
     {name: "coverImage", maxCount: 1},
@@ -240,6 +241,32 @@ const changeSpecificImage = asyncHandler(async (req, res, next) => {
         ));
 })
 
+const deleteSpecificImage = asyncHandler(async (req, res, next) => {
+    const {publicId} = req.body;
+    const {productId} = req.params;
+
+    const product = await AuctionModel.findByIdAndUpdate(productId, {
+        $pull: {
+            images: {
+                public_id: publicId
+            }
+        }
+    }, {new: true})
+
+    await cloudinary.uploader.destroy(publicId);
+
+    if (!product) {
+        return next(new ApiError(`No auction found`, 404));
+    }
+
+    return res.status(200).json(
+        apiSuccess(
+            "Image deleted successfully",
+            200,
+            null,
+        ));
+})
+
 const updatePrice = asyncHandler(async (req, res) => {
     const {finalPrice} = req.body;
     const {productId} = req.params
@@ -280,4 +307,5 @@ module.exports = {
     updatePrice,
     changeCoverImage,
     changeSpecificImage,
+    deleteSpecificImage,
 }
