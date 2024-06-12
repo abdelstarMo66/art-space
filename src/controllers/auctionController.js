@@ -183,7 +183,7 @@ const getProductOfAuction = asyncHandler(async (req, res) => {
 });
 
 const getMeAuction = asyncHandler(async (req, res, next) => {
-    req.filterObj = {owner: req.loggedUser._id};
+    req.filterObj = {artist: req.loggedUser._id};
 
     next();
 });
