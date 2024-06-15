@@ -33,7 +33,7 @@ router.post(
     createCashOrder,
 )
 
-router.get(
+router.post(
     "/checkoutSession/:cartId",
     allowedToUser(),
     permissionValidate,
