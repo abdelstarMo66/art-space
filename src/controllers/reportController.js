@@ -66,14 +66,16 @@ const getAvailableProductsReport = asyncHandler(async (req, res, next) => {
         return next(ApiError("not Products found", 404));
     }
 
-    if (sendResultToEmail.toString() === "true") {
-        await sendDocToEmail(availableProductsReport(products)[0], availableProductsReport(products));
+    if (sendResultToEmail) {
+        if (sendResultToEmail.toString() === "true") {
+            await sendDocToEmail(availableProductsReport(products)[0], availableProductsReport(products));
 
-        return res.status(200).json(apiSuccess(
-            "All Available product generated successfully in report and send to email",
-            200,
-            null,
-        ));
+            return res.status(200).json(apiSuccess(
+                "All Available product generated successfully in report and send to email",
+                200,
+                null,
+            ));
+        }
     }
 
 
@@ -146,14 +148,16 @@ const getUnAvailableProductsReport = asyncHandler(async (req, res, next) => {
         });
     }
 
-    if (sendResultToEmail.toString() === "true") {
-        await sendDocToEmail(unavailableProductsReport(unAvailableProductsList)[0], unavailableProductsReport(unAvailableProductsList));
+    if (sendResultToEmail) {
+        if (sendResultToEmail.toString() === "true") {
+            await sendDocToEmail(unavailableProductsReport(unAvailableProductsList)[0], unavailableProductsReport(unAvailableProductsList));
 
-        return res.status(200).json(apiSuccess(
-            "All Unavailable product generated successfully in report and send to email",
-            200,
-            null,
-        ));
+            return res.status(200).json(apiSuccess(
+                "All Unavailable product generated successfully in report and send to email",
+                200,
+                null,
+            ));
+        }
     }
 
     return res.status(200).json(apiSuccess(
@@ -191,14 +195,16 @@ const getArtistsStatisticReport = asyncHandler(async (req, res) => {
         });
     }
 
-    if (sendResultToEmail.toString() === "true") {
-        await sendDocToEmail(artistStatisticReport(artistsStatistic)[0], artistStatisticReport(artistsStatistic));
+    if (sendResultToEmail) {
+        if (sendResultToEmail.toString() === "true") {
+            await sendDocToEmail(artistStatisticReport(artistsStatistic)[0], artistStatisticReport(artistsStatistic));
 
-        return res.status(200).json(apiSuccess(
-            "Artist Statistic generated successfully in report and send to email",
-            200,
-            null,
-        ));
+            return res.status(200).json(apiSuccess(
+                "Artist Statistic generated successfully in report and send to email",
+                200,
+                null,
+            ));
+        }
     }
 
     return res.status(200).json(apiSuccess(
@@ -270,14 +276,16 @@ const getLastEventsReport = asyncHandler(async (req, res, next) => {
         return next(ApiError("not events found", 404));
     }
 
-    if (sendResultToEmail.toString() === "true") {
-        await sendDocToEmail(lastEventsReport(events)[0], lastEventsReport(events));
+    if (sendResultToEmail) {
+        if (sendResultToEmail.toString() === "true") {
+            await sendDocToEmail(lastEventsReport(events)[0], lastEventsReport(events));
 
-        return res.status(200).json(apiSuccess(
-            "All Available events generated successfully in report and send to email",
-            200,
-            null,
-        ));
+            return res.status(200).json(apiSuccess(
+                "All Available events generated successfully in report and send to email",
+                200,
+                null,
+            ));
+        }
     }
 
     return res.status(200).json(apiSuccess(
@@ -334,14 +342,16 @@ const getLastAuctionsReport = asyncHandler(async (req, res, next) => {
         return next(ApiError("not auctions found", 404));
     }
 
-    if (sendResultToEmail.toString() === "true") {
-        await sendDocToEmail(lastAuctionsReport(auctions)[0], lastAuctionsReport(auctions));
+    if (sendResultToEmail) {
+        if (sendResultToEmail.toString() === "true") {
+            await sendDocToEmail(lastAuctionsReport(auctions)[0], lastAuctionsReport(auctions));
 
-        return res.status(200).json(apiSuccess(
-            "All Available auctions generated successfully in report and send to email",
-            200,
-            null,
-        ));
+            return res.status(200).json(apiSuccess(
+                "All Available auctions generated successfully in report and send to email",
+                200,
+                null,
+            ));
+        }
     }
 
     return res.status(200).json(apiSuccess(
