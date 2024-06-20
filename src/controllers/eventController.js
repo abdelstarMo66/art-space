@@ -110,11 +110,15 @@ const updateEvent = asyncHandler(async (req, res, next) => {
         }
     }
 
+    if (req.body.duration) {
+        req.body.duration = parseInt(req.body.duration);
+    }
+
     const event = await EventModel.findByIdAndUpdate(id,
         {
             title: req.body.title,
             description: req.body.description,
-            duration: parseInt(req.body.duration),
+            duration: req.body.duration,
             began: req.body.began,
         },
         {new: true},
