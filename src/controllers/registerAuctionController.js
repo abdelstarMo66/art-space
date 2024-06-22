@@ -9,6 +9,7 @@ const {registerAuctionData} = require("../utils/responseModelData");
 const AuctionModel = require("../models/auctionModel");
 const UserModel = require("../models/userModel");
 const RegisterAuctionModel = require("../models/registerAuctionModel")
+const ApiError = require("../utils/apiError");
 
 const checkoutSession = asyncHandler(async (req, res) => {
     const {auctionId} = req.params;
@@ -86,8 +87,12 @@ const registerAuctionWebhookCheckout = asyncHandler(async (req, res) => {
         ));
 });
 
-const getRegisterAuctions = asyncHandler(async (req, res) => {
+const getRegisterAuctions = asyncHandler(async (req, res, next) => {
     const registerAuction = await RegisterAuctionModel.findOne({user: req.loggedUser._id});
+
+    if (!registerAuction) {
+        return next(new ApiError(`no register auction found`, 404));
+    }
 
     return res.status(200).json(
         apiSuccess(
